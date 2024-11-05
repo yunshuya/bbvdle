@@ -31,6 +31,7 @@ bbvdle/
 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
 
 ### Linux安装
+
 项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
 
 ```cmd
@@ -55,19 +56,27 @@ fnm use --install-if-missing 13
 `npm run build`
 
 ## 5. 部署项目
+
 ### Windows本地部属
+
 `npm install -g http-server`
 `http-server . -p 8080`
+
 ### Linux部署
-安装Apache
+
+1. 安装Apache
 `sudo yum install -y httpd`
-复制文件至根目录
+
+2. 复制文件至根目录
 `sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
-配置Apache
+
+3. 配置Apache
 `sudo systemctl reload httpd`
-启动Apache
+
+4. 启动Apache
 `sudo systemctl start httpd`
-设置开机自启
+
+5. 设置开机自启
 `sudo systemctl enable httpd`
 
 ## 报错解决
@@ -96,13 +105,16 @@ gyp ERR! find VS
 gyp ERR! configure error
 gyp ERR! stack Error: Could not find any Visual Studio installation to use
 ```
+
 #### 解决方法
+
 `npm cache clean --force`
 删除package-lock和node_modules
 `npm install canvas@2.8.0 --ignore-scripts`
 `npm install`
 
 ### 2. npm run build报错
+
 ```报错信息
 > tsc --skipLibCheck && webpack --mode development && node-sass src/ui -o src/ui
 
@@ -139,7 +151,9 @@ internal/fs/utils.js:230
     throw err;
     ^
 ```
+
 #### 解决方法
+
 先尝试
 `npm rebuild node-sass`
 若不行，则删除 `node-sass` 和其缓存
