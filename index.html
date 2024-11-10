@@ -2,8 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta name="description" content="Welcome to ENNUI - An elegant neural network user interface which allows you to easily design, train, and visualize neural networks.">
-	<title>ENNUI ~ Elegant Neural Network User Interface ~</title>
+	<meta name="description" content="欢迎来到ENNUI - 一个优雅的神经网络用户界面，让您能够轻松设计、训练和可视化神经网络。">
+	<title>ENNUI ~ 优雅的神经网络用户界面 ~</title>
 
 	<!-- MathJax cdn to render latex -->
 	<script type="text/javascript" async
@@ -15,10 +15,10 @@
 	{
 	  "@context" : "http://schema.org",
 	  "@type" : "SoftwareApplication",
-	  "name" : "ENNUI ~ an elegant neural network user interface ~",
+	  "name" : "ENNUI ~ 优雅的神经网络用户界面 ~'/8",
 	  "author" : [ {
 		"@type" : "Person",
-		"name" : "Jesse Michel"
+		"name" : ""
 	  }, {
 		"@type" : "Person",
 		"name" : "Zack Holbrook"
@@ -52,34 +52,34 @@
 
 <body>
 
-<h1 style="display:none">ENNUI ~ Elegant Neural Network User Interface ~</h1>
-<p style="display:none">ENNUI helps people learn about deep learning by building, training, and visualizing deep neural networks on the browser. It has an easy to use drag-and-drop interface. When you're ready to start coding you can export the network to produce code in Python or Julia! </p>
+<h1 style="display:none">ENNUI ~ 优雅的神经网络教学平台 ~</h1>
+<p style="display:none">ENNUI 通过构建、训练和在浏览器中可视化深度神经网络，帮助人们了解深度学习。它具有易于使用的拖放界面。当您准备开始编码时，可以导出网络以生成Python或Julia代码！ </p>
 
 
-<h6 style="display:none">About ENNUI</h6>
+<h6 style="display:none">关于 ENNUI</h6>
 <p style="display:none">
-	ENNUI provides several tools for all stages of deep learning development. The canvas gives space to design neural network architectures with a drag-and-drop interface. This design is easily sharable with friends and coworkers by exporting to a link. <br/>
-	Not only can you design neural networks, you can train them on several datasets: MNIST, CIFAR-10, and more! During training, you can track your network loss and accuracies in the Progress tab, as well as view of confusion matrix. <br/>
-	Once training is complete, ENNUI provides a suite of neural network visualization tools to better understand your architecture. <br/>
-	ENNUI is constantly updated with new features, so be sure to keep following!
+	ENNUI为深度学习开发的所有阶段提供多种工具。画布提供了一个拖放界面，用于设计神经网络架构。这个设计可以通过导出到链接与朋友和同事轻松分享。
+	您不仅可以设计神经网络，还可以在多个数据集上训练它们：MNIST、CIFAR-10等！在训练期间，您可以在进度标签中跟踪您的网络损失和准确率，还可以查看混淆矩阵。
+	一旦训练完成，ENNUI提供了一套神经网络可视化工具，以更好地理解您的架构。
+	ENNUI不断更新新功能，所以请继续关注！
 </p>
 <div id = 'main'>
 
 	<!-- The leftmost strip to select tabs -->
 	<div id = 'tabselector'>
 		<div id = 'blanktab' class='top_neighbor_tab-selected'> </div>
-		<div title = 'Network' class = 'tab-selected option tab-option' id = 'network' data-optionValue = 'network'>
+		<div title = '神经网络' class = 'tab-selected option tab-option' id = 'network' data-optionValue = 'network'>
 			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16zm0-11.47L17.74 9 12 13.47 6.26 9 12 4.53z"/></svg>
 		</div>
-		<div title = 'Progress' class = 'option tab-option bottom_neighbor_tab-selected' id = 'progress' data-optionValue = 'progress'>
+		<div title = '训练过程' class = 'option tab-option bottom_neighbor_tab-selected' id = 'progress' data-optionValue = 'progress'>
 			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M13.5 13.48l-4-4L2 16.99l1.5 1.5 6-6.01 4 4L22 6.92l-1.41-1.41z"/></svg>
 		</div>
-		<div title = 'Visualization' class = 'option tab-option' id = 'visualization' data-optionValue = 'visualization'>
+		<div title = '结果可视化' class = 'option tab-option' id = 'visualization' data-optionValue = 'visualization'>
 			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0z"/><path d="M11 9h2v2h-2V9zm-2 2h2v2H9v-2zm4 0h2v2h-2v-2zm2-2h2v2h-2V9zM7 9h2v2H7V9zm12-6H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 18H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm2-7h-2v2h2v2h-2v-2h-2v2h-2v-2h-2v2H9v-2H7v2H5v-2h2v-2H5V5h14v6z"/></svg>
 		</div>
 		<div id = 'middleblanktab' > </div>
 
-		<div title = 'Education' class = 'option tab-option' id = 'education' data-optionValue = 'education'>
+		<div title = '教学' class = 'option tab-option' id = 'education' data-optionValue = 'education'>
 			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
 		</div>
 		<div id = 'bottomblanktab' > </div>
@@ -96,7 +96,7 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Layers
+						神经网络层
 					</div>
 
 				</div>
@@ -106,19 +106,19 @@
 
 
 				<div class = 'option-dropdown'>
-					<div style="float:left">More</div>
+					<div style="float:left">更多</div>
 					<div style="float:right">〉</div>
 					<div class='dropdown-content left'>
-						<div title = 'Modify batches of data during training to make them more similar, resulting in faster convergence and better results.'
-							 class = 'option select-option' data-optionValue = 'batchnorm'> Batch Normalization</div>
-						<div title = 'Ignore a different random portion of the weights each batch for better generalization and faster training.'
-							 class = 'option select-option' data-optionValue = 'dropout'> Dropout</div>
-						<div title = 'Flatten a list of 2D images into a 1D feature vector.'
-							 class = 'option select-option' data-optionValue = 'flatten'> Flatten</div>
-						<div title = 'Concatenate two or more inputs that are all 1D or all 2D.'
-							 class = 'option select-option' data-optionValue = 'concatenate'> Concatenate</div>
-						<div title = 'Add two or more inputs together.'
-							 class = 'option select-option last-dropdown' data-optionValue = 'add'> Add</div>
+						<div title = '在训练过程中修改一批数据，使其更相似，从而加快收敛并获得更好的结果。'
+							 class = 'option select-option' data-optionValue = 'batchnorm'> Batch Normalization </div>
+						<div title = '在每个批次中忽略一部分随机的权重，以获得更好的泛化能力并加快训练。'
+							 class = 'option select-option' data-optionValue = 'dropout'> Dropout </div>
+						<div title = '将一组二维图像展平为一维特征向量。'
+							 class = 'option select-option' data-optionValue = 'flatten'> Flatten </div>
+						<div title = '将两个或多个输入（它们可以是1D或2D）连接起来'
+							 class = 'option select-option' data-optionValue = 'concatenate'> Concatenate </div>
+						<div title = '将两个或多个输入相加。'
+							 class = 'option select-option last-dropdown' data-optionValue = 'add'> Add </div>
 					</div>
 				</div>
 			</div>
@@ -131,7 +131,7 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Activations
+						激活函数
 					</div>
 				</div>
 				<div class = 'option select-option' data-optionValue = 'relu'> ReLU </div>
@@ -146,12 +146,12 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Templates
+						模板
 					</div>
 				</div>
-				<div class = 'option select-option' data-optionValue = 'blank'> Blank </div>
-				<div class = 'option select-option' data-optionValue = 'default'> Default </div>
-				<div class = 'option select-option' data-optionValue = 'resnet'> ResNet </div>
+				<div class = 'option select-option' data-optionValue = 'blank'> 清空 </div>
+				<div class = 'option select-option' data-optionValue = 'default'> 默认模板 </div>
+				<div class = 'option select-option' data-optionValue = 'resnet'> ResNet残差网络 </div>
 			</div>
 		</div>
 
@@ -164,7 +164,7 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Optimizers
+						优化器
 					</div>
 				</div>
 				<div id = "defaultOptimizer" class = 'option select-option selected' id = 'sgd' data-optionValue = 'sgd'> SGD </div>
@@ -180,7 +180,7 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Losses
+						损失函数
 					</div>
 				</div>
 				<div id = 'defaultLoss' class = 'option select-option selected' data-optionValue = 'categoricalCrossentropy'>CrossEntropy</div>
@@ -199,10 +199,10 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Classes
+						分类
 					</div>
 				</div>
-				<div class = 'option select-option selected' data-optionValue = 'all'> All </div>
+				<div class = 'option select-option selected' data-optionValue = 'all'> ALL </div>
 				<div class = 'option select-option' data-optionValue = '0'> 0 </div>
 				<div class = 'option select-option' data-optionValue = '1'> 1 </div>
 				<div class = 'option select-option' data-optionValue = '2'> 2 </div>
@@ -225,14 +225,14 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Articles
+						相关文章
 					</div>
 
 				</div>
 
-				<div class = 'option select-option education-option' data-optionValue = 'Overview'> Overview </div>
+				<div class = 'option select-option education-option' data-optionValue = 'Overview'> 概述 </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Overfitting'> Overfitting</div>
-				<div class = 'option select-option education-option' data-optionValue = 'ResNets'> ResNets </div>
+				<div class = 'option select-option education-option' data-optionValue = 'ResNets'>ResNets</div>
 			</div>
 
 			<div id = 'educationStory' class = 'category'>
@@ -243,14 +243,14 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Layers
+						神经网络层
 					</div>
 				</div>
 
-				<div class = 'option select-option education-option' data-optionValue = 'Concatenate'> Concatenate</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Concatenate'> Concatenate </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Convolution'> Convolution </div>
-				<div class = 'option select-option education-option' data-optionValue = 'Dropout'> Dropout</div>
-				<div class = 'option select-option education-option' data-optionValue = 'Flatten'> Flatten</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Dropout'> Dropout </div>
+				<div class = 'option select-option education-option' data-optionValue = 'Flatten'> Flatten </div>
 
 			</div>
 
@@ -280,175 +280,171 @@
 		</div>
 
 		<div id = 'informationOverlay'>
-			<div id='information'>Welcome to ENNUI
-				<div id="informationBody">~ an elegant neural network user interface ~</div>
+			<div id='information'>欢迎来到ENNUI
+				<div id="informationBody">~ 优雅的神经网络教学平台 ~</div>
 				<div class="informationRow">
 					<div class="informationColumn">
-						Start Building <br></br>
+						自主创建神经网络 <br></br>
 						<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="30%" max-height="30%" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16zm0-11.47L17.74 9 12 13.47 6.26 9 12 4.53z"/></svg>
 					</div>
 					<div class="informationBlankColumn"></div>
 					<div id="informationEducation" class="informationColumn">
-						Explore Deep Learning <br></br>
+						开始学习如何创建神经网络 <br></br>
 						<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="30%" max-height="30%" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
 					</div>
 				</div>
 				<div id = 'acknowledgements'>
-					Developed by (<a class="overlayLinks" href="mailto:ennui-devs@mit.edu">ennui-devs@mit.edu</a>) <br>
-					Jesse Michel, Zack Holbrook, Stefan Grosser, Rikhav Shah <br>
-					with advising from <a class="overlayLinks" href="http://hendrik.strobelt.com/" target="_blank">Hendrik Strobelt</a> and <a class="overlayLinks" href="http://www-math.mit.edu/~gs/" target="_blank">Gilbert Strang</a>.<br>
-					First prototyped at <a class="overlayLinks" href="https://devpost.com/software/ennui" target="_blank">HackMIT</a>.
-					Open-sourced on <a class="overlayLinks" href="https://github.com/martinjm97/ENNUI" target="_blank">GitHub</a>.
+					<br>
+					袁子茜，崔雯嘉，周艺瑶，田恒钟，姜逸涵 <br>
+					开源资源<a class="overlayLinks" href="https://github.com/sunyia123/bbvdle" target="_blank">GitHub</a>.
 				</div>
 			</div>
 		</div>
 
 		<div id = 'educationTab' style="display: none">
 			<div id="educationOverview">
-				<div class="educationTitle" style="padding-top: 0px"> Learn About Deep Neural Networks </div>
-				<div class="educationSection"> Introduction to ENNUI </div>
+				<div class="educationTitle" style="padding-top: 0px"> 关于深度学习神经网络 </div>
+				<div class="educationSection"> 介绍ENNUI </div>
 				<div class="educationContent">
-					If you are new to ENNUI, a good place to start is to watch
-					the quick tutorial below:
+					如果你第一次进入我们的教学平台, 
+					可以参考以下的快速入门教学开始自己的神经网络学习之旅：
 				</div>
 				<!--<iframe class="educationVideo" src="https://www.youtube.com/embed/m0YnwAtPbb8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
 
-				<div style="text-align: center; font-size: 25px;"><a href="https://www.youtube.com/watch?v=m0YnwAtPbb8" target="blank">ENNUI Tutorial</a></div>
-				<div class="educationSection"> Foundations of Deep Learning </div>
+				<div style="text-align: center; font-size: 25px;"><a href="https://www.youtube.com/watch?v=m0YnwAtPbb8" target="blank">ENNUI 教学</a></div>
+				<div class="educationSection"> 深度学习的基本知识 </div>
 				<div class="educationContent">
-					If you are new to machine learning, the lecture video below is an excellent introduction.
-					This lecture is from the 18.065 class from Spring of 2019. If you want to learn more check out the <a href="http://math.mit.edu/~gs/learningfromdata/">learning from data textbook</a>.
+					如果您不熟悉机器学习，下面的讲座视频是一个很好的介绍。
 				</div>
 				<div style="text-align: center; font-size: 25px;"><a href="https://video.odl.mit.edu/videos/9101a72a7d994d53800d1398fd885b88/embed/?start=339" target="blank">Gilbert Strang: Deep Learning</a></div>
 				<!-- <iframe class="educationVideo" src="https://video.odl.mit.edu/videos/9101a72a7d994d53800d1398fd885b88/embed/?start=339" scrolling="no" frameborder="0" allowfullscreen></iframe> -->
 			</div>
 
 			<div id="educationConvolution">
-				<div class="educationTitle"> Convolutional Nets </div>
-				<div class="educationAuthor">by <i>Gilbert Strang</i></div>
+				<div class="educationTitle"> 卷积网络 </div>
+				<div class="educationAuthor">作者 <i>Gilbert Strang</i></div>
 
 				<div class="educationContent">
-					<p>The words <strong>weight sharing</strong> give the key idea of CNNs. The weight matrix <span class="math inline">\(A\)</span> that connects one layer to the next layer has only a small number of independent entries. So optimizing those weights is much faster than for a fully-connected (dense) architecture.</p>
-					<p>In a one-dimensional problem, suppose the inputs (layer zero) are given by a vector <span class="math inline">\(v = (v_1,...,v_n)\)</span>. A convolution will multiply <span class="math inline">\(v\)</span> by a weight matrix <span class="math inline">\(A\)</span> with constant diagonals. Then the same set of weights (say 3 weights) is repeated all along the layer :</p>
+					<p><strong>权重共享</strong> 这一词是卷积神经网络（CNNs）的核心思想。连接一层到另一层的权重矩阵<span class="math inline">\(A\)</span>  只有少数几个独立元素。 因此，优化这些权重的速度比全连接（密集）架构更快。</p>
+					<p>在一维问题中，假设输入层（第0层）由一个向量<span class="math inline">\(v = (v_1,...,v_n)\)</span>表示。 卷积层将 <span class="math inline">\(v\)</span> 与一个具有常数对角线的权重矩阵 <span class="math inline">\(A\)</span> 相乘。然后，整个层中将重复使用相同的权重集（假设是 3 个权重）： </p>
 					<p><span class="math display">\[A=
 					\begin{bmatrix}
 						a_{-1} &amp; a_0 &amp; a_1 &amp;  &amp;  \\
 						&amp; a_{-1} &amp; a_0 &amp; a_1 &amp;  \\
 						&amp; &amp; a_{-1} &amp; a_0 &amp; a_1 \\
-					\end{bmatrix}\]</span> This <span class="math inline">\(A\)</span> has <span class="math inline">\(n = 5\)</span> inputs and <span class="math inline">\(m = 3\)</span> outputs. A is <strong>shift-invariant</strong>: a convolution = filter = Toeplitz matrix. Convolutions are especially important for images with many pixels. The <span class="math inline">\(3\)</span> independent weights <span class="math inline">\(a_{-1}, a_0, a_1\)</span> might change to <span class="math inline">\(3 \times 3=9\)</span> weights in 2D. Those 9 numbers are <span class="math inline">\(a_{ij}\)</span> for <span class="math inline">\(i = -1,0,1\)</span> and <span class="math inline">\(j = -1,0,1\)</span>. An input with its 8 neighbors (in a <span class="math inline">\(3 \times 3\)</span> square) is multiplied by <span class="math inline">\(a_{00}\)</span> and its <span class="math inline">\(8\)</span> neighbors–that sum of 9 terms gives one output in <span class="math inline">\(Av\)</span>. As usual, a bias vector <span class="math inline">\(b\)</span> is added and each component of <span class="math inline">\(Av + b\)</span> is activated (or not) by a function like ReLU : the new layer contains <span class="math inline">\(\textrm{ReLU}(Av + b)\)</span>.</p>
-					<p>This 2D matrix <span class="math inline">\(A\)</span> is not so easy to display. You should see that a <span class="math inline">\(3 \times 3\)</span> square around an input vector <span class="math inline">\(v\)</span> of size <span class="math inline">\(n \times n\)</span> will produce an output <span class="math inline">\(Av\)</span> of size <span class="math inline">\((n - 2) \times (n - 2)\)</span>, in the same way that 5 inputs gave 3 outputs in 1D. Notice that we only had <span class="math inline">\(3 \times 3 = 9\)</span> (or maybe <span class="math inline">\(5 \times 5 = 25\)</span>) independent weights in 2D, because the convolution not only <strong>shares weights</strong> but it is <strong>local</strong>.</p>
+					\end{bmatrix}\]</span> 这个矩阵 <span class="math inline">\(A\)</span> 有 <span class="math inline">\(n = 5\)</span> 个输出和 <span class="math inline">\(m = 3\)</span> 个输出。 A 是<strong>平移不变</strong>的: 卷积 = 滤波器 = Toeplitz 矩阵。卷积对于有许多像素的图像尤其重要。那 <span class="math inline">\(3\)</span> 个独立的权重<span class="math inline">\(a_{-1}, a_0, a_1\)</span> 可能在二维中变成 <span class="math inline">\(3 \times 3=9\)</span> 个权重。这 9 个数是 <span class="math inline">\(a_{ij}\)</span> 其中 <span class="math inline">\(i = -1,0,1\)</span> 和 <span class="math inline">\(j = -1,0,1\)</span>。一个包含其 8 个邻居（在一个 <span class="math inline">\(3 \times 3\)</span> 的方块中的输入）将与 <span class="math inline">\(a_{00}\)</span> 及其   <span class="math inline">\(8\)</span> 个邻居相乘——这 9 项的和给出一个输出 <span class="math inline">\(Av\)</span>。像往常一样，偏置向量  <span class="math inline">\(b\)</span> 会被加到结果中，并且  <span class="math inline">\(Av + b\)</span> 的每个分量都会通过像 ReLU 这样的函数进行激活（或不激活）：新层包含 <span class="math inline">\(\textrm{ReLU}(Av + b)\)</span>.</p>
+					<p>这个二维矩阵 <span class="math inline">\(A\)</span> 并不容易显示。你应该可以看到，围绕一个大小为 <span class="math inline">\(n \times n\)</span> 的输入向量 <span class="math inline">\(v\)</span> 的一个 <span class="math inline">\(3 \times 3\)</span> 方块将产生一个大小为 <span class="math inline">\((n - 2) \times (n - 2)\)</span> 的输出，就像在一维中 5 个输入产生了 3 个输出一样。注意，在二维中我们只有 <span class="math inline">\(3 \times 3 = 9\)</span>（或者也许是 <span class="math inline">\(5 \times 5 = 25\)</span>）个独立的权重，因为卷积不仅是 <strong>共享权重</strong>，而且是 <strong>局部的</strong>。</p>
 				</div>
 			</div>
 
 			<div id="educationResNets">
-				<div class="educationTitle"> Residual Networks (ResNets) </div>
-				<div class="educationAuthor">by <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
+				<div class="educationTitle"> 残差网络 (ResNets) </div>
+				<div class="educationAuthor">作者 <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
 
 				<div class="educationContent">
-					<p>In 2015, a research team at Microsoft won the <a href="http://www.image-net.org/challenges/LSVRC/">ImageNet Large Scale Visual Recognition Challenge</a> with record performance using a ResNet. Since 2015, variants of ResNets have dominated the competition, exceeding human performance in the given task. They have become a popular choice of architecture for a broad variety of image recognition tasks and are relatively easy to implement and train.</p>
-					<div class="educationSection">ResNet Architecture</div>
-					<p>ResNets are a type of convolutional neural network (CNN) that have <strong>identity shortcuts</strong>, which are paths through the network that skip layers, thereby creating shortcuts through the network. We provide a typical example of a ResNet below:
-
+					<p>2015 年，微软的一个研究团队凭借 ResNet 在 <a href="http://www.image-net.org/challenges/LSVRC/">ImageNet 大规模视觉识别挑战赛</a> 中获得了创纪录的表现。自 2015 年以来，ResNet 的变种一直主导着这一竞赛，超过了人类在该任务中的表现。它们已成为图像识别任务中广泛采用的架构，并且相对容易实现和训练。</p>
+					<div class="educationSection">ResNet 架构</div>
+					<p>ResNet 是一种卷积神经网络（CNN），具有 <strong>恒等捷径（identity shortcuts）</strong>，这是通过跳过某些层创建的网络路径，从而在网络中创建捷径。下面我们提供一个典型的 ResNet 示例：
+				
 						<img class="educationImage" src="dist/resnet.png" alt="Resnet image" width="50%">
-
+				
 						<div class="modelLink">
 							<a class="modelLink" target="_newtab" href="http://math.mit.edu/ennui/#%7B%22graph%22:%5B%7B%22layer_name%22:%22Input%22,%22children_ids%22:%5B5,9%5D,%22parent_ids%22:%5B%5D,%22params%22:%7B%22dataset%22:%22mnist%22%7D,%22id%22:0,%22xPosition%22:100,%22yPosition%22:377%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B6%5D,%22parent_ids%22:%5B0%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:5,%22xPosition%22:169,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B7,10%5D,%22parent_ids%22:%5B0,6%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:9,%22xPosition%22:276,%22yPosition%22:411%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B9%5D,%22parent_ids%22:%5B5%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:6,%22xPosition%22:294,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B8%5D,%22parent_ids%22:%5B9%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:7,%22xPosition%22:414,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B11%5D,%22parent_ids%22:%5B9,8%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:10,%22xPosition%22:521,%22yPosition%22:412%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B10%5D,%22parent_ids%22:%5B7%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:8,%22xPosition%22:541,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Flatten%22,%22children_ids%22:%5B12%5D,%22parent_ids%22:%5B10%5D,%22params%22:%7B%7D,%22id%22:11,%22xPosition%22:708,%22yPosition%22:463%7D,%7B%22layer_name%22:%22Dense%22,%22children_ids%22:%5B13%5D,%22parent_ids%22:%5B11%5D,%22params%22:%7B%22units%22:32,%22activation%22:%22relu%22%7D,%22id%22:12,%22xPosition%22:702,%22yPosition%22:434%7D,%7B%22layer_name%22:%22Dropout%22,%22children_ids%22:%5B1%5D,%22parent_ids%22:%5B12%5D,%22params%22:%7B%22rate%22:0.5%7D,%22id%22:13,%22xPosition%22:778,%22yPosition%22:365%7D,%7B%22layer_name%22:%22Output%22,%22children_ids%22:%5B%5D,%22parent_ids%22:%5B13%5D,%22params%22:%7B%7D,%22id%22:1,%22xPosition%22:900,%22yPosition%22:377%7D%5D,%22hyperparameters%22:%7B%22learningRate%22:0.01,%22batchSize%22:64,%22optimizer_id%22:%22defaultOptimizer%22,%22epochs%22:6,%22loss_id%22:%22defaultLoss%22%7D%7D">
-								Model Link
+								模型链接
 							</a>
 						</div>
-
-						Identity shortcuts mean that the learned parameters are residuals. Mathematically, if <span class="math inline">\(R(x)\)</span> is a sequence of convolutional layers with ReLUs, known as a <strong>residual block</strong>, for example, let <span class="math display">\[R(x) = \textrm{Conv}(\textrm{ReLU}(\textrm{Conv}(x))).\]</span> Then the output of the residual block will be <span class="math inline">\(R(x) + x\)</span>, where <span class="math inline">\(x\)</span> is the identity pass-through. If the neural network is trying to approximate some function <span class="math inline">\(F(x)\)</span>, then a perfect residual block <span class="math inline">\(R^*(x)\)</span> will be such that <span class="math inline">\(R^*(x) = F(x) - x\)</span>, which is exactly a residual after subtracting the input image.</p>
-					<div class="educationSection">Advantages of ResNets</div>
-					<p>The amazing property of ResNets is its ability to scale well, leading to deeper neural networks that still train well. As networks get larger, a number of problems arise.</p>
-					<p>Large networks tend to train slowly, but the <strong>weight sharing</strong> of CNNs mean that each residual block has relatively few parameters to train. Large networks also tend to have the problem of the <strong>vanishing gradient</strong> – where weight updates from gradient descent diminish to the point where the network does not improve even with more training time. The identity shortcuts in ResNets give a path for the gradients to flow, avoiding the problem of the vanishing gradient.</p>
+				
+						恒等捷径意味着学习到的参数是残差。数学上，如果 <span class="math inline">\(R(x)\)</span> 是一系列卷积层与 ReLU 组合，称为 <strong>残差块</strong>，例如，假设 <span class="math display">\[R(x) = \textrm{Conv}(\textrm{ReLU}(\textrm{Conv}(x))).\]</span> 那么，残差块的输出将是 <span class="math inline">\(R(x) + x\)</span>，其中 <span class="math inline">\(x\)</span> 是恒等传递。如果神经网络试图逼近某个函数 <span class="math inline">\(F(x)\)</span>，那么一个完美的残差块 <span class="math inline">\(R^*(x)\)</span> 会使得 <span class="math inline">\(R^*(x) = F(x) - x\)</span>，这正是通过减去输入图像得到的残差。</p>
+					<div class="educationSection">ResNet 的优势</div>
+					<p>ResNet 的一个惊人特性是它的良好扩展性，使得深层神经网络仍然能够良好地训练。当网络变得更大时，许多问题会出现。</p>
+					<p>大规模网络往往训练速度较慢，但 CNN 的 <strong>权重共享</strong> 意味着每个残差块需要训练的参数相对较少。大规模网络还往往面临 <strong>梯度消失</strong> 问题——在梯度下降中，权重更新会逐渐变得微不足道，导致即使有更多的训练时间，网络也无法改进。ResNet 中的恒等捷径为梯度提供了流动路径，从而避免了梯度消失的问题。</p>
 				</div>
 			</div>
 
 			<div id="educationFlatten">
-				<div class="educationTitle"> Flatten Layers </div>
-				<div class="educationAuthor">by <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
+				<div class="educationTitle"> 展平层（Flatten） </div>
+				<div class="educationAuthor">作者 <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
 
 				<div class="educationContent">
-					<p>The flatten layer takes in a multidimensional input and produces a single dimensional output. For example, the CIFAR dataset is a collection of images which is 3-dimensional since it is a collection of 2-dimensional images that are 32x32 pixels and has 3 color channels (Red, Green, Blue). A Flatten layer could take data from this dataset as an input, and would produce a 1 dimensional vector of size 32*32*3 = 3072.</p>
+					<p>展平层接受一个多维输入并产生一个一维输出。例如，CIFAR 数据集是一个包含图像的集合，它是三维的，因为它由32x32像素的二维图像组成，并且有3个颜色通道（红色、绿色、蓝色）。一个展平层可以将该数据集的数据作为输入，输出一个大小为 32*32*3 = 3072 的一维向量。</p>
 				</div>
+				
 			</div>
 
 			<div id="educationConcatenate">
-				<div class="educationTitle"> Concatenate Layers </div>
-				<div class="educationAuthor">by <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
-
+				<div class="educationTitle">拼接层（Concentrate）</div>
+				<div class="educationAuthor">作者<i>Zack Holbrook</i> 和 <i>Jesse Michel</i></div>
+			
 				<div class="educationContent">
-					<p>A concatenate layer takes two or more layers and concatenates the outputs into a single output by stacking the inputs. For example, it would concatenate two vectors of size 10 into a vector of size 20 by stacking one on top of the other.</p>
+					<p>拼接层接受两个或更多层，并通过将输入堆叠在一起将它们的输出拼接成一个单一输出。例如，它可以将两个大小为 10 的向量拼接成一个大小为 20 的向量，方法是将一个向量堆叠在另一个向量的上面。</p>
 				</div>
 			</div>
+			
 
 			<div id="educationDropout">
-				<div class="educationTitle"> Dropout Layers </div>
-				<div class="educationAuthor">by <i>Stefan Grosser</i> and <i>Jesse Michel</i></div>
-
+				<div class="educationTitle">丢弃层（Dropout）</div>
+				<div class="educationAuthor">作者<i>Stefan Grosser</i> 和 <i>Jesse Michel</i></div>
+			
 				<div class="educationContent">
-					<p>Dropout layers ignore a random fraction of the incoming units during training time. For example, if the rate is 0.1, then on each forward pass the dropout layer will randomly select 10% of the weights and assign them to 0. Adding a dropout layer with a rate of 0 will make no change to the network, while a rate of 1 will have the dropout layer output 0.</p>
-
-					<p>Dropout is commonly used to prevent <strong>overfitting</strong> (for more information, see our write-up on the topic). One may think of dropout as having the network learn a collection of weak classifiers that during testing come together to create a more powerful classifier. For those who are familiar with this terminology, it is boosting using an ensemble model. It also has the convenient property of speeding up training since fewer weights are required in each forward pass.</p>
+					<p>丢弃层在训练期间忽略一部分输入单元。例如，如果丢弃率为 0.1，则在每次前向传播中，丢弃层会随机选择 10% 的权重并将它们设为 0。添加一个丢弃率为 0 的丢弃层不会对网络产生任何影响，而丢弃率为 1 时，丢弃层将输出 0。</p>
+			
+					<p>丢弃通常用于防止<strong>过拟合</strong>（有关更多信息，请参阅我们的相关文章）。可以将丢弃视为让网络学习一组弱分类器，在测试时将它们结合起来形成一个更强的分类器。对于熟悉这个术语的人来说，这类似于使用集成模型的提升方法。丢弃层还有一个方便的特点，即加速训练，因为每次前向传播时所需的权重较少。</p>
 				</div>
 			</div>
+			
 
 			<div id="educationOverfitting">
-				<div class="educationTitle"> Overfitting </div>
-				<div class="educationAuthor">by <i>Stefan Grosser</i> and <i>Jesse Michel</i></div>
+				<div class="educationTitle">过拟合（Overfitting）</div>
+				<div class="educationAuthor">作者 <i>Stefan Grosser</i> 和 <i>Jesse Michel</i></div>
 				<div class="educationContent">
-
-					<p>A neural network sometimes learns too well. It identifies trends specific only to the training data and thus fails to <strong>generalize</strong>. This problem of fitting the training data too closely is called <strong>overfitting</strong>. The following figure shows the decision boundary – the curve that determines the prediction of the classifier – in the cases of underfitting, fitting well (normal), and overfitting.</p>
-
-					<img class="educationImage" src="dist/overfitti_ng.png" alt="Possible decision boundaries " />
+			
+					<p>神经网络有时会学习得过于精确。它识别出仅仅是训练数据中特定的趋势，因此无法<strong>泛化</strong>。这种过度拟合训练数据的问题称为<strong>过拟合</strong>。下图展示了决策边界——决定分类器预测的曲线——在欠拟合、拟合良好（正常）和过拟合的情况下的变化。</p>
+			
+					<img class="educationImage" src="dist/overfitti_ng.png" alt="可能的决策边界" />
 					<div class="modelLink">
-							<a class="modelLink" target="_newtab" href="http://mlwiki.org/index.php/Overfitting">
-								Source: ML Wiki
-							</a>
+						<a class="modelLink" target="_newtab" href="http://mlwiki.org/index.php/Overfitting">
+							来源: ML Wiki
+						</a>
 					</div>
-					<p>When a classifier overfits, it performs far better on the training data than on the test data. Therefore, the training accuracy will be much higher than the validation accuracy and the training loss will be much lower than the validation loss. We have provided an example of this below. </p>
-
-					<img class="educationImage" style="float: left; max-width: 50%;" src="dist/loss_overfit.png" title="fig:" alt="Visualization of overfitting during training" />
-
-
-					<img class="educationImage" style="float: right; max-width: 50%;" src="dist/accuracy_overfit.png" title="fig:" alt="Visualization of overfitting during training" />
-
+					<p>当分类器发生过拟合时，它在训练数据上的表现远远优于测试数据。因此，训练准确度会远高于验证准确度，训练损失会远低于验证损失。我们在下方提供了这个例子的可视化。</p>
+			
+					<img class="educationImage" style="float: left; max-width: 50%;" src="dist/loss_overfit.png" title="图：训练过程中的过拟合可视化" alt="训练过程中过拟合的可视化" />
+			
+					<img class="educationImage" style="float: right; max-width: 50%;" src="dist/accuracy_overfit.png" title="图：训练过程中的过拟合可视化" alt="训练过程中过拟合的可视化" />
+			
 					<div style="margin-top:10px;">
-						<!-- TODO: padding above -->
-						The architecture used for this example is shown below.
+						该示例所用的架构如下所示：
 					</div>
-
-
+			
 					<div class="figure">
-
-						<img class="educationImage" style="max-width: 50%;" src="dist/overfitting_network.png" alt="Network architecture" >
-
-
+						<img class="educationImage" style="max-width: 50%;" src="dist/overfitting_network.png" alt="网络架构" >
+			
 						<div class="modelLink">
-								<a class="modelLink" target="_newtab" href="https://math.mit.edu/ennui/#%7B%22graph%22:%5B%7B%22layer_name%22:%22Input%22,%22children_ids%22:%5B2%5D,%22parent_ids%22:%5B%5D,%22params%22:%7B%22dataset%22:%22cifar%22%7D,%22id%22:0,%22xPosition%22:100,%22yPosition%22:399%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B3%5D,%22parent_ids%22:%5B0%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22kernelRegularizer%22:%22none%22,%22regScale%22:0.1,%22activation%22:%22relu%22%7D,%22id%22:2,%22xPosition%22:261,%22yPosition%22:453%7D,%7B%22layer_name%22:%22Flatten%22,%22children_ids%22:%5B1%5D,%22parent_ids%22:%5B2%5D,%22params%22:%7B%7D,%22id%22:3,%22xPosition%22:585,%22yPosition%22:484%7D,%7B%22layer_name%22:%22Output%22,%22children_ids%22:%5B%5D,%22parent_ids%22:%5B3%5D,%22params%22:%7B%7D,%22id%22:1,%22xPosition%22:900,%22yPosition%22:399%7D%5D,%22hyperparameters%22:%7B%22learningRate%22:0.1,%22batchSize%22:64,%22optimizer_id%22:%22defaultOptimizer%22,%22epochs%22:15,%22loss_id%22:%22defaultLoss%22%7D%7D">
-									Model Link
-								</a>
+							<a class="modelLink" target="_newtab" href="https://math.mit.edu/ennui/#%7B%22graph%22:%5B%7B%22layer_name%22:%22Input%22,%22children_ids%22:%5B2%5D,%22parent_ids%22:%5B%5D,%22params%22:%7B%22dataset%22:%22cifar%22%7D,%22id%22:0,%22xPosition%22:100,%22yPosition%22:399%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B3%5D,%22parent_ids%22:%5B0%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22kernelRegularizer%22:%22none%22,%22regScale%22:0.1,%22activation%22:%22relu%22%7D,%22id%22:2,%22xPosition%22:261,%22yPosition%22:453%7D,%7B%22layer_name%22:%22Flatten%22,%22children_ids%22:%5B1%5D,%22parent_ids%22:%5B2%5D,%22params%22:%7B%7D,%22id%22:3,%22xPosition%22:585,%22yPosition%22:484%7D,%7B%22layer_name%22:%22Output%22,%22children_ids%22:%5B%5D,%22parent_ids%22:%5B3%5D,%22params%22:%7B%7D,%22id%22:1,%22xPosition%22:900,%22yPosition%22:399%7D%5D,%22hyperparameters%22:%7B%22learningRate%22:0.1,%22batchSize%22:64,%22optimizer_id%22:%22defaultOptimizer%22,%22epochs%22:15,%22loss_id%22:%22defaultLoss%22%7D%7D">
+								模型链接
+							</a>
 						</div>
 					</div>
 					<br/><br/>
-					<p>Overfitting exemplifies why cross validation is so important; without a validation set, we would not be able to identify that the model will fail to generalize.</p>
-					<p>So, how can we combat overfitting and make sure that a model finds generalizable traits?</p>
-					<div class="educationSection">Regularization</div>
-					<p>One way to prevent overfitting is regularization, which takes the form of adding in a new term that guides the model towards a simpler solution. Recall that in classification problems we begin with pairs of inputs and their classifications <span class="math display">\[(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n).\]</span> From this, we want to find a function <span class="math inline">\(f\)</span> that will accurately predict the classes of new samples of data. So if our original problem was <span class="math display">\[\min_f \sum_{i=1}^{n} C(f(x_i), y_i),\]</span> where <span class="math inline">\(C\)</span> calculates the cost of predicting <span class="math inline">\(f(x_i)\)</span> when the true value is <span class="math inline">\(y_i\)</span>, then the regularized loss will be <span class="math display">\[\min_f \sum_{i=1}^{n} C(f(x_i), y_i) + \lambda R(f),\]</span> where <span class="math inline">\(R(f)\)</span> is the regularization term that is defined to be larger when <span class="math inline">\(f\)</span> is more complex and <span class="math inline"> \(\lambda>0\) </span> is a tunable parameter controlling the amount of regularization. There are various definitions of how complex a layer is, but in our case we will say that a layer with a lower <span class="math inline">\(L2\)</span>-norm is less complex. Formally, we define <span class="math inline">\(L2\)</span>-norm for a matrix <span class="math inline">\(A\)</span> as <span class="math display">\[\text{norm}(A) = \sqrt{\sum_i \sum_j a_{ij}^2}.\]</span> For example, given matrix <span class="math display">\[A =
+					<p>过拟合展示了交叉验证为何如此重要；如果没有验证集，我们将无法识别模型无法泛化的问题。</p>
+					<p>那么，如何应对过拟合，确保模型找到可以泛化的特征呢？</p>
+					<div class="educationSection">正则化</div>
+					<p>防止过拟合的一种方法是正则化，它通过加入一个新的项来引导模型走向更简单的解决方案。回想一下，在分类问题中，我们从一对对输入和它们的分类 <span class="math display">\[(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n).\]</span> 开始。我们希望找到一个函数 <span class="math inline">\(f\)</span>，它能准确预测新数据样本的类别。因此，如果我们的原始问题是 <span class="math display">\[\min_f \sum_{i=1}^{n} C(f(x_i), y_i),\]</span> 其中 <span class="math inline">\(C\)</span> 计算当预测 <span class="math inline">\(f(x_i)\)</span> 时的代价，当真实值是 <span class="math inline">\(y_i\)</span>，那么正则化损失将是 <span class="math display">\[\min_f \sum_{i=1}^{n} C(f(x_i), y_i) + \lambda R(f),\]</span> 其中 <span class="math inline">\(R(f)\)</span> 是正则化项，定义为当 <span class="math inline">\(f\)</span> 更复杂时它会变大，而 <span class="math inline"> \(\lambda>0\) </span> 是一个可调节的参数，控制正则化的程度。层的复杂性有多种定义，但在我们的案例中，我们会说，具有较低 <span class="math inline">\(L2\)</span>-范数的层较为简单。正式地，我们将 <span class="math inline">\(L2\)</span>-范数定义为 <span class="math display">\[\text{norm}(A) = \sqrt{\sum_i \sum_j a_{ij}^2}.\]</span> 例如，给定矩阵 <span class="math display">\[A =
 					\begin{bmatrix}
-					1 &amp; 2 \\
-					0 &amp; -2
-					\end{bmatrix},\]</span> the L2-norm is <span class="math display">\[||A||_2 = \sqrt{1^2 + 2^2 + 0^2 + (-2)^2} = 3.\]</span></p>
-					<p>There are several reasons why penalizing an increased <span class="math inline">\(L2\)</span>-norm is a reasonable action. If we assume that a classifier is going to overfit, then adding in the penalty <span class="math inline">\(\lambda R(f)\)</span> will guide the decision boundary away from that state. This can be seen as adding “wiggle room&quot; to the classifier. Moreover, this penalty of a high <span class="math inline">\(L2\)</span>-norm is a way to encourage discarding useless information. The penalty term drives layer weights to be smaller, and the closer a layer weight gets to zero, the smaller its impact is as a feature.</p>
-					<p>This notion of complexity leads to <span class="math inline">\(L1\)</span>- and <span class="math inline">\(L2\)</span>-norms becoming forms of regularization. In the case of <span class="math inline">\(L2\)</span>-regularization, we can add <span class="math inline">\(\lambda ||W||_2\)</span> to our loss function for a given layer <span class="math inline">\(W.\)</span> There are other ways to regularize, but for now let us take a look at a different approach. </p>
-					<!-- TODO: Maybe explain L1-regularization in the future -->
+					1 & 2 \\
+					0 & -2
+					\end{bmatrix},\]</span> 其 L2-范数为 <span class="math display">\[||A||_2 = \sqrt{1^2 + 2^2 + 0^2 + (-2)^2} = 3.\]</span></p>
+					<p>有几个原因解释了为何惩罚增大的 <span class="math inline">\(L2\)</span>-范数是一个合理的做法。如果我们假设分类器会发生过拟合，那么加入惩罚项 <span class="math inline">\(\lambda R(f)\)</span> 将会引导决策边界远离这一状态。这可以看作是给分类器增加“摆动空间”。此外，这种高 <span class="math inline">\(L2\)</span>-范数的惩罚是鼓励丢弃无用信息的一种方式。惩罚项促使层的权重变小，而层的权重越接近零，其作为特征的影响就越小。</p>
+					<p>这种复杂性的概念导致了 <span class="math inline">\(L1\)</span>-和 <span class="math inline">\(L2\)</span>-范数成为正则化的一种形式。在 <span class="math inline">\(L2\)</span>-正则化的情况下，我们可以将 <span class="math inline">\(\lambda ||W||_2\)</span> 加入到损失函数中，针对给定层 <span class="math inline">\(W.\)</span> 当然，还有其他的正则化方式，但现在我们来看看另一种方法。</p>
+					<!-- TODO: 以后可能解释 L1-正则化 -->
 					<div class="educationSection">Dropout</div>
-					<p>Another way to fight overfitting is a technique known as dropout. Dropout layers ignore a random fraction of the input units during training time (see our explanation on dropout layers for more information). There are two intuitions for why dropout helps prevent overfitting. Dropout can be seen a type of ensemble learning -- taking a collection of weak (underfit) classifiers and combing their classifications in some way, e.g., taking the majority class. For each batch, a new section of the network is trained as a weak classifier. During validation, the whole network is used, effectively combining all of the classifiers to provide a single result. Another view is that over many runs, dropout forces all parts of a network architecture to be used. Therefore, no one feature of the training set will be too influential, avoiding the network from focusing on artifacts that are only specific to the training set.</p>
-					<div class="educationSection">Conclusion</div>
-					<p>Overfitting hinders the performance of classifiers on unseen data. Regularization and dropout are two widely-used and easy-to-implement approaches for combatting overfitting. Combining these methods with cross validation makes it far easier to build more generalizable models.</p>
+					<p>防止过拟合的另一种方法是名为 dropout 的技术。Dropout 层在训练期间忽略一部分输入单元（有关更多信息，请参阅我们的 dropout 层解释）。有两种直觉可以解释为什么 dropout 有助于防止过拟合。Dropout 可以看作是一种集成学习——将一组弱（欠拟合）分类器的结果进行某种方式的组合，例如采用多数类别。在每个批次中，网络的一个新部分作为弱分类器进行训练。在验证阶段，整个网络都会被使用，从而有效地将所有分类器结合起来提供一个单一的结果。另一种看法是，经过多次运行后，dropout 强制网络架构的所有部分都被使用。因此，训练集的任何一个特征都不会过于影响网络，避免网络集中在仅对训练集特有的伪影上。</p>
+					<div class="educationSection">结论</div>
+					<p>过拟合会妨碍分类器在未见数据上的表现。正则化和 dropout 是两种广泛使用且容易实现的防止过拟合的方法。结合这些方法与交叉验证，使得构建更具泛化能力的模型变得更加容易。</p>
 				</div>
-
+			
 			</div>
+			
 
 
 			<div style="height:100px;"> </div>
@@ -458,7 +454,7 @@
 
 		<div id = 'loadingDataTab' style="display: none">
 			<div id='loadingMNIST'>
-				Loading <span id="datasetLoadingName">MNIST</span> dataset
+				加载中 <span id="datasetLoadingName">MNIST</span> 数据集
 			</div>
 		</div>
 
@@ -474,7 +470,7 @@
 	<!-- The right panel -->
 	<div id = 'paramshell'>
 		<div class = 'trainbox' id = 'trainbox'>
-			<div id = 'train' class = 'train' data-actionType = 'json'> Train </div>
+			<div id = 'train' class = 'train' data-actionType = 'json'> 训练 </div>
 		</div>
 
 		<div class = 'category' id = 'kerasinfo'>
@@ -485,28 +481,28 @@
 					</svg>
 				</div>
 				<div class='categoryTitleText'>
-					Model Status
+					模型状态
 				</div>
 			</div>
 			<div class = 'parambox'>
 				<div id = 'ti_training' class = 'paramline'>
-					<div class = 'paramname'>Training:</div>
-					<div class = 'paramvalue'>No</div>
+					<div class = 'paramname'>训练中</div>
+					<div class = 'paramvalue'>否</div>
 				</div>
 				<div id = 'ti_acc' class = 'paramline'>
-					<div class = 'paramname'>Accuracy:</div>
+					<div class = 'paramname'>准确率：</div>
 					<div class = 'paramvalue'>N/A</div>
 				</div>
 				<div id = 'ti_loss' class = 'paramline'>
-					<div class = 'paramname'>Loss:</div>
+					<div class = 'paramname'>损失率:</div>
 					<div class = 'paramvalue'>N/A</div>
 				</div>
 				<div id = 'ti_vacc' class = 'paramline'>
-					<div class = 'paramname'>Validation Acc:</div>
+					<div class = 'paramname'>验证集准确率:</div>
 					<div class = 'paramvalue'>N/A</div>
 				</div>
 				<div id = 'ti_vloss' class = 'paramline'>
-					<div class = 'paramname'>Validation Loss:</div>
+					<div class = 'paramname'>验证集损失率:</div>
 					<div class = 'paramvalue'>N/A</div>
 				</div>
 			</div>
@@ -519,12 +515,12 @@
 					</svg>
 				</div>
 				<div class='categoryTitleText'>
-					Share
+					导出代码
 				</div>
 			</div>
-			<div id="exportPython" class="select-option right-option">Export to Python</div>
-			<div id="exportJulia" class="select-option right-option">Export to Julia</div>
-			<div id="copyModel" class="select-option right-option">Copy model link</div>
+			<div id="exportPython" class="select-option right-option">导出 Python</div>
+			<div id="exportJulia" class="select-option right-option">导出 Julia</div>
+			<div id="copyModel" class="select-option right-option">模型链接</div>
 		</div>
 		<div id = 'networkParamshell'>
 
@@ -536,10 +532,10 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Parameters
+						参数
 					</div>
 				</div>
-				<div id='defaultparambox' class = 'parambox'>Click on a layer to view and change its parameters.</div>
+				<div id='defaultparambox' class = 'parambox'>点击一个层以查看和更改其参数。</div>
 			</div>
 		</div>
 
@@ -552,12 +548,12 @@
 						</svg>
 					</div>
 					<div class='categoryTitleText'>
-						Hyperparams
+						超参数
 					</div>
 				</div>
 				<div class = 'parambox'>
 					<div class = 'paramline'>
-						<div class="paramname" data-name="lr">Learning rate: </div>
+						<div class="paramname" data-name="lr">Learning Rate: </div>
 						<input id="learningRate" class="paramvalue hyperparamvalue" value="0.01">
 					</div>
 					<div class = 'paramline'>
@@ -580,9 +576,6 @@
 
 	</div>
 
-</div>
-<div id='footer'>
-	<a href='https://accessibility.mit.edu'>Accessibility</a>
 </div>
 </body>
 </html>
