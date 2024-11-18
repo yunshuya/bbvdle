@@ -96,6 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Select the input block when we load the page
     svgData.input.select();
 
+    //task open
+    const taskTitle = document.getElementById("taskTitle");
+    if (taskTitle) {
+        taskTitle.addEventListener("click", () => {
+            toggleTaskSteps();
+        });
+    }
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
@@ -131,9 +138,88 @@ function setupOptionOnClicks(): void {
         selectOption("losses", element);
         model.params.loss = lossType;
     });
+    //new
+    const taskOptions = document.querySelectorAll("#tasks .option");
+    taskOptions.forEach(option => {
+        option.addEventListener("click", () => {
+            const taskType = option.getAttribute("data-optionValue");
+            switchTask(taskType);
+        });
+    });
 }
 
+const taskMapping = {
+    MLP: "多层感知机",
+    CNN: "卷积神经网络",
+    RNN: "循环神经网络",
+} as const;
+
+async function switchTask(taskType: string): Promise<void> {
+    console.log("Switching to task: " + taskType);
+
+    const taskDisplay = document.getElementById("taskTitleText");
+    const stepsList = document.getElementById("stepsList");
+
+    if (!taskDisplay || !stepsList) return;
+
+    // 更新任务标题
+    taskDisplay.textContent = "当前任务: " + (taskMapping[taskType as keyof typeof taskMapping] || "未知任务");
+
+    try {
+        // 异步加载任务步骤 JSON 文件
+        const response = await fetch('dist/tasksteps.json');
+        if (!response.ok) throw new Error('无法加载任务步骤数据');
+
+        const taskSteps = await response.json();
+
+        // 根据任务类型获取步骤
+        const steps: string[] = taskSteps[taskType] || ['未找到对应任务的步骤'];
+
+        // 清空当前步骤内容
+        stepsList.innerHTML = '';
+
+        // 填充步骤内容
+        steps.forEach((step) => {
+            const li = document.createElement('li');
+            li.textContent = step;
+            stepsList.appendChild(li);
+        });
+
+        // 展开任务步骤内容
+        toggleTaskSteps(true);
+    } catch (error) {
+        console.error('加载任务步骤失败:', error);
+
+        // 显示加载失败提示
+        stepsList.innerHTML = '<li>任务步骤加载失败，请检查网络或联系管理员。</li>';
+    }
+}
+
+
+// 控制步骤展示框的展开和收起
+function toggleTaskSteps(forceOpen?: boolean): void {
+    console.log("toggleTaskSteps");
+    const taskContent = document.getElementById("taskContent");
+    const arrow = document.getElementById("arrow");
+
+    if (taskContent && arrow) {
+        // 判断当前状态
+        const isHidden = taskContent.style.display === 'none';
+
+        // 根据传入的 forceOpen 参数或当前状态决定切换逻辑
+        if (forceOpen !== undefined) {
+            taskContent.style.display = forceOpen ? 'block' : 'none';
+            arrow.classList.toggle('open', forceOpen);
+        } else {
+            taskContent.style.display = isHidden ? 'block' : 'none';
+            arrow.classList.toggle('open', isHidden);
+        }
+    }
+}
+
+
 function selectOption(optionCategoryId: string, optionElement: HTMLElement): void {
+    console.log("optionCategoryId, optionElement");
     for (const option of document.getElementById(optionCategoryId).getElementsByClassName("option")) {
         option.classList.remove("selected");
     }

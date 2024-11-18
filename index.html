@@ -88,6 +88,23 @@
 	<!-- The left panel (menu) -->
 	<div id = 'menu'>
 		<div id = 'networkMenu'>
+			<!-- The task -->
+			<div id="tasks" class="category">
+				<div class="categoryTitle" data-expanded="true">
+					<div class="expander">
+						<svg height="24px" width="24px">
+							<path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" style="fill:#FFFFFF;"></path>
+						</svg>
+					</div>
+					<div class="categoryTitleText">
+						教学任务
+					</div>
+				</div>
+				<div class="option select-option" data-optionValue="MLP">多层感知机</div>
+				<div class="option select-option" data-optionValue="CNN">卷积神经网络</div>
+				<div class="option select-option" data-optionValue="RNN">循环神经网络</div>
+			</div>
+
 			<div id = 'layers' class = 'category'>
 				<div class = 'categoryTitle' data-expanded = 'true'>
 					<div class='expander'>
@@ -258,8 +275,21 @@
 
 	</div>
 
+	
+
 	<!-- The middle canvas -->
 	<div id = 'middle'>
+		<div id="taskSteps">
+			<div id="taskTitle" class="task-title" onclick="toggleTaskSteps()">
+				<span id="taskTitleText">未选择任务</span>
+				<span id="arrow" class="arrow">&#9660;</span> <!-- 初始为收起箭头 -->
+			</div>
+			<div id="taskContent" class="task-content" style="display: none;">
+				<ul id="stepsList">
+					<!-- 这里将动态显示步骤内容 -->
+				</ul>
+			</div>
+		</div>
 
 		<div id = 'networkTab'>
 			<svg id = 'svg'> </svg>

@@ -108,8 +108,10 @@ gyp ERR! stack Error: Could not find any Visual Studio installation to use
 
 #### 解决方法
 
+`npm config set proxy false`
 `npm cache clean --force`
 删除package-lock和node_modules
+`npm config set proxy false`
 `npm install canvas@2.8.0 --ignore-scripts`
 `npm install`
 

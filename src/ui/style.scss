@@ -707,3 +707,41 @@ label {
   .hidden_div {
       display: none;
   }
+
+  #taskSteps {
+    position: absolute; /* 使其悬浮 */
+    top: 20px;          /* 距离父容器顶部的偏移量，可根据需求调整 */
+    right: 20px;        /* 距离右侧的偏移量，可根据需求调整 */
+    width: 300px;       /* 设置任务栏宽度 */
+    z-index: 1000;      /* 保证其位于其他元素之上 */
+    background-color: #f8f8f8; /* 背景色 */
+    border: 1px solid #ccc;    /* 边框 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影以突出悬浮效果 */
+    border-radius: 8px;       /* 圆角边框 */
+    overflow: hidden;         /* 防止内容溢出 */
+}
+
+#taskTitle {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #e0e0e0; /* 标题栏背景色 */
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+}
+
+#taskContent {
+    padding: 10px;
+    display: none; /* 默认隐藏 */
+    max-height: 400px; /* 限制高度，避免内容过长溢出 */
+    overflow-y: auto;  /* 添加垂直滚动条 */
+}
+
+.arrow {
+    float: right;
+    transition: transform 0.3s ease; /* 添加旋转动画 */
+}
+
+.arrow.open {
+    transform: rotate(180deg); /* 展开时旋转 */
+}
+
