@@ -111,7 +111,6 @@ gyp ERR! stack Error: Could not find any Visual Studio installation to use
 `npm config set proxy false`
 `npm cache clean --force`
 删除package-lock和node_modules
-`npm config set proxy false`
 `npm install canvas@2.8.0 --ignore-scripts`
 `npm install`
 
@@ -162,5 +161,3 @@ internal/fs/utils.js:230
 `npm uninstall node-sass`
 `npm cache clean --force`
 `npm install node-sass@4.14.1`
-
-尝试一下可不可以commit，yzq

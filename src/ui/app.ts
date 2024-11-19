@@ -465,6 +465,12 @@ function switchTab(tabType: string): void {
     document.getElementById("visualizationParamshell").style.display = "none";
     document.getElementById("educationParamshell").style.display = "none";
 
+    // Hide taskSteps by default
+    const taskSteps = document.getElementById("taskSteps");
+    if (taskSteps) {
+        taskSteps.style.display = "none";
+    }
+
     // Unselect all tabs
     document.getElementById("network").classList.remove("tab-selected");
     document.getElementById("progress").classList.remove("tab-selected");
@@ -479,6 +485,11 @@ function switchTab(tabType: string): void {
     document.getElementById("paramshell").style.display = null;
     document.getElementById("menu").style.display = null;
     // document.getElementById("menu_expander").style.display = null;
+
+    // Show taskSteps only for "network" tab
+    if (tabType === "network" && taskSteps) {
+        taskSteps.style.display = "block";
+    }
 
     switch (tabType) {
         case "network": resizeMiddleSVG(); break;
