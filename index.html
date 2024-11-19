@@ -270,8 +270,25 @@
 				<div class = 'option select-option education-option' data-optionValue = 'Flatten'> Flatten </div>
 
 			</div>
-
+			<div id = 'educationModel' class = 'category'>
+				<div class = 'categoryTitle data-expanded' = 'true'>
+					<div class = 'expander'>
+						<svg height="24px" width="24px">
+							<path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" style="fill:#FFFFFF;"></path>
+						</svg>
+					</div>
+					<div class='categoryTitleText'>
+						模型教学
+					</div>
+				</div>
+				<div class = 'option select-option education-option' data-optionValue = 'MLP'> 感知机 </div>
+				<div class = 'option select-option education-option' data-optionValue = 'CNN'> 卷积神经网络 </div>
+				<div class = 'option select-option education-option' data-optionValue = 'newCNN'> 现代卷积神经网络 </div>
+				<div class = 'option select-option education-option' data-optionValue = 'RNN'> 循环神经网络 </div>
+				<div class = 'option select-option education-option' data-optionValue = 'newRNN'> 现代循环神经网络 </div>
+			</div>
 		</div>
+		
 
 	</div>
 
@@ -474,6 +491,112 @@
 				</div>
 			
 			</div>
+			<div id="educationMLP">
+				<div class="educationTitle">感知机</div>
+				<div class="educationContent">
+					<div class="educationSection">（一）概述</div>
+					<p>
+						多层感知机（MLP：Multi-Layer Perceptron）由感知机(PLA: Perceptron Learning Algorithm)推广而来。它最主要的特点是有多个神经元层，因此也叫深度神经网络(DNN: Deep Neural Networks)。
+					</p>
+					<p>
+						感知机是单个神经元模型，是较大神经网络的前身。神经网络的强大之处在于它们能够学习训练数据中的表示，以及如何将其与想要预测的输出变量联系起来。从数学上讲，它们能够学习任何映射函数，并且已经被证明是一种通用的近似算法。
+					</p>
+					<p>
+						神经网络的预测能力来自网络的分层或多层结构。而多层感知机是指具有至少三层节点（输入层，一些中间层和输出层）的神经网络。每一层中的节点与相邻层的节点完全连接。
+					</p>
+					<div class="educationSection">（二）各层说明</div>
+					<p><strong>1．输入层：</strong> 每个输入特征对应一个神经元，输入层不涉及计算。</p>
+					<p><strong>2．单个或多个隐藏层：</strong></p>
+					<ul>
+						<li>介绍</li>
+						<p>至少有一个隐藏层，通常包含多个神经元。每一层的神经元与前一层的神经元连接。</p>
+						<p>隐藏层负责对输入数据进行非线性转换。在每个神经元中，输入值会与相应的权重相乘，再加上偏置，最后通过激活函数进行变换。这样每一层都能够提取特征。</p>
+						<li>神经元的计算</li>
+						<ul>
+							<li>对于第L层的第j个神经元，其输出为：
+								<span class="math inline">\[z_j=W_j\cdot a^{(1-1)}+b_j\]</span>
+								<span class="math inline">\[a_j{=}f(z_j)\]</span>
+								<p>其中,<span class="math inline">\(W_j\)</span>是权重，<span class=",math inline">\(b_j\)</span>是偏置，<span class=",math inline">\(a^{(l-1)}\)</span>是前一层的输出，<span class="math inline">\(f(z_j)\)</span>是激活函数 (如ReLU) 。 假设隐藏层有3个神经元，并且我们使用 ReLU 激活函数。每个神经元的输入是输入层的输出(x1, x2),它们会被分别与权重和偏置进行加权和偏置计算。</p>
+							</li>
+							<li>隐藏层神经元的计算过程：
+								<p>对于第一个神经元：<span class="math inline">\[z_1=W_1\cdot x+b_1=w_1\cdot x_1+w_{12}\cdot x_2+b_1\]</span></p>
+								<p>激活函数(ReLU)会将计算结果输出：<span class="math inline">\[a_1{=}\mathrm{ReLU}(z_1)\]</span></p>
+								<p>对于第二个和第三个神经元，同样的计算方式。</p>
+							</li>
+						</ul>
+						<li>激活函数的选择：</li>
+						<ul>
+							<li>ReLU：适用于隐藏层，能够加速训练，避免梯度消失问题。</li>
+							<li>Sigmoid：可以用于隐藏层，但在深层网络中容易导致梯度消失。</li>
+							<li>Tanh：适用于隐藏层，能够解决一些 Sigmoid 的问题，具有对称性。</li>
+						</ul>
+					</ul>
+					<p><strong>3．输出层：</strong> </p>
+
+					<ul>
+						<li>介绍</li>
+						<p>输出层负责将隐藏层的结果转化为最终预测值。</p>
+						<li>神经元计算（以 Sigmoid 为例）
+							<p>输出层的计算可以表示为：</p>
+							<span class="math inline">\[a^{(\mathrm{hidden})}+b_{\mathrm{out}}\]</span>
+							<p>其中，<span class="math inline">\(\mathbf{a^{(hiddcn)}}\)</span>是隐藏层的输出,<span class="math inline">\(W_{\mathrm{out}}\)</span>是输出层的权重，<span class="math inline">\(\widehat{y}=\sigma(z_{\mathrm{out}})=\frac1{1+e^{-z_{\mathrm{out}}}}\)</span>
+								,其中<span class="math inline">\(\widehat{y}\)</span>是模型的预测输出，代表样本属于某一类的概率。
+								</p>
+						</li>
+					</ul>
+					<div class="educationSection">（三）思考题</div>
+					<ol>
+						<li>
+							<strong>过拟合问题：</strong> 为什么 Dropout 可以防止过拟合？除此之外还有哪些方法？
+						</li>
+						<li>
+							<strong>可解释性问题：</strong> 为什么深度学习被称为“黑箱”模型？如何提高其可解释性？
+						</li>
+						<li>
+							<strong>激活函数问题：</strong> 为什么需要使用非线性激活函数？
+						</li>
+					</ol>
+				</div>
+
+			</div>
+			<div id="educationCNN">
+				<div class="educationTitle">卷积神经网络</div>
+				<div class="educationContent">
+					<div class="educationSection">（一）概述</div>
+					<p>卷积神经网络（Convolutional Neural Network，简称 CNN）是一种特别适合处理和分析图像的深度学习模型。CNN 的结构和原理借鉴了生物视觉系统，尤其是人类视觉皮层的工作方式，使它能够有效提取图像中的各种特征，如边缘、纹理和形状。与传统的神经网络不同，CNN 通过卷积层和池化层来提取特征，并用全连接层对提取到的特征进行分类或回归。</p>
+					<div class="educationSection">（二）CNN模型提出</div>
+					<ol>
+						<li>CNN 发展背景与基本思想</li>
+						<p>在 1980 年代，计算机视觉领域的研究者发现传统的机器学习方法在图像处理任务上表现不佳。图像中包含的大量像素信息使得简单的机器学习模型难以有效提取有用的特征，且数据维度高、参数多。这些挑战使得研究者们开始寻找新的方法来自动从图像数据中提取特征。</p>
+						<p>此时，研究人员借鉴了生物视觉系统的工作原理。生物学家发现，人类视觉皮层在处理视觉信息时，会逐层提取图像中的不同层次信息，从而形成对图像内容的理解。基于这种启发，研究者们开始设计一种模拟生物视觉系统的层次化结构模型，即卷积神经网络。</p>
+						<li>Yann LeCun 和 LeNet 的诞生</li>
+						<p>Yann LeCun 是法国计算机科学家，被誉为“卷积神经网络之父”。他在 1989 年提出了一个简单的卷积神经网络模型，用于手写数字识别任务。LeCun 的工作受生物视觉系统启发，并基于如下两个关键原则来设计 CNN：</p>
+						<ul>
+							<li>局部连接：LeCun 提出的 CNN 只对图像的局部区域进行处理，而不是全图连接。这种方法不仅减少了参数数量，还能更有效地学习图像的局部特征。</li>
+							<li> 权重共享：在卷积操作中，CNN 的每一个卷积核在图像的不同位置共享相同的权重，从而减少了需要学习的参数数量。这种结构可以让网络自动识别图像中重复的模式，比如边缘或特定的形状。</li>
+						</ul>
+						<p>这两个设计思想极大降低了模型复杂度，使得 CNN 能够在当时有限的计算资源下运行。</p>
+						<li>LeNet-5 架构（1998 年）</li>
+						<p>在 1998 年，Yann LeCun 等人提出了 LeNet-5，这是一个多层的卷积神经网络结构，主要用于手写数字识别（例如识别 0-9 的手写数字）。LeNet-5 的结构包括：</p>
+						<ul>
+							<li>卷积层：用于提取图像的局部特征。</li>
+							<li>池化层：通过下采样操作减少特征的尺寸，从而降低模型的计算量。</li>
+							<li>全连接层：用于将卷积和池化提取到的特征综合，用于最终的分类。</li>
+
+						</ul>
+						<p>LeNet-5 的诞生标志着 CNN 的第一次成功应用，并在手写数字识别任务上取得了令人瞩目的表现。然而，由于当时的计算能力和数据集规模有限，CNN 的进一步发展受到限制，无法应用于更大规模的任务。</p>
+						<li>深度学习和计算能力的推动</li>
+						<p>2000 年代，随着 GPU 的出现和计算能力的提升，深度学习的研究逐渐复兴。大规模数据集（如 ImageNet）的出现为 CNN 的训练提供了丰富的数据。AlexNet 的提出将 CNN 推向了新的高度。</p>
+						<li>AlexNet 和 CNN 的重大突破（2012 年）</li>
+						<p>在 2012 年，由 Alex Krizhevsky 等人设计的 AlexNet 模型参加了 ImageNet 大规模视觉识别竞赛（ILSVRC），并在分类任务上取得了巨大的成功，准确率远超其他方法。AlexNet 的结构和 LeNet-5 相似，但 AlexNet 增加了深度层数、使用了 ReLU 激活函数以及 Dropout 正则化等技术来提升性能。</p>
+						<p>AlexNet 的成功证明了 CNN 的潜力，并在计算机视觉领域掀起了深度学习的热潮。此后，更多深层次的 CNN 架构被提出，如 VGG、GoogLeNet、ResNet 等，使 CNN 成为计算机视觉的核心模型。</p>
+					</ol>
+					<div class="educationSection">（三）CNN模型的核心</div>
+					<image class="educationImage" src="resources/educationimage/CNN_1.png"  alt="CNN_1"></image>
+				</div>
+			</div>		
+			
+			
 			
 
 
