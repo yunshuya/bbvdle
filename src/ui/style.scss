@@ -745,3 +745,114 @@ label {
     transform: rotate(180deg); /* 展开时旋转 */
 }
 
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #6200EA;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.floating-button svg {
+    fill: white;
+}
+
+.ai-dialog {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
+
+.dialog-header {
+    background-color: #6200EA;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.dialog-content {
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1;
+    border-top: 1px solid #ccc;
+}
+
+.dialog-footer {
+    display: flex;
+    border-top: 1px solid #ccc;
+}
+
+.dialog-footer input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+}
+
+.dialog-footer button {
+    border: none;
+    background-color: #6200EA;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+/* 消息容器样式 */
+.message {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+}
+
+/* 用户和助手消息的底色区分 */
+.message.user .message-content {
+    background-color: #d1e7dd; /* 用户消息：浅绿色 */
+    align-self: flex-end; /* 靠右 */
+}
+
+.message.assistant .message-content {
+    background-color: #f8d7da; /* 助手消息：浅红色 */
+    align-self: flex-start; /* 靠左 */
+}
+
+/* 消息内容通用样式 */
+.message-content {
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 发送者标签 */
+.sender-label {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 2px;
+    text-align: left;
+}
+
+.message.user .sender-label {
+    text-align: right; /* 用户消息的发送者名靠右 */
+}

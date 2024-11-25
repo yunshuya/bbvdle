@@ -27,6 +27,8 @@ import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
+import { switchTask, toggleTaskSteps } from './taskModule';
+import { appendMessage, fetchAiResponse } from './aiassistant';
 
 export interface IDraggableData {
     draggable: Draggable[];
@@ -103,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleTaskSteps();
         });
     }
+    setupAiAssistant();
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
@@ -150,76 +153,6 @@ function setupOptionOnClicks(): void {
         });
     });
 }
-
-const taskMapping = {
-    MLP: "多层感知机",
-    CNN: "卷积神经网络",
-    RNN: "循环神经网络",
-} as const;
-
-async function switchTask(taskType: string): Promise<void> {
-    console.log("Switching to task: " + taskType);
-
-    const taskDisplay = document.getElementById("taskTitleText");
-    const stepsList = document.getElementById("stepsList");
-
-    if (!taskDisplay || !stepsList) return;
-
-    // 更新任务标题
-    taskDisplay.textContent = "当前任务: " + (taskMapping[taskType as keyof typeof taskMapping] || "未知任务");
-
-    try {
-        // 异步加载任务步骤 JSON 文件
-        const response = await fetch('dist/tasksteps.json');
-        if (!response.ok) throw new Error('无法加载任务步骤数据');
-
-        const taskSteps = await response.json();
-
-        // 根据任务类型获取步骤
-        const steps: string[] = taskSteps[taskType] || ['未找到对应任务的步骤'];
-
-        // 清空当前步骤内容
-        stepsList.innerHTML = '';
-
-        // 填充步骤内容
-        steps.forEach((step) => {
-            const li = document.createElement('li');
-            li.textContent = step;
-            stepsList.appendChild(li);
-        });
-
-        // 展开任务步骤内容
-        toggleTaskSteps(true);
-    } catch (error) {
-        console.error('加载任务步骤失败:', error);
-
-        // 显示加载失败提示
-        stepsList.innerHTML = '<li>任务步骤加载失败，请检查网络或联系管理员。</li>';
-    }
-}
-
-
-// 控制步骤展示框的展开和收起
-function toggleTaskSteps(forceOpen?: boolean): void {
-    console.log("toggleTaskSteps");
-    const taskContent = document.getElementById("taskContent");
-    const arrow = document.getElementById("arrow");
-
-    if (taskContent && arrow) {
-        // 判断当前状态
-        const isHidden = taskContent.style.display === 'none';
-
-        // 根据传入的 forceOpen 参数或当前状态决定切换逻辑
-        if (forceOpen !== undefined) {
-            taskContent.style.display = forceOpen ? 'block' : 'none';
-            arrow.classList.toggle('open', forceOpen);
-        } else {
-            taskContent.style.display = isHidden ? 'block' : 'none';
-            arrow.classList.toggle('open', isHidden);
-        }
-    }
-}
-
 
 function selectOption(optionCategoryId: string, optionElement: HTMLElement): void {
     console.log("optionCategoryId, optionElement");
@@ -517,4 +450,32 @@ function switchTab(tabType: string): void {
 
     document.getElementById(tabMapping[index - 1]).classList.add("top_neighbor_tab-selected");
     document.getElementById(tabMapping[index + 1]).classList.add("bottom_neighbor_tab-selected");
+}
+
+
+// 封装 AI 助手事件监听器
+function setupAiAssistant(): void {
+    const aiButton = document.getElementById("aiAssistantButton");
+    const aiDialog = document.getElementById("aiAssistantDialog");
+    const dialogContent = document.getElementById("dialogContent");
+    const dialogInput = document.getElementById("dialogInput") as HTMLInputElement;
+    const sendButton = document.getElementById("sendButton");
+
+    if (!aiButton || !aiDialog || !dialogContent || !dialogInput || !sendButton) return;
+
+    // 显示/隐藏对话框
+    aiButton.addEventListener("click", () => {
+        aiDialog.classList.toggle("hidden");
+    });
+
+    // 发送消息并模拟 AI 回复
+    sendButton.addEventListener("click", async () => {
+        const userMessage = dialogInput.value.trim();
+        if (userMessage) {
+            appendMessage(dialogContent, "user", userMessage);
+            dialogInput.value = "";
+            const aiResponse = await fetchAiResponse(userMessage);
+            appendMessage(dialogContent, "assistant", aiResponse);
+        }
+    });
 }

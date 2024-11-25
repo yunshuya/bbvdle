@@ -296,6 +296,24 @@
 
 	<!-- The middle canvas -->
 	<div id = 'middle'>
+		<!-- 添加 AI 助手的按钮 -->
+		<div id="aiAssistantButton" class="floating-button">
+			<svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="12" cy="12" r="10" fill="#6200EA"/>
+				<text x="12" y="16" text-anchor="middle" fill="white" font-size="14px" font-family="Arial">AI</text>
+			</svg>
+		</div>
+
+		<!-- 添加对话框 -->
+		<div id="aiAssistantDialog" class="ai-dialog hidden">
+			<div class="dialog-header">AI 助手</div>
+			<div class="dialog-content" id="dialogContent"></div>
+			<div class="dialog-footer">
+				<input type="text" id="dialogInput" placeholder="输入消息..." />
+				<button id="sendButton">发送</button>
+			</div>
+		</div>
+
 		<div id="taskSteps">
 			<div id="taskTitle" class="task-title" onclick="toggleTaskSteps()">
 				<span id="taskTitleText">未选择任务</span>
