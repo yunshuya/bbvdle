@@ -54,6 +54,7 @@ source ~/.bashrc
 //出现conda23.10.0,安装成功
 conda create -n py38 python=3.8
 conda activate py38
+pip install Flask flask-cors zhipuai
 ```
 
 ## 2. 克隆仓库
