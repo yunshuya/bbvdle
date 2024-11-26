@@ -15,12 +15,12 @@ bbvdle/
 ├── dist/
 ├── resources/
 ├── src/
-    ├──ui/              # 前端组件
-                        样式、按钮逻辑以及可拖动的组件
-                        （例如层和激活函数）    
-    ├──model/           #后端组件
-                        支持构建神经网络、
-                        代码生成以及在浏览器中保存状态的核心功能
+|   ├──ui/              # 前端组件
+|   |                    样式、按钮逻辑以及可拖动的组件
+|   |                    （例如层和激活函数）    
+|   ├──model/           # 后端组件
+|   |                    支持构建神经网络、
+|   └──                  代码生成以及在浏览器中保存状态的核心功能
 └── README.md           # 项目说明文件
 ```
 
@@ -28,9 +28,9 @@ bbvdle/
 
 ### Windows
 
-python == 3.8
+1. python == 3.8
 `pip install Flask flask-cors zhipuai`
-下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
+2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
 
 ### Linux安装Nodejs
 
@@ -103,7 +103,7 @@ conda activate py38
 ## 注意
 
 代码默认在实例公网ip,本地测试时需要修改代码,部署前需要修改为对应实例公网ip
-![alt text](dist\ai_asisstant_mod.png)
+<img src="dist/ai_asisstant_mod.png" width="600px"/>
 
 ## 报错解决
 
