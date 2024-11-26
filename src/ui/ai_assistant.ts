@@ -28,8 +28,11 @@ export function appendMessage(container: HTMLElement, sender: string, message: s
 export async function fetchAiResponse(userMessage: string): Promise<string> {
     // return "你好，我是AI助手，有什么可以帮助你的吗？"
     try {
-        // 发送 POST 请求到 Python 后端
-        const response = await axios.post('http://localhost:5000/api/reply', {
+        // 发送 POST 请求到 Python 后端,注意修改为你的实例的IP地址
+        // const response = await axios.post('http://localhost:5000/api/reply', {
+        //     message: userMessage
+        // });
+        const response = await axios.post('http://54.147.80.126:5000/api/reply', {
             message: userMessage
         });
 

@@ -26,14 +26,13 @@ bbvdle/
 
 ## 1. 安装Nodejs\python及其他必要包
 
-python == 3.8
-`pip install Flask flask-cors zhipuai`
-
 ### Windows
 
+python == 3.8
+`pip install Flask flask-cors zhipuai`
 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
 
-### Linux安装
+### Linux安装Nodejs
 
 项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
 
@@ -45,6 +44,18 @@ curl -fsSL https://fnm.vercel.app/install | bash
 source ~/.bashrc
 fnm use --install-if-missing 13
 ```
+
+### Linux安装配置Python 3.8
+
+```cmd
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+source ~/.bashrc
+//出现conda23.10.0,安装成功
+conda create -n py38 python=3.8
+conda activate py38
+```
+
 
 ## 2. 克隆仓库
 
@@ -72,19 +83,24 @@ fnm use --install-if-missing 13
 
 2. 复制文件至根目录
 `sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
+`cd /var/www/html/`
 
 3. 配置Apache
 `sudo systemctl reload httpd`
 
 4. 启动Apache
 `sudo systemctl start httpd`
+`sudo systemctl start httpd.service`
 
 5. 设置开机自启
 `sudo systemctl enable httpd`
 
+直接访问公网ip不要加https
+
 ### 部署ai_assistant后端
+
 切换至bbvdle目录下，执行
-`python src\model\GLM.py`
+`python /home/ec2-user/bbvdle/src/model/GLM.py`
 
 ## 报错解决
 
