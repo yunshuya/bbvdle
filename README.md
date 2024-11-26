@@ -56,7 +56,6 @@ conda create -n py38 python=3.8
 conda activate py38
 ```
 
-
 ## 2. 克隆仓库
 
 `git clone --recursive https://github.com/sunyia123/bbvdle.git`
@@ -90,9 +89,8 @@ conda activate py38
 
 4. 启动Apache
 `sudo systemctl start httpd`
-`sudo systemctl start httpd.service`
 
-5. 设置开机自启
+1. 设置开机自启
 `sudo systemctl enable httpd`
 
 直接访问公网ip不要加https
@@ -101,6 +99,11 @@ conda activate py38
 
 切换至bbvdle目录下，执行
 `python /home/ec2-user/bbvdle/src/model/GLM.py`
+
+## 注意
+
+代码默认在实例公网ip,本地测试时需要修改代码,部署前需要修改为对应实例公网ip
+![alt text](dist\ai_asisstant_mod.png)
 
 ## 报错解决
 
