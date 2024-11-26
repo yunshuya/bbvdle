@@ -24,7 +24,10 @@ bbvdle/
 └── README.md           # 项目说明文件
 ```
 
-## 1. 安装Nodejs及其他必要包
+## 1. 安装Nodejs\python及其他必要包
+
+python == 3.8
+`pip install Flask flask-cors zhipuai`
 
 ### Windows
 
@@ -78,6 +81,10 @@ fnm use --install-if-missing 13
 
 5. 设置开机自启
 `sudo systemctl enable httpd`
+
+### 部署ai_assistant后端
+切换至bbvdle目录下，执行
+`python src\model\GLM.py`
 
 ## 报错解决
 

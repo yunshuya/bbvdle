@@ -1,0 +1,42 @@
+import axios from 'axios';
+
+// 添加消息到对话框，并注明发送者
+export function appendMessage(container: HTMLElement, sender: string, message: string): void {
+    const messageWrapper = document.createElement("div");
+    messageWrapper.className = sender === "user" ? "message user" : "message assistant";
+
+    // 发送者标签
+    const senderLabel = document.createElement("span");
+    senderLabel.className = "sender-label";
+    senderLabel.textContent = sender === "user" ? "用户" : "助手";
+
+    // 消息内容
+    const messageContent = document.createElement("div");
+    messageContent.className = "message-content";
+    messageContent.textContent = message;
+
+    // 组合消息元素
+    messageWrapper.appendChild(senderLabel);
+    messageWrapper.appendChild(messageContent);
+    container.appendChild(messageWrapper);
+
+    // 自动滚动到最新消息
+    container.scrollTop = container.scrollHeight;
+}
+
+// 调用 Python 后端的 REST API 获取回复
+export async function fetchAiResponse(userMessage: string): Promise<string> {
+    // return "你好，我是AI助手，有什么可以帮助你的吗？"
+    try {
+        // 发送 POST 请求到 Python 后端
+        const response = await axios.post('http://localhost:5000/api/reply', {
+            message: userMessage
+        });
+
+        // 从后端获取的回复
+        return response.data.reply;
+    } catch (error) {
+        console.error("请求失败:", error);
+        return "无法连接到后端服务。";
+    }
+}

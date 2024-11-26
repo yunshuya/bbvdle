@@ -28,7 +28,7 @@ import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps } from './taskModule';
-import { appendMessage, fetchAiResponse } from './aiassistant';
+import { appendMessage, fetchAiResponse } from './ai_assistant';
 
 export interface IDraggableData {
     draggable: Draggable[];

@@ -8,6 +8,7 @@
     "@tensorflow/tfjs-vis": "^0.4.0",
     "@types/d3": "^5.7.2",
     "@types/file-saver": "^2.0.1",
+    "axios": "^0.27.2",
     "canvas": "^2.8.0",
     "common-js": "^0.3.8",
     "d3": "^5.15.0",
@@ -42,5 +43,7 @@
     "url": "https://github.mit.edu/jmmichel/ClientENNUI.git"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "proxy": "http://localhost:5000"
+
 }
