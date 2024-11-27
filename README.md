@@ -18,92 +18,43 @@ bbvdle/
 |   ├──ui/              # 前端组件
 |   |                    样式、按钮逻辑以及可拖动的组件
 |   |                    （例如层和激活函数）    
-|   ├──model/           # 后端组件
-|   |                    支持构建神经网络、
-|   └──                  代码生成以及在浏览器中保存状态的核心功能
+|   └──model/           # 后端组件
+|                        支持构建神经网络、
+|                        代码生成以及在浏览器中保存状态的核心功能
 └── README.md           # 项目说明文件
 ```
 
-## 1. 安装Nodejs\python及其他必要包
+## Windows部署流程
 
-### Windows
+### 1. 安装Nodejs\python及其他必要包
 
 1. python == 3.8
 `pip install Flask flask-cors zhipuai`
-2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
+2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件，**注意版本必须正确**
 
-### Linux安装Nodejs
-
-项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
-
-```cmd
-sudo yum update -y
-sudo yum install git -y
-//// 安装Nodejs
-curl -fsSL https://fnm.vercel.app/install | bash
-source ~/.bashrc
-fnm use --install-if-missing 13
-```
-
-### Linux安装配置Python 3.8
-
-```cmd
-wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-source ~/.bashrc
-//出现conda23.10.0,安装成功
-conda create -n py38 python=3.8
-conda activate py38
-pip install Flask flask-cors zhipuai
-```
-
-## 2. 克隆仓库
+### 2. 克隆仓库
 
 `git clone --recursive https://github.com/sunyia123/bbvdle.git`
 
-## 3. 构建应用程序
+### 3. 构建应用程序
 
 `npm install`
 
-## 4. 启动项目
+### 4. 启动项目
 
 `npm run build`
 
-## 5. 部署项目
-
-### Windows本地部属
+### 5. 部署项目
 
 `npm install -g http-server`
 `http-server . -p 8080`
+或使用vscode插件`Live Server (Five Server)`
 
-### Linux部署
+### 6. 部署AI助手后端
 
-1. 安装Apache
-`sudo yum install -y httpd`
+切换至bbvdle目录下，执行`python src/model/GLM.py`
 
-2. 复制文件至根目录
-`sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
-`cd /var/www/html/`
-
-3. 配置Apache
-`sudo systemctl reload httpd`
-
-4. 启动Apache
-`sudo systemctl start httpd`
-
-1. 设置开机自启
-`sudo systemctl enable httpd`
-
-直接访问公网ip不要加https
-
-### 部署ai_assistant后端
-
-切换至bbvdle目录下，执行
-`python /home/ec2-user/bbvdle/src/model/GLM.py`
-
-## 注意
-
-代码默认在实例公网ip,本地测试时需要修改代码,部署前需要修改为对应实例公网ip
+代码默认在实例公网ip，本地测试时需要取消src\ui\ai_assistant.ts中“本地测试”部分代码的注释，添加GLM的apikey，去掉src\model\GLM.py `host="0.0.0.0"`部分
 <img src="dist/ai_asisstant_mod.png" width="600px"/>
 
 ## 报错解决
@@ -188,3 +139,56 @@ internal/fs/utils.js:230
 `npm uninstall node-sass`
 `npm cache clean --force`
 `npm install node-sass@4.14.1`
+
+## Linux部署流程
+
+### 1. 安装Nodejs
+
+项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
+
+```cmd
+sudo yum update -y
+sudo yum install git -y
+//// 安装Nodejs
+curl -fsSL https://fnm.vercel.app/install | bash
+source ~/.bashrc
+fnm use --install-if-missing 13
+```
+
+### 2. 安装配置Python 3.8
+
+```cmd
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+source ~/.bashrc
+//出现conda23.10.0,安装成功
+conda create -n py38 python=3.8
+conda activate py38
+pip install Flask flask-cors zhipuai
+```
+
+### 3. 安装配置Apache并部署项目
+
+1. 安装Apache
+`sudo yum install -y httpd`
+
+2. 复制文件至根目录
+`sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
+`cd /var/www/html/`
+
+3. 配置Apache
+`sudo systemctl reload httpd`
+
+4. 启动Apache
+`sudo systemctl start httpd`
+
+5. 设置开机自启
+`sudo systemctl enable httpd`
+
+直接访问公网ip不要加https
+
+### 4. 部署AI助手后端
+
+切换至bbvdle目录下，执行
+`python /home/ec2-user/bbvdle/src/model/GLM.py` 
+**注意部署前需要修改src\ui\ai_assistant.ts中对应代码为对应实例公网ip，添加api，添加安全组入组规则（接受5000端口）**
