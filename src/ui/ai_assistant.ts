@@ -34,7 +34,7 @@ export async function fetchAiResponse(userMessage: string): Promise<string> {
         // });
 
         //部署代码,注意修改为你的实例的IP地址
-        const response = await axios.post('http://54.147.80.126:5000/api/reply', {
+        const response = await axios.post('http://34.238.240.129:5000/api/reply', {
             message: userMessage
         });
 
