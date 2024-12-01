@@ -52,20 +52,4 @@ export async function fetchAiResponse(userMessage: string): Promise<string> {
         console.error("请求失败:", error);
         return "无法连接到后端服务。";
     }
-    // try {
-    //     // 本地测试,发送 POST 请求到 Python 后端
-    //     // const response = await axios.post('http://localhost:5000/api/reply', {
-    //     //     message: userMessage
-    //     // });
-
-    //     //部署代码,注意修改为你的实例的IP地址
-    //     const response = await axios.post('http://34.238.240.129:5000/api/reply', {
-    //         message: userMessage
-    //     });
-
-    //     return response.data.reply;
-    // } catch (error) {
-    //     console.error("请求失败:", error);
-    //     return "无法连接到后端服务。";
-    // }
 }

@@ -6,7 +6,6 @@
 2. 循序渐进地学习神经网络搭建方法。
 3. 在浏览器中训练这些网络。
 4. 可视化训练过程。
-5. 导出至Python。
 
 ## 项目结构
 
@@ -24,7 +23,7 @@ bbvdle/
 └── README.md           # 项目说明文件
 ```
 
-## Windows部署流程
+## Windows部署流程（本地测试）
 
 ### 1. 安装Nodejs\python及其他必要包
 
@@ -54,14 +53,19 @@ bbvdle/
 
 切换至bbvdle目录下，执行`python src/model/GLM.py`
 
-代码默认在实例公网ip，本地测试时需要取消src\ui\ai_assistant.ts中“本地测试”部分代码的注释，添加GLM的apikey，去掉src\model\GLM.py `host="0.0.0.0"`部分
-<img src="dist/ai_asisstant_mod.png" width="600px"/>
+**注意：**
+
+1. 修改dist/ip.txt内容为localhost
+2. 修改dist\zhipuai_key.txt为你的GLM apikey
+3. 去掉src\model\GLM.py `host="0.0.0.0"`部分
+![图示](dist/ai_asisstant_mod.png){:width="600px"}
 
 ## 报错解决
 
 ### 1. npm install报错
 
-```报错信息
+报错信息如下（canvas无法安装）：
+```
 gyp ERR! find VS 
 gyp ERR! find VS msvs_version was set from command line or npm config
 gyp ERR! find VS - looking for Visual Studio version 2019
@@ -94,7 +98,9 @@ gyp ERR! stack Error: Could not find any Visual Studio installation to use
 
 ### 2. npm run build报错
 
-```报错信息
+报错信息如下（node-sass编译错误）
+
+```
 > tsc --skipLibCheck && webpack --mode development && node-sass src/ui -o src/ui
 
 Hash: 4c13200e2cf9321e64bd
@@ -133,18 +139,18 @@ internal/fs/utils.js:230
 
 #### 解决方法
 
-先尝试
+1. 先尝试
 `npm rebuild node-sass`
-若不行，则删除 `node-sass` 和其缓存
+2. 若不行，则删除 `node-sass` 和其缓存
 `npm uninstall node-sass`
 `npm cache clean --force`
 `npm install node-sass@4.14.1`
 
 ## Linux部署流程
 
-### 1. 安装Nodejs
+项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI，参考[视频](https://www.bilibili.com/video/BV1EP411v7Sw/?spm_id_from=333.337.search-card.all.click&vd_source=12ea1b89a9a563301764e357b2bfa7b2)。
 
-项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
+### 1. 安装Nodejs
 
 ```cmd
 sudo yum update -y
@@ -185,10 +191,16 @@ pip install Flask flask-cors zhipuai
 5. 设置开机自启
 `sudo systemctl enable httpd`
 
-直接访问公网ip不要加https
-
 ### 4. 部署AI助手后端
 
-切换至bbvdle目录下，执行
-`python /home/ec2-user/bbvdle/src/model/GLM.py` 
-**注意部署前需要修改src\ui\ai_assistant.ts中对应代码为对应实例公网ip，添加api，添加安全组入组规则（接受5000端口）**
+**注意**
+
+1. 部署前添加安全组入组规则（接受5000端口）
+2. 需要修改实例公网ip和api，操作如下：
+
+```cmd
+cd /home/ec2-user/bbvdle/
+echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt
+echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
+python /home/ec2-user/bbvdle/src/model/GLM.py
+```

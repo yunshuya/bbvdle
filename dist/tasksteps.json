@@ -1,14 +1,16 @@
 {
     "MLP": [
-      "模板中自动生成“Input”层和“Output”层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集。",
+      "点击清空，模板中自动生成“Input”层和“Output”层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集为MNIST。",
+      "点击“Flatten”，生成一个“Flatten”层。",
+      "将“Flatten”层连接到“Input”层。",
       "点击“Dense”，生成一个“Dense”层。",
-      "将“Dense”层连接到“Input”层。",
+      "将“Flatten”层连接到“Dense”层。",
       "点击“Dropout”层，并将其放置在“Dense”层和“Output”层之间。",
-      "点击激活函数ReLU，并将其放置在“Dense”层。",
+      "点击激活函数“ReLU”，并将其嵌入“Dense”层下方。",
       "以上步骤描述了一个隐藏层。若需增加隐藏层，请重复上述操作。"
     ],
     "CNN": [
-      "在积木块平台的“输入”选项中，拖拽一个输入积木块，设定输入形状。",
+      "点击清空，模板中自动生成“Input”层和“Output”层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集为MNIST。",
       "找到“Convolution”积木块，将其拖动并放置在“Input”块之后，设置卷积核的数量和大小，并选择激活函数。",
       "选择“Max Pooling”积木块，将其连接到“Convolution”层之后，并设置池化窗口大小。",
       "根据需要重复添加“Convolution”层和“Max Pooling”层。",
