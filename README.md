@@ -6,7 +6,6 @@
 2. 循序渐进地学习神经网络搭建方法。
 3. 在浏览器中训练这些网络。
 4. 可视化训练过程。
-5. 导出至Python。
 
 ## 项目结构
 
@@ -18,99 +17,55 @@ bbvdle/
 |   ├──ui/              # 前端组件
 |   |                    样式、按钮逻辑以及可拖动的组件
 |   |                    （例如层和激活函数）    
-|   ├──model/           # 后端组件
-|   |                    支持构建神经网络、
-|   └──                  代码生成以及在浏览器中保存状态的核心功能
+|   └──model/           # 后端组件
+|                        支持构建神经网络、
+|                        代码生成以及在浏览器中保存状态的核心功能
 └── README.md           # 项目说明文件
 ```
 
-## 1. 安装Nodejs\python及其他必要包
+## Windows部署流程（本地测试）
 
-### Windows
+### 1. 安装Nodejs\python及其他必要包
 
 1. python == 3.8
 `pip install Flask flask-cors zhipuai`
-2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件
+2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件，**注意版本必须正确**
 
-### Linux安装Nodejs
-
-项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI。
-
-```cmd
-sudo yum update -y
-sudo yum install git -y
-//// 安装Nodejs
-curl -fsSL https://fnm.vercel.app/install | bash
-source ~/.bashrc
-fnm use --install-if-missing 13
-```
-
-### Linux安装配置Python 3.8
-
-```cmd
-wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-source ~/.bashrc
-//出现conda23.10.0,安装成功
-conda create -n py38 python=3.8
-conda activate py38
-pip install Flask flask-cors zhipuai
-```
-
-## 2. 克隆仓库
+### 2. 克隆仓库
 
 `git clone --recursive https://github.com/sunyia123/bbvdle.git`
 
-## 3. 构建应用程序
+### 3. 构建应用程序
 
 `npm install`
 
-## 4. 启动项目
+### 4. 启动项目
 
 `npm run build`
 
-## 5. 部署项目
-
-### Windows本地部属
+### 5. 部署项目
 
 `npm install -g http-server`
 `http-server . -p 8080`
+或使用vscode插件`Live Server (Five Server)`
 
-### Linux部署
+### 6. 部署AI助手后端
 
-1. 安装Apache
-`sudo yum install -y httpd`
+切换至bbvdle目录下，执行`python src/model/GLM.py`
 
-2. 复制文件至根目录
-`sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
-`cd /var/www/html/`
+**注意：**
 
-3. 配置Apache
-`sudo systemctl reload httpd`
-
-4. 启动Apache
-`sudo systemctl start httpd`
-
-1. 设置开机自启
-`sudo systemctl enable httpd`
-
-直接访问公网ip不要加https
-
-### 部署ai_assistant后端
-
-切换至bbvdle目录下，执行
-`python /home/ec2-user/bbvdle/src/model/GLM.py`
-
-## 注意
-
-代码默认在实例公网ip,本地测试时需要修改代码,部署前需要修改为对应实例公网ip
-<img src="dist/ai_asisstant_mod.png" width="600px"/>
+1. 修改dist/ip.txt内容为localhost
+2. 修改dist\zhipuai_key.txt为你的GLM apikey
+3. 去掉src\model\GLM.py `host="0.0.0.0"`部分
+![图示](dist/ai_asisstant_mod.png){:width="600px"}
 
 ## 报错解决
 
 ### 1. npm install报错
 
-```报错信息
+报错信息如下（canvas无法安装）：
+```
 gyp ERR! find VS 
 gyp ERR! find VS msvs_version was set from command line or npm config
 gyp ERR! find VS - looking for Visual Studio version 2019
@@ -143,7 +98,9 @@ gyp ERR! stack Error: Could not find any Visual Studio installation to use
 
 ### 2. npm run build报错
 
-```报错信息
+报错信息如下（node-sass编译错误）
+
+```
 > tsc --skipLibCheck && webpack --mode development && node-sass src/ui -o src/ui
 
 Hash: 4c13200e2cf9321e64bd
@@ -182,9 +139,68 @@ internal/fs/utils.js:230
 
 #### 解决方法
 
-先尝试
+1. 先尝试
 `npm rebuild node-sass`
-若不行，则删除 `node-sass` 和其缓存
+2. 若不行，则删除 `node-sass` 和其缓存
 `npm uninstall node-sass`
 `npm cache clean --force`
 `npm install node-sass@4.14.1`
+
+## Linux部署流程
+
+项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI，参考[视频](https://www.bilibili.com/video/BV1EP411v7Sw/?spm_id_from=333.337.search-card.all.click&vd_source=12ea1b89a9a563301764e357b2bfa7b2)。
+
+### 1. 安装Nodejs
+
+```cmd
+sudo yum update -y
+sudo yum install git -y
+//// 安装Nodejs
+curl -fsSL https://fnm.vercel.app/install | bash
+source ~/.bashrc
+fnm use --install-if-missing 13
+```
+
+### 2. 安装配置Python 3.8
+
+```cmd
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+source ~/.bashrc
+//出现conda23.10.0,安装成功
+conda create -n py38 python=3.8
+conda activate py38
+pip install Flask flask-cors zhipuai
+```
+
+### 3. 安装配置Apache并部署项目
+
+1. 安装Apache
+`sudo yum install -y httpd`
+
+2. 复制文件至根目录
+`sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
+`cd /var/www/html/`
+
+3. 配置Apache
+`sudo systemctl reload httpd`
+
+4. 启动Apache
+`sudo systemctl start httpd`
+
+5. 设置开机自启
+`sudo systemctl enable httpd`
+
+### 4. 部署AI助手后端
+
+**注意**
+
+1. 部署前添加安全组入组规则（接受5000端口）
+2. 需要修改实例公网ip和api，操作如下：
+
+```cmd
+cd /home/ec2-user/bbvdle/
+echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt
+echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
+python /home/ec2-user/bbvdle/src/model/GLM.py
+```

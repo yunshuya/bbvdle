@@ -10,6 +10,7 @@ import { Draggable } from "./draggable";
 import { Point, Shape } from "./shape";
 import { Wire } from "./wire";
 
+
 export interface ILayerJson {
     layer_name: string;
     id: number;
@@ -76,6 +77,7 @@ export abstract class Layer extends Draggable {
 
         this.svgComponent.on("click", () => {
                              this.select();
+                             
                              window.clearTimeout(this.moveTimeout);
                              this.hoverText.style("visibility", "hidden");
                         });
@@ -107,6 +109,7 @@ export abstract class Layer extends Draggable {
         if (currSelected != null && currSelected !== this &&
                 currSelected instanceof Layer && currSelected.outputWiresAllowed) {
             currSelected.addChild(this);
+           
         }
         super.select();
         document.getElementById("defaultparambox").style.display = "none";
@@ -146,6 +149,10 @@ export abstract class Layer extends Draggable {
             child.wires.add(newWire);
 
         }
+        // if(isTaskAlready){
+            
+        //     verifyStepCompletion(this);
+        // }
     }
 
     /**
@@ -154,6 +161,7 @@ export abstract class Layer extends Draggable {
      */
     public addParent(parent: Layer): void {
         parent.addChild(this);
+       
     }
 
     public delete(): void {
