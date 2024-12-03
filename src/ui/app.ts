@@ -27,8 +27,9 @@ import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
-import { switchTask, toggleTaskSteps } from './taskModule';
+import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
+
 
 export interface IDraggableData {
     draggable: Draggable[];
@@ -149,6 +150,8 @@ function setupOptionOnClicks(): void {
     taskOptions.forEach(option => {
         option.addEventListener("click", () => {
             const taskType = option.getAttribute("data-optionValue");
+            //点击任务，修改当前任务的全局变量
+            
             switchTask(taskType);
         });
     });
@@ -164,7 +167,19 @@ function selectOption(optionCategoryId: string, optionElement: HTMLElement): voi
 
 function createTemplate(template: string): void {
     switch (template) {
-        case "blank": blankTemplate(svgData); break;
+        case "blank": {
+            blankTemplate(svgData);
+            if(isTaskAlready){
+                console.log(template);
+                verifyStepCompletion(svgData.input);
+            }
+             break;
+            //当前有教学任务时，验证是否生成input和output；
+            
+                
+
+        }
+        
         case "default": defaultTemplate(svgData); break;
         case "resnet": resnetTemplate(svgData); break;
 
@@ -187,6 +202,13 @@ function appendItem(itemType: string): void {
     } as any)[itemType]();
 
     svgData.draggable.push(item);
+    //这里是验证教学任务的步骤
+    if(isTaskAlready){
+            verifyStepCompletion(item);    
+    }
+   
+  
+    
 }
 
 function setupIndividualOnClicks(): void {

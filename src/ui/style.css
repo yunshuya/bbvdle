@@ -753,3 +753,37 @@ label {
 .message.user .sender-label {
   text-align: right;
   /* 用户消息的发送者名靠右 */ }
+
+.checkmark {
+  font-size: 24px;
+  /* 设置图标的大小 */
+  font-weight: bold;
+  /* 设置图标的粗细 */
+  margin-left: 8px;
+  /* 给勾或叉添加一些左边距 */
+  transition: transform 0.3s ease-in-out;
+  /* 添加动画效果 */ }
+
+.checkmark-checked {
+  color: green;
+  /* 勾的颜色为绿色 */
+  transform: rotate(0deg);
+  /* 勾显示时没有旋转效果 */ }
+
+.checkmark-fault {
+  color: red;
+  /* 叉的颜色为红色 */
+  transform: rotate(45deg);
+  /* 叉旋转45度，形成 X 的效果 */ }
+
+.completed-step {
+  background-color: #e0f7fa;
+  /* 完成步骤的背景色，淡蓝色 */
+  border-left: 5px solid green;
+  /* 完成步骤时，左侧添加绿色边框 */ }
+
+.failed-step {
+  background-color: #ffebee;
+  /* 失败步骤的背景色，淡红色 */
+  border-left: 5px solid red;
+  /* 失败步骤时，左侧添加红色边框 */ }
