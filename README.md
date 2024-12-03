@@ -200,7 +200,7 @@ pip install Flask flask-cors zhipuai
 
 ```cmd
 cd /home/ec2-user/bbvdle/
-echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt
-echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
+echo "{{当前实例ip}}" > /var/www/html/dist/ip.txt
+echo "{{你的智谱清言apikey}}" > /var/www/html/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
 ```
