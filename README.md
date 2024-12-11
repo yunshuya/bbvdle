@@ -45,8 +45,11 @@ bbvdle/
 
 ### 5. 部署项目
 
-`npm install -g http-server`
-`http-server . -p 8080`
+```
+npm install -g http-server
+http-server . -p 8080
+```
+
 或使用vscode插件`Live Server (Five Server)`
 
 ### 6. 部署AI助手后端
@@ -89,12 +92,13 @@ gyp ERR! stack Error: Could not find any Visual Studio installation to use
 ```
 
 #### 解决方法
-
-`npm config set proxy false`
-`npm cache clean --force`
 删除package-lock和node_modules
-`npm install canvas@2.8.0 --ignore-scripts`
-`npm install`
+```
+npm config set proxy false
+npm cache clean --force
+npm install canvas@2.8.0 --ignore-scripts
+npm install
+```
 
 ### 2. npm run build报错
 
@@ -142,9 +146,12 @@ internal/fs/utils.js:230
 1. 先尝试
 `npm rebuild node-sass`
 2. 若不行，则删除 `node-sass` 和其缓存
-`npm uninstall node-sass`
-`npm cache clean --force`
-`npm install node-sass@4.14.1`
+
+```
+npm uninstall node-sass
+npm cache clean --force
+npm install node-sass@4.14.1
+```
 
 ## Linux部署流程
 
@@ -173,17 +180,21 @@ conda activate py38
 pip install Flask flask-cors zhipuai
 ```
 
-### 3. 安装配置Apache并部署项目
+### 3. 安装配置并部署项目
 
-1. 安装Apache
+1. git项目并install和build（见win部属部分）
+
+2. 安装Apache
 `sudo yum install -y httpd`
 
-2. 复制文件至根目录
-`echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt`
-`sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
-`cd /var/www/html/`
+3. 修改实例公网ip并复制文件至根目录
+```
+echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt
+sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
+cd /var/www/html/
+```
 
-1. 配置Apache
+4. 配置Apache
 `sudo systemctl reload httpd`
 
 1. 启动Apache
@@ -197,18 +208,10 @@ pip install Flask flask-cors zhipuai
 **注意**
 
 1. 部署前添加安全组入组规则（接受5000端口）
-2. 需要修改实例公网ip和api，操作如下：
+2. 需要修改LLM的api（[申请地址](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys)），操作如下：
 
 ```cmd
 cd /home/ec2-user/bbvdle/
 echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
-```
-
-### 其他
-
-```
-git checkout -- dist/bundle.js
-git checkout -- package.json
-git pull
 ```
