@@ -39,26 +39,13 @@ async function getServerIP() {
 // 调用 Python 后端的 REST API 获取回复
 export async function fetchAiResponse(userMessage: string): Promise<string> {
     // return "你好，我是AI助手，有什么可以帮助你的吗？"
-<<<<<<< Updated upstream
     const serverIP = await getServerIP();
     const apiUrl = `http://${serverIP}:5000/api/reply`;
 
     try {
         const response = await axios.post(apiUrl, {
         message: userMessage
-=======
-    try {
-        // 本地测试,发送 POST 请求到 Python 后端
-        const response = await axios.post('http://localhost:5000/api/reply', {
-            message: userMessage
->>>>>>> Stashed changes
         });
-
-        //部署代码,注意修改为你的实例的IP地址
-        // const response = await axios.post(' http://10.64.125.97:5000/api/reply', {
-        //     message: userMessage
-        // });
-
         return response.data.reply;
     } catch (error) {
         console.error("请求失败:", error);

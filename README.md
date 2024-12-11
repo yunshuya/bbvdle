@@ -179,16 +179,17 @@ pip install Flask flask-cors zhipuai
 `sudo yum install -y httpd`
 
 2. 复制文件至根目录
+`echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt`
 `sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/`
 `cd /var/www/html/`
 
-3. 配置Apache
+1. 配置Apache
 `sudo systemctl reload httpd`
 
-4. 启动Apache
+1. 启动Apache
 `sudo systemctl start httpd`
 
-5. 设置开机自启
+1. 设置开机自启
 `sudo systemctl enable httpd`
 
 ### 4. 部署AI助手后端
@@ -200,7 +201,14 @@ pip install Flask flask-cors zhipuai
 
 ```cmd
 cd /home/ec2-user/bbvdle/
-echo "{{当前实例ip}}" > /var/www/html/dist/ip.txt
-echo "{{你的智谱清言apikey}}" > /var/www/html/dist/zhipuai_key.txt
+echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
+```
+
+### 其他
+
+```
+git checkout -- dist/bundle.js
+git checkout -- package.json
+git pull
 ```
