@@ -17,6 +17,19 @@ import { model } from "./params_object";
  *
  * @param {*} model The model to
  */
+
+export let stopTraining = false;
+
+export function stopTrainingHandler() {
+    stopTraining = true;
+    console.log("Training stop triggered.");
+}
+
+export function resetTrainingFlag() {
+    stopTraining = false;
+    console.log("Training flag reset. Ready to start new training.");
+}
+
 export async function train(): Promise<void> {
     // Set up all of the plots
     resetPlotValues();
@@ -52,6 +65,14 @@ export async function train(): Promise<void> {
         batchSize,
         callbacks: {
             onBatchEnd: async (batch: number, logs: tf.Logs) => {
+
+                if (stopTraining) {
+                    console.log("Training stopped by user.");
+                    model.architecture.stopTraining = true;
+                    model.architecture.resetStates();
+                    return;
+                }
+
                 trainBatchCount++;
                 const accBox = document.getElementById("ti_acc");
                 const lossBox = document.getElementById("ti_loss");
@@ -80,6 +101,14 @@ export async function train(): Promise<void> {
                 await tf.nextFrame();
             },
             onEpochEnd: async (_: number, logs: tf.Logs) => {
+
+                if (stopTraining) {
+                    console.log("Training stopped by user.");
+                    model.architecture.stopTraining = true;
+                    model.architecture.resetStates();
+                    return;
+                }
+
                 const valAcc = logs.val_acc;
                 const valLoss = logs.val_loss;
                 const accBox = document.getElementById("ti_vacc");

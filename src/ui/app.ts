@@ -29,6 +29,7 @@ import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
+import { stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
 
 
 export interface IDraggableData {
@@ -266,35 +267,35 @@ function deleteSelected(): void {
     }
 }
 
-async function trainOnClick(): Promise<void> {
+// async function trainOnClick(): Promise<void> {
 
-    // Only train if not already training
+//     // Only train if not already training
 
-    const training = document.getElementById("train");
-    if (!training.classList.contains("train-active")) {
-        clearError();
+//     const training = document.getElementById("train");
+//     if (!training.classList.contains("train-active")) {
+//         clearError();
 
-        changeDataset(svgData.input.getParams().dataset); // TODO change dataset should happen when the dataset changes
+//         changeDataset(svgData.input.getParams().dataset); // TODO change dataset should happen when the dataset changes
 
-        // Grab hyperparameters
-        setModelHyperparameters();
+//         // Grab hyperparameters
+//         setModelHyperparameters();
 
-        const trainingBox = document.getElementById("ti_training");
-        trainingBox.children[1].innerHTML = "Yes";
-        training.innerHTML = "Training";
-        training.classList.add("train-active");
-        try {
-            model.architecture = buildNetworkDAG(svgData.input);
-            await train();
-        } catch (error) {
-            displayError(error);
-        } finally {
-            training.innerHTML = "Train";
-            training.classList.remove("train-active");
-            trainingBox.children[1].innerHTML = "No";
-        }
-    }
-}
+//         const trainingBox = document.getElementById("ti_training");
+//         trainingBox.children[1].innerHTML = "Yes";
+//         training.innerHTML = "Training";
+//         training.classList.add("train-active");
+//         try {
+//             model.architecture = buildNetworkDAG(svgData.input);
+//             await train();
+//         } catch (error) {
+//             displayError(error);
+//         } finally {
+//             training.innerHTML = "Train";
+//             training.classList.remove("train-active");
+//             trainingBox.children[1].innerHTML = "No";
+//         }
+//     }
+// }
 
 function resizeMiddleSVG(): void {
     const originalSVGWidth = 1000;
@@ -500,4 +501,60 @@ function setupAiAssistant(): void {
             appendMessage(dialogContent, "assistant", aiResponse);
         }
     });
+}
+
+async function trainOnClick(): Promise<void> {
+    const training = document.getElementById("train");
+
+    // Check if training is active (i.e., the button text is "训练")
+    if (training.classList.contains("train-active")) {
+        // If training is active, stop the training and reset everything
+        await stopTraining();
+    } else {
+        // If training is not active, start the training process
+        await startTraining();
+    }
+}
+
+async function startTraining(): Promise<void> {
+    const training = document.getElementById("train");
+    clearError();
+
+    changeDataset(svgData.input.getParams().dataset); // Change dataset if needed
+    setModelHyperparameters();
+
+    resetTrainingFlag();
+
+    const trainingBox = document.getElementById("ti_training");
+    trainingBox.children[1].innerHTML = "Yes";
+    training.classList.add("train-active");
+
+    try {
+        training.innerHTML = "点击终止"; // Change button text 
+        model.architecture = buildNetworkDAG(svgData.input);
+        await train(); // Start training  
+    } catch (error) {
+        displayError(error);
+    } finally {
+        training.innerHTML = "训练";
+        training.classList.remove("train-active");
+        trainingBox.children[1].innerHTML = "No";
+    }   
+}
+
+async function stopTraining(): Promise<void> {
+    const training = document.getElementById("train");
+
+    // Reset the button text and class
+    training.innerHTML = "训练";
+    training.classList.remove("train-active");
+
+    // Reset the training state, cancel any ongoing training process
+    const trainingBox = document.getElementById("ti_training");
+    trainingBox.children[1].innerHTML = "No";
+
+    // Add any cleanup logic to stop the training, such as canceling ongoing requests
+    // For example, you might have a training process that can be aborted:
+
+    stopTrainingHandler() 
 }
