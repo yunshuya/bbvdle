@@ -108,6 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     setupAiAssistant();
+    const taskSteps = document.querySelector('#taskSteps') as HTMLElement;
+    const aiAssistantDialog = document.querySelector('#aiAssistantDialog') as HTMLElement;       
+    makeDraggable(taskSteps);
+    makeDraggable(aiAssistantDialog);
+    makeResizable(taskSteps);
+    makeResizable(aiAssistantDialog);
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
@@ -500,6 +506,7 @@ function setupAiAssistant(): void {
             const aiResponse = await fetchAiResponse(userMessage);
             appendMessage(dialogContent, "assistant", aiResponse);
         }
+       
     });
 }
 
@@ -558,3 +565,109 @@ async function stopTraining(): Promise<void> {
 
     stopTrainingHandler() 
 }
+    //    // 获取ai谈话窗口弹窗元素
+    //    const dialog = document.getElementById('aiAssistantDialog') as HTMLElement;
+    //    const dialogHeader = dialog.querySelector('.dialog-header') as HTMLElement;
+   
+    //    let isDragging = false;
+    //    let offsetX = 0;
+    //    let offsetY = 0;
+   
+    //    // 监听鼠标按下事件，开始拖拽
+    //    dialogHeader.addEventListener('mousedown', (e) => {
+    //        isDragging = true;
+    //        offsetX = e.clientX - dialog.getBoundingClientRect().left;
+    //        offsetY = e.clientY - dialog.getBoundingClientRect().top;
+   
+    //        // 禁止文本选中，提高拖拽体验
+    //        document.body.style.userSelect = 'none';
+    //    });
+   
+    //    // 监听鼠标移动事件，进行拖动
+    //    document.addEventListener('mousemove', (e) => {
+    //        if (isDragging) {
+    //            const left = e.clientX - offsetX;
+    //            const top = e.clientY - offsetY;
+   
+    //            // 设置新的位置
+    //            dialog.style.left = `${left}px`;
+    //            dialog.style.top = `${top}px`;
+    //        }
+    //    });
+   
+    //    // 监听鼠标松开事件，结束拖拽
+    //    document.addEventListener('mouseup', () => {
+    //        isDragging = false;
+    //        document.body.style.userSelect = 'auto'; // 恢复文本选中
+    //    });
+    
+
+    function makeDraggable(element: HTMLElement) {
+        let offsetX: number, offsetY: number;
+    
+        // 鼠标按下时触发
+        element.addEventListener('mousedown', function (e: MouseEvent) {
+            offsetX = e.clientX - element.getBoundingClientRect().left;
+            offsetY = e.clientY - element.getBoundingClientRect().top;
+    
+            // 鼠标移动时触发
+            function onMouseMove(e: MouseEvent) {
+                element.style.left = `${e.clientX - offsetX}px`;
+                element.style.top = `${e.clientY - offsetY}px`;
+            }
+    
+            // 鼠标松开时停止拖拽
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+    
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
+    function makeResizable(element: HTMLElement) {
+        const resizer = document.createElement('div');
+        resizer.style.width = '10px';
+        resizer.style.height = '10px';
+        resizer.style.backgroundColor = '#888';
+        resizer.style.position = 'absolute';
+        resizer.style.right = '0';
+        resizer.style.bottom = '0';
+        resizer.style.cursor = 'se-resize';
+        element.appendChild(resizer);
+    
+        let startX: number, startY: number, startWidth: number, startHeight: number;
+    
+        // 鼠标按下时触发
+        resizer.addEventListener('mousedown', function (e: MouseEvent) {
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = element.offsetWidth;
+            startHeight = element.offsetHeight;
+    
+            // 鼠标移动时触发
+            function onMouseMove(e: MouseEvent) {
+                const newWidth = startWidth + (e.clientX - startX);
+                const newHeight = startHeight + (e.clientY - startY);
+    
+                // 更新元素的宽高
+                element.style.width = `${newWidth}px`;
+                element.style.height = `${newHeight}px`;
+            }
+    
+            // 鼠标松开时停止缩放
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+    
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
+    
+
+    
+ 
+        

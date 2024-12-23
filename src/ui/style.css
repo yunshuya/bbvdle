@@ -606,11 +606,11 @@ label {
 #taskSteps {
   position: absolute;
   /* 使其悬浮 */
-  top: 20px;
+  top: 5px;
   /* 距离父容器顶部的偏移量，可根据需求调整 */
-  right: 20px;
+  left: 20px;
   /* 距离右侧的偏移量，可根据需求调整 */
-  width: 300px;
+  width: 350px;
   /* 设置任务栏宽度 */
   z-index: 1000;
   /* 保证其位于其他元素之上 */
@@ -628,8 +628,8 @@ label {
 #taskTitle {
   padding: 10px;
   cursor: pointer;
-  background-color: #e0e0e0;
-  /* 标题栏背景色 */
+  background-color: #5b5a5a;
+  color: ghostwhite;
   border-bottom: 1px solid #ccc;
   font-weight: bold; }
 
@@ -657,7 +657,8 @@ label {
   right: 20px;
   width: 60px;
   height: 60px;
-  background-color: #6200EA;
+  color: #806cb7;
+  background-color: #806cb7;
   border-radius: 50%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
@@ -687,7 +688,7 @@ label {
   display: none; }
 
 .dialog-header {
-  background-color: #6200EA;
+  background-color: #806cb7;
   color: white;
   padding: 10px;
   font-weight: bold;
@@ -711,7 +712,7 @@ label {
 
 .dialog-footer button {
   border: none;
-  background-color: #6200EA;
+  background-color: #806cb7;
   color: white;
   padding: 10px;
   cursor: pointer; }
