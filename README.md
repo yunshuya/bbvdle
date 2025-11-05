@@ -189,7 +189,7 @@ pip install Flask flask-cors zhipuai
 
 3. 修改实例公网ip并复制文件至根目录
 ```
-echo "{{当前实例ip}}" > /home/ec2-user/bbvdle/dist/ip.txt
+echo "{{54.210.207.98}}" > /home/ec2-user/bbvdle/dist/ip.txt
 sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
 cd /var/www/html/
 ```
@@ -212,6 +212,6 @@ cd /var/www/html/
 
 ```cmd
 cd /home/ec2-user/bbvdle/
-echo "{{你的智谱清言apikey}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
+echo "{{9a5fbe2068344cdb959f9f8c0f374906.q8zJp9nyjCGpTacQ}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
 ```

@@ -14,6 +14,9 @@ import { Flatten } from "../ui/shapes/layers/flatten";
 import { Input } from "../ui/shapes/layers/input";
 import { MaxPooling2D } from "../ui/shapes/layers/maxpooling";
 import { Output } from "../ui/shapes/layers/output";
+import { SimpleRNN } from "../ui/shapes/layers/simplernn";
+import { LSTM } from "../ui/shapes/layers/lstm";
+import { GRU } from "../ui/shapes/layers/gru";
 import { Point } from "../ui/shapes/shape";
 import { IHyperparameterData } from "./params_object";
 
@@ -232,6 +235,12 @@ function createLayerInstanceFromName(svgData: IDraggableData, lj: ILayerJson): L
                     layer = new Dense(location); break;
                 case "Conv2D":
                     layer = new Conv2D(location); break;
+                case "SimpleRNN":
+                    layer = new SimpleRNN(location); break;
+                case "LSTM":
+                    layer = new LSTM(location); break;
+                case "GRU":
+                    layer = new GRU(location); break;
                 case "Concatenate":
                     layer = new Concatenate(location); break;
                 case "Flatten":

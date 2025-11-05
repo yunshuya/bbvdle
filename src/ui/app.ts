@@ -23,6 +23,9 @@ import { Flatten } from "./shapes/layers/flatten";
 import { Input } from "./shapes/layers/input";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
 import { Output } from "./shapes/layers/output";
+import { SimpleRNN } from "./shapes/layers/simplernn";
+import { LSTM } from "./shapes/layers/lstm";
+import { GRU } from "./shapes/layers/gru";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
@@ -203,6 +206,9 @@ function appendItem(itemType: string): void {
         dropout: Dropout,
         flatten: Flatten,
         maxPooling2D: MaxPooling2D,
+        simpleRNN: SimpleRNN,
+        lstm: LSTM,
+        gru: GRU,
         relu: Relu,
         sigmoid: Sigmoid,
         tanh: Tanh,
