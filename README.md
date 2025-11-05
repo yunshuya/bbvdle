@@ -215,3 +215,5 @@ cd /home/ec2-user/bbvdle/
 echo "{{9a5fbe2068344cdb959f9f8c0f374906.q8zJp9nyjCGpTacQ}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
 ```
+# bbvdle
+基于可视化积木编程的深度学习教学平台
