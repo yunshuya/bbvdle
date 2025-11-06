@@ -61,6 +61,8 @@
    ```bash
    git clone https://github.com/yunshuya/bbvdle.git
    ```
+   如果出现connection was reset报错：尝试使用SSH直连（具体操作可以自己查AI）
+
    执行后会在该位置生成项目文件夹
 
 3. **在本地部署运行项目**
@@ -70,17 +72,20 @@
 4. **查看当前分支**
    ```bash
    git branch
+   ```
 
 5. **拉取最新开发分支**
    ```bash
    git checkout dev
    git pull origin dev
+   ```
 
 6. **创建个人功能分支**
    
    命名规范：feature-你的功能
    ```bash
    git checkout -b feature-yourtask
+   ```
 
 7. **进行功能修改与开发**
 
@@ -89,6 +94,7 @@
    3）保存修改后返回终端，输入：
    ```bash
    git status
+   ```
 
 8. **提交修改到本地git**
    ```bash
