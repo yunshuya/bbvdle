@@ -60,7 +60,8 @@
    在电脑上选择一个合适的位置，右键“Git bash here”，执行：
    ```bash
    git clone https://github.com/yunshuya/bbvdle.git
-   # 执行后会在该位置生成项目文件夹
+   ```
+   执行后会在该位置生成项目文件夹
 
 3. **在本地部署运行项目**
 
@@ -93,16 +94,20 @@
    ```bash
    git add .
    git commit -m "feat: 完成登录模块前端功能"
-   # 说明：
-   # git add . 表示将所有修改文件放入暂存区
-   # git commit -m 后面是你的提交说明
+   ```
+   说明：
+   
+   git add . 表示将所有修改文件放入暂存区
+   
+   git commit -m 后面是你的提交说明
 
-9. **推送分支到Github仓库**
+10. **推送分支到Github仓库**
    ```bash
    git push origin feature-login
-   # 执行后，GitHub 上会自动创建一个同名分支。
+```
+   执行后，GitHub 上会自动创建一个同名分支。
 
-10. **发起Pull Request合并请求**
+11. **发起Pull Request合并请求**
 
    1）打开项目网页
    
@@ -131,6 +136,53 @@
    git merge dev
    git tag -a v1.0 -m "第一阶段功能完成"
    git push origin main --tags
+   ```
+
+12. **同步更新代码**
+
+   每次开始新功能开发之前，请先同步主分支：
+   ```bash
+   git checkout dev
+   git pull origin dev
+   ```
+   如果出现冲突，请与组长或负责该模块的同学沟通解决。
+
+---
+
+## 五、Git常用命令速查表
+
+| 操作     | 命令                                     |
+| ------ | -------------------------------------- |
+| 克隆仓库   | `git clone <repo>`                     |
+| 查看分支   | `git branch -a`                        |
+| 创建分支   | `git checkout -b feature-xxx`          |
+| 切换分支   | `git checkout dev`                     |
+| 查看状态   | `git status`                           |
+| 添加修改   | `git add .`                            |
+| 提交修改   | `git commit -m "描述"`                   |
+| 推送分支   | `git push origin feature-xxx`          |
+| 拉取最新代码 | `git pull origin dev`                  |
+| 删除本地分支 | `git branch -d feature-xxx`            |
+| 删除远程分支 | `git push origin --delete feature-xxx` |
+
+---
+
+## 六、工作规范提醒
+
+1. **所有组员禁止直接 push 到 main 分支；**
+
+2. **所有代码修改都必须通过 Pull Request 审核合并；**
+
+3. **每次开发前先执行：**
+```bash
+git pull origin dev
+```
+确保代码是最新；
+
+
+
+
+
    
 
 
