@@ -101,13 +101,13 @@
    
    git commit -m 后面是你的提交说明
 
-10. **推送分支到Github仓库**
+9. **推送分支到Github仓库**
    ```bash
    git push origin feature-login
-```
+   ```
    执行后，GitHub 上会自动创建一个同名分支。
 
-11. **发起Pull Request合并请求**
+10. **发起Pull Request合并请求**
 
    1）打开项目网页
    
