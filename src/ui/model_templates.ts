@@ -10,6 +10,7 @@ import { Dense } from "./shapes/layers/dense";
 import { Dropout } from "./shapes/layers/dropout";
 import { Flatten } from "./shapes/layers/flatten";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
+import { Recurrent } from "./shapes/layers/rnn";
 import { Point } from "./shapes/shape";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
@@ -225,4 +226,50 @@ export function complexTemplate(svgData: IDraggableData): void {
     svgData.draggable.push(flat1);
     svgData.draggable.push(flat2);
     svgData.draggable.push(batch);
+}
+
+export function rnnTemplate(svgData: IDraggableData): void {
+    resetWorkspace(svgData);
+
+    // Initialize each of the layers and activations
+    const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
+
+    const inputPos = new Point(width / 5, height / 3);
+    const rnn1Pos = new Point(width / 3, height / 2);
+    const dropoutPos = new Point(width / 1.5, height / 2);
+    const densePos = new Point(width / 1.2, height / 2);
+    const outputPos = new Point(width - 100, height / 2);
+
+    // Create layers
+    const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
+    // 为RNN层添加ReLU激活函数
+    const rnnRelu: Activation = new Relu(rnn1Pos);
+    const dropout: Layer = new Dropout(dropoutPos);
+    const dense: ActivationLayer = new Dense(densePos);
+    // 设置Dense层的units为10（MNIST有10个类别）
+    dense.parameterDefaults.units = 10;
+    // 为Dense层添加ReLU激活函数（而不是Softmax）
+    const denseRelu: Activation = new Relu(densePos);
+
+    // Add activations
+    rnn1.addActivation(rnnRelu);
+    dense.addActivation(denseRelu);
+
+    // Add relationships among layers
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    svgData.input.addChild(rnn1);
+    rnn1.addChild(dropout);
+    dropout.addChild(dense);
+    dense.addChild(svgData.output);
+
+    // Store the new network
+    svgData.draggable.push(rnn1);
+    svgData.draggable.push(rnnRelu);
+    svgData.draggable.push(dropout);
+    svgData.draggable.push(dense);
+    svgData.draggable.push(denseRelu);
 }

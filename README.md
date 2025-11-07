@@ -34,6 +34,7 @@ bbvdle/
 ### 2. 克隆仓库
 
 `git clone --recursive https://github.com/sunyia123/bbvdle.git`
+git clone --recursive https://github.com/yunshuya/bbvdle.git
 
 ### 3. 构建应用程序
 
@@ -47,6 +48,15 @@ bbvdle/
 
 ```
 npm install -g http-server
+http-server . -p 8080
+
+ps:‘http-server . -p 8080’报错：zsh: command not found: http-server
+解决方案：
+1.测试：先使用完整路径启动服务器
+/usr/local/nodejs-13.14.0/bin/http-server . -p 8080
+2.若上述可行，设置永久解决方案
+echo 'export PATH="/usr/local/nodejs-13.14.0/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 http-server . -p 8080
 ```
 
@@ -175,33 +185,51 @@ wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.
 bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
 source ~/.bashrc
 //出现conda23.10.0,安装成功
-conda create -n py38 python=3.8
-conda activate py38
+测试conda版本
+conda --version
+
+创建虚拟环境
+//conda create -n py38 python=3.8
+//conda activate py38
+//conda 创建虚拟环境可能比较慢，改为python
+python3.8 -m venv py38_env
+source py38_env/bin/activate
 pip install Flask flask-cors zhipuai
 ```
 
 ### 3. 安装配置并部署项目
 
-1. git项目并install和build（见win部属部分）
+1. git项目并install和build（参考win部属部分）
+
+git clone --recursive https://github.com/sunyia123/bbvdle.git
+//直接install会报错
+cd /home/ec2-user/bbvdle/
+npm install
+npm run build
+
 
 2. 安装Apache
-`sudo yum install -y httpd`
+sudo yum install -y httpd
 
 3. 修改实例公网ip并复制文件至根目录
 ```
-echo "{{54.210.207.98}}" > /home/ec2-user/bbvdle/dist/ip.txt
+echo "{{公网ip }}" > /home/ec2-user/bbvdle/dist/ip.txt
 sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
 cd /var/www/html/
 ```
 
 4. 配置Apache
-`sudo systemctl reload httpd`
+sudo systemctl reload httpd
+启动apache
+sudo systemctl start httpd
+设置开机自启
+sudo systemctl enable httpd
 
-1. 启动Apache
-`sudo systemctl start httpd`
-
-1. 设置开机自启
-`sudo systemctl enable httpd`
+后面这个就不用运行了
+//1. 启动Apache
+//`sudo systemctl start httpd`
+//1. 设置开机自启
+//`sudo systemctl enable httpd`
 
 ### 4. 部署AI助手后端
 
@@ -212,8 +240,6 @@ cd /var/www/html/
 
 ```cmd
 cd /home/ec2-user/bbvdle/
-echo "{{9a5fbe2068344cdb959f9f8c0f374906.q8zJp9nyjCGpTacQ}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
+echo "{{92139536965c47beb1aa9762f84205fa.aSRYfudFQvXnrS7s}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
 python /home/ec2-user/bbvdle/src/model/GLM.py
 ```
-# bbvdle
-基于可视化积木编程的深度学习教学平台
