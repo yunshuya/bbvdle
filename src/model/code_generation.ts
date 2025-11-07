@@ -12,12 +12,25 @@ export function generatePython(sorted: Layer[]): string {
     for (const layer of sorted) {
         const layerstring = layer.lineOfPython();
         let applystring = ""; // Nothing to apply if no parents (input)
-        if (layer.parents.size === 1) {
-            applystring = `(x${layer.parents.values().next().value.uid})`;
-        } else if (layer.parents.size > 1) {
-            applystring = `([${[...layer.parents].map((p) => "x" + p.uid).join(", ")}])`;
+        
+        // 对于RNN层，我们需要检查输入形状并可能添加reshape层来处理MNIST数据
+        if (layer.layerType === "Recurrent") {
+            // 获取父层的UID
+            const parentUid = layer.parents.values().next().value.uid;
+            
+            // 添加reshape层来将4D张量(批次, 28, 28, 1)转换为3D张量(批次, 28, 28)
+            pythonScript += `# Reshape layer for RNN input\n`;
+            pythonScript += `x_reshape_${layer.uid} = Reshape((28, 28))(x${parentUid})\n`;
+            pythonScript += `x${layer.uid} = ` + layerstring + `(x_reshape_${layer.uid})` + "\n";
+        } else {
+            if (layer.parents.size === 1) {
+                applystring = `(x${layer.parents.values().next().value.uid})`;
+            } else if (layer.parents.size > 1) {
+                applystring = `([${[...layer.parents].map((p) => "x" + p.uid).join(", ")}])`;
+            }
+            pythonScript += `x${layer.uid} = ` + layerstring + applystring + "\n";
         }
-        pythonScript += `x${layer.uid} = ` + layerstring + applystring + "\n";
+        
         // TODO: Move this to BatchNorm and generalize layerstring to an array
         if (layer.layerType === "BatchNorm" && (layer as ActivationLayer).activation != null) {
             if (this.activation != null && this.activation.activationType !== "relu") {

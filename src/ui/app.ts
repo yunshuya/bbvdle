@@ -8,7 +8,7 @@ import { train } from "../model/mnist_model";
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
-import { blankTemplate, defaultTemplate, resnetTemplate } from "./model_templates";
+import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate } from "./model_templates";
 import { Activation, Relu, Sigmoid, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Draggable } from "./shapes/draggable";
@@ -23,6 +23,7 @@ import { Flatten } from "./shapes/layers/flatten";
 import { Input } from "./shapes/layers/input";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
 import { Output } from "./shapes/layers/output";
+import { Recurrent } from "./shapes/layers/rnn";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
@@ -189,6 +190,7 @@ function createTemplate(template: string): void {
         
         case "default": defaultTemplate(svgData); break;
         case "resnet": resnetTemplate(svgData); break;
+        case "rnn": rnnTemplate(svgData); break;
 
     }
 }
@@ -203,6 +205,7 @@ function appendItem(itemType: string): void {
         dropout: Dropout,
         flatten: Flatten,
         maxPooling2D: MaxPooling2D,
+        recurrent: Recurrent,
         relu: Relu,
         sigmoid: Sigmoid,
         tanh: Tanh,
