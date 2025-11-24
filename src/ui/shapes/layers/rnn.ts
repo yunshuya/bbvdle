@@ -6,10 +6,10 @@ import { PathShape, Point } from "../shape";
 export class Recurrent extends ActivationLayer {
     public layerType: string = "Recurrent";
     public parameterDefaults: { [key: string]: any } = {
-        units: 64,  // 增加units数量以提高表达能力
+        units: 64,  // 设置units为64以提高表达能力，适合图像分类任务
         returnSequences: false,
-        dropout: 0.2,  // 添加默认dropout以防止过拟合
-        recurrentDropout: 0.2  // 添加recurrent dropout
+        dropout: 0.1,  // 降低dropout率，避免训练后期性能突然下降
+        recurrentDropout: 0.1  // 降低recurrent dropout，防止RNN梯度问题
     };
     public readonly tfjsEmptyLayer: any = tf.layers.simpleRNN;
 
@@ -32,7 +32,7 @@ export class Recurrent extends ActivationLayer {
         name1.setAttribute("data-name", "units");
         const value1 = document.createElement("input");
         value1.className = "paramvalue layerparamvalue";
-        value1.value = "64";  // 修改默认值为64
+        value1.value = "64";  // 修改默认值为64以提高表达能力
         line1.appendChild(name1);
         line1.appendChild(value1);
         this.paramBox.append(line1);
@@ -119,34 +119,51 @@ export class Recurrent extends ActivationLayer {
             break; 
         }
         
+        // 获取父层的输出
+        const parentLayer = parent.getTfjsLayer();
+        
+        // 如果父层是Reshape层，直接使用父层的输出，不需要再次reshape
+        if (parent && parent.layerType === "Reshape") {
+            this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parentLayer);
+            return;
+        }
+        
         // 对于Recurrent，我们需要将2D图像数据重塑为适合RNN的格式
         // 首先将图像展平为序列格式
-        const parentLayer = parent.getTfjsLayer();
         const parentShape = parentLayer.shape;
         
-        // 如果输入是4D张量（批次，高度，宽度，通道），我们需要将其重塑
-        if (parentShape.length === 4) {
-            // 对于MNIST数据 (批次, 28, 28, 1)，我们将每一行作为一个时间步
-            // 重塑为 (批次, 28, 28) - 28个时间步，每个时间步28个特征
-            const timeSteps = parentShape[1]; // 28 (高度)
-            const features = parentShape[2]; // 28 (宽度)
-            
-            // 创建一个Lambda层来重塑数据
-            const reshapeLayer = tf.layers.reshape({targetShape: [timeSteps, features]});
-            const reshaped = reshapeLayer.apply(parentLayer);
-            
-            // 然后应用Recurrent层
-            this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(reshaped);
-        } else if (parentShape.length === 2) {
-            // 如果输入是2D张量（批次，特征），我们需要添加时间维度
-            // 将其重塑为（批次，1，特征）
-            const reshapeLayer = tf.layers.reshape({targetShape: [1, parentShape[1]]});
-            const reshaped = reshapeLayer.apply(parentLayer);
-            
-            // 然后应用Recurrent层
-            this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(reshaped);
-        } else {
-            // 直接应用Recurrent层
+        try {
+            // 如果输入是4D张量（批次，高度，宽度，通道），我们需要将其重塑
+            if (parentShape.length === 4) {
+                // 支持MNIST数据 (批次, 28, 28, 1) 和CIFAR-10数据 (批次, 32, 32, 3)
+                // 重塑为 (批次, 时间步, 特征) 格式
+                const timeSteps = parentShape[1]; // 高度 (28 for MNIST, 32 for CIFAR-10)
+                const features = parentShape[2] * parentShape[3]; // 宽度 * 通道数
+                
+                // 创建一个Lambda层来重塑数据
+                const reshapeLayer = tf.layers.reshape({targetShape: [timeSteps, features]});
+                const reshaped = reshapeLayer.apply(parentLayer);
+                
+                // 然后应用Recurrent层
+                this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(reshaped);
+            } else if (parentShape.length === 2) {
+                // 如果输入是2D张量（批次，特征），我们需要添加时间维度
+                // 将其重塑为（批次，1，特征）
+                const reshapeLayer = tf.layers.reshape({targetShape: [1, parentShape[1]]});
+                const reshaped = reshapeLayer.apply(parentLayer);
+                
+                // 然后应用Recurrent层
+                this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(reshaped);
+            } else if (parentShape.length === 3) {
+                // 如果输入已经是3D张量（批次，时间步，特征），直接应用Recurrent层
+                this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parentLayer);
+            } else {
+                // 对于其他情况，尝试直接应用Recurrent层
+                this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parentLayer);
+            }
+        } catch (error) {
+            // 如果重塑失败，尝试直接应用Recurrent层
+            console.warn("RNN layer reshape failed, applying layer directly: ", error);
             this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parentLayer);
         }
     }

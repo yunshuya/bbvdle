@@ -1,5 +1,5 @@
 import { IDraggableData } from "./app";
-import { Activation, Relu } from "./shapes/activation";
+import { Activation, Relu, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Layer } from "./shapes/layer";
 import { Add } from "./shapes/layers/add";
@@ -9,9 +9,11 @@ import { Conv2D } from "./shapes/layers/convolutional";
 import { Dense } from "./shapes/layers/dense";
 import { Dropout } from "./shapes/layers/dropout";
 import { Flatten } from "./shapes/layers/flatten";
+import { LSTM } from "./shapes/layers/lstm";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
-import { Recurrent } from "./shapes/layers/rnn";
 import { Point } from "./shapes/shape";
+import { Recurrent } from "./shapes/layers/rnn";
+import { Reshape } from "./shapes/layers/reshape";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 
@@ -197,35 +199,34 @@ export function complexTemplate(svgData: IDraggableData): void {
 
     // conv2 -> batch
     conv2.addChild(batch);
+    batch.addActivation(batchRelu2);
 
     // batch -> flat2
     batch.addChild(flat2);
-    batch.addActivation(batchRelu2);
+
+    // flat1, flat2 -> concat
+    flat1.addChild(concat);
+    flat2.addChild(concat);
 
     // concat -> dense
     concat.addChild(dense);
-
-    // flat1 -> concat
-    flat1.addChild(concat);
-
-    // flat2 -> concat
-    flat2.addChild(concat);
+    dense.addActivation(denseRelu);
 
     // dense -> out
-    dense.addActivation(denseRelu);
     dense.addChild(svgData.output);
 
     // Store the new network
     svgData.draggable.push(conv);
-    svgData.draggable.push(conv2);
     svgData.draggable.push(dense);
+    svgData.draggable.push(conv2);
     svgData.draggable.push(maxpooling);
-    svgData.draggable.push(convRelu);
-    svgData.draggable.push(batchRelu2);
     svgData.draggable.push(concat);
     svgData.draggable.push(flat1);
     svgData.draggable.push(flat2);
     svgData.draggable.push(batch);
+    svgData.draggable.push(convRelu);
+    svgData.draggable.push(denseRelu);
+    svgData.draggable.push(batchRelu2);
 }
 
 export function rnnTemplate(svgData: IDraggableData): void {
@@ -237,38 +238,120 @@ export function rnnTemplate(svgData: IDraggableData): void {
     const height = canvasBoundingBox.height;
 
     const inputPos = new Point(width / 5, height / 3);
-    const rnn1Pos = new Point(width / 3, height / 2);
+    const reshapePos = new Point(width / 4, height / 2);
+    const rnn1Pos = new Point(width / 2.5, height / 2);
     const dropoutPos = new Point(width / 1.5, height / 2);
     const densePos = new Point(width / 1.2, height / 2);
     const outputPos = new Point(width - 100, height / 2);
 
     // Create layers
+    // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
+    // 默认使用 MNIST 格式 (28, 28)，用户可以根据数据集调整
+    const reshape: Layer = new Reshape(reshapePos);
+    reshape.parameterDefaults.targetShape1 = 28;
+    reshape.parameterDefaults.targetShape2 = 28;
+    
     const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
-    // 为RNN层添加ReLU激活函数
-    const rnnRelu: Activation = new Relu(rnn1Pos);
+    // 设置RNN层units为64以提高表达能力
+    rnn1.parameterDefaults.units = 64;
+    // 为RNN层添加tanh激活函数（RNN的默认激活函数，比ReLU更适合序列数据）
+    const rnnTanh: Activation = new Tanh(rnn1Pos);
     const dropout: Layer = new Dropout(dropoutPos);
+    // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
+    // 过高的dropout（如0.3-0.5）可能导致模型在训练后期性能突然下降
+    dropout.parameterDefaults.rate = 0.2;
     const dense: ActivationLayer = new Dense(densePos);
     // 设置Dense层的units为10（MNIST有10个类别）
     dense.parameterDefaults.units = 10;
-    // 为Dense层添加ReLU激活函数（而不是Softmax）
+    // 注意：Dense层不使用激活函数，因为Output层会自动应用softmax
+    // 如果Dense层也使用softmax，会导致双重softmax，使模型输出固定
+
+    // Add activations
+    rnn1.addActivation(rnnTanh);
+    // Dense层不添加激活函数，让Output层处理softmax
+
+    // Add relationships among layers
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    // Input -> Reshape -> RNN -> Dropout -> Dense -> Output
+    svgData.input.addChild(reshape);
+    reshape.addChild(rnn1);
+    rnn1.addChild(dropout);
+    dropout.addChild(dense);
+    dense.addChild(svgData.output);
+
+    // Store the new network
+    svgData.draggable.push(reshape);
+    svgData.draggable.push(rnn1);
+    svgData.draggable.push(rnnTanh);
+    svgData.draggable.push(dropout);
+    svgData.draggable.push(dense);
+    // 注意：Output层会自动应用softmax，所以Dense层不需要激活函数
+}
+
+// LSTM模板
+export function lstmTemplate(svgData: IDraggableData): void {
+    resetWorkspace(svgData);
+
+    // Initialize each of the layers and activations
+    const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
+
+    const inputPos = new Point(width / 5, height / 3);
+    const reshapePos = new Point(width / 4, height / 2);
+    const lstm1Pos = new Point(width / 2.5, height / 2);
+    const dropoutPos = new Point(width / 1.5, height / 2);
+    const densePos = new Point(width / 1.2, height / 2);
+    const outputPos = new Point(width - 100, height / 2);
+
+    // Create layers
+    // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
+    // Reshape层会根据当前数据集自动设置默认值（在populateParamBox中）
+    // 这里设置parameterDefaults以确保一致性
+    const reshape: Layer = new Reshape(reshapePos);
+    // 获取当前数据集类型，根据数据集设置默认值
+    const currentDataset = svgData.input.getParams().dataset;
+    if (currentDataset === "cifar") {
+        // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
+        reshape.parameterDefaults.targetShape1 = 32;
+        reshape.parameterDefaults.targetShape2 = 96;
+    } else {
+        // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
+        reshape.parameterDefaults.targetShape1 = 28;
+        reshape.parameterDefaults.targetShape2 = 28;
+    }
+    
+    const lstm1: ActivationLayer = new LSTM(lstm1Pos);
+    // 为LSTM层添加ReLU激活函数
+    const lstmRelu: Activation = new Relu(lstm1Pos);
+    const dropout: Layer = new Dropout(dropoutPos);
+    const dense: ActivationLayer = new Dense(densePos);
+    // 设置Dense层的units为10（数据集有10个类别）
+    dense.parameterDefaults.units = 10;
+    // 为Dense层添加ReLU激活函数
     const denseRelu: Activation = new Relu(densePos);
 
     // Add activations
-    rnn1.addActivation(rnnRelu);
+    lstm1.addActivation(lstmRelu);
     dense.addActivation(denseRelu);
 
     // Add relationships among layers
     svgData.input.setPosition(inputPos);
     svgData.output.setPosition(outputPos);
     
-    svgData.input.addChild(rnn1);
-    rnn1.addChild(dropout);
+    // Input -> Reshape -> LSTM -> Dropout -> Dense -> Output
+    svgData.input.addChild(reshape);
+    reshape.addChild(lstm1);
+    lstm1.addChild(dropout);
     dropout.addChild(dense);
     dense.addChild(svgData.output);
 
     // Store the new network
-    svgData.draggable.push(rnn1);
-    svgData.draggable.push(rnnRelu);
+    svgData.draggable.push(reshape);
+    svgData.draggable.push(lstm1);
+    svgData.draggable.push(lstmRelu);
     svgData.draggable.push(dropout);
     svgData.draggable.push(dense);
     svgData.draggable.push(denseRelu);

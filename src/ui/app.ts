@@ -8,8 +8,8 @@ import { train } from "../model/mnist_model";
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
-import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate } from "./model_templates";
-import { Activation, Relu, Sigmoid, Tanh } from "./shapes/activation";
+import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate } from "./model_templates";
+import { Activation, Relu, Sigmoid, Softmax, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Draggable } from "./shapes/draggable";
 import { Layer } from "./shapes/layer";
@@ -21,9 +21,11 @@ import { Dense } from "./shapes/layers/dense";
 import { Dropout } from "./shapes/layers/dropout";
 import { Flatten } from "./shapes/layers/flatten";
 import { Input } from "./shapes/layers/input";
+import { LSTM } from "./shapes/layers/lstm";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
 import { Output } from "./shapes/layers/output";
 import { Recurrent } from "./shapes/layers/rnn";
+import { Reshape } from "./shapes/layers/reshape";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
@@ -118,9 +120,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
-    for (const element of document.getElementById(categoryId).getElementsByClassName("option")) {
+    console.log("addOnClickToOptions called for categoryId:", categoryId);
+    const container = document.getElementById(categoryId);
+    if (!container) {
+        console.error("Container not found for categoryId:", categoryId);
+        return;
+    }
+    const elements = container.getElementsByClassName("option");
+    console.log("Found elements:", elements.length);
+    for (const element of elements) {
+        console.log("Adding click listener to element with data-optionValue:", element.getAttribute("data-optionValue"));
         element.addEventListener("click", () => {
-            func(element.getAttribute("data-optionValue"), element as HTMLElement);
+            const optionValue = element.getAttribute("data-optionValue");
+            console.log("Element clicked with optionValue:", optionValue);
+            func(optionValue, element as HTMLElement);
         });
     }
 }
@@ -185,18 +198,21 @@ function createTemplate(template: string): void {
             //当前有教学任务时，验证是否生成input和output；
             
                 
-
         }
         
         case "default": defaultTemplate(svgData); break;
         case "resnet": resnetTemplate(svgData); break;
         case "rnn": rnnTemplate(svgData); break;
+        case "lstm": lstmTemplate(svgData); break;
 
     }
 }
 
 function appendItem(itemType: string): void {
-    const item: Draggable = new ({
+    console.log("appendItem called with itemType:", itemType);
+    
+    // 检查 itemType 是否在映射中
+    const itemMap: { [key: string]: any } = {
         add: Add,
         batchnorm: BatchNorm,
         concatenate: Concatenate,
@@ -204,21 +220,33 @@ function appendItem(itemType: string): void {
         dense: Dense,
         dropout: Dropout,
         flatten: Flatten,
+        lstm: LSTM,
         maxPooling2D: MaxPooling2D,
         recurrent: Recurrent,
         relu: Relu,
+        reshape: Reshape,
         sigmoid: Sigmoid,
+        softmax: Softmax,
         tanh: Tanh,
-    } as any)[itemType]();
-
-    svgData.draggable.push(item);
-    //这里是验证教学任务的步骤
-    if(isTaskAlready){
-            verifyStepCompletion(item);    
-    }
-   
-  
+    };
     
+    if (!itemMap[itemType]) {
+        console.error("Unknown itemType:", itemType);
+        return;
+    }
+    
+    try {
+        const item: Draggable = new itemMap[itemType]();
+        console.log("Created item:", item);
+        
+        svgData.draggable.push(item);
+        //这里是验证教学任务的步骤
+        if(isTaskAlready){
+                verifyStepCompletion(item);    
+        }
+    } catch (error) {
+        console.error("Error creating item of type", itemType, error);
+    }
 }
 
 function setupIndividualOnClicks(): void {
