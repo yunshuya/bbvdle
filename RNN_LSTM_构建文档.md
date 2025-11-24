@@ -16,6 +16,8 @@
 
 4. **Softmax 激活函数**：新增了 Softmax 激活函数积木块，用于多分类任务的输出层，可以将神经网络的输出转换为概率分布，方便用户构建分类模型。
 
+5.**修复了加载CIFAR-10数据集时出现的"Cannot read properties of undefined (reading 'backend')"错误** :可以成功对CIFAR-10数据集进行训练
+
 ---
 
 ## 二、涉及的文件变更
@@ -100,6 +102,10 @@
 - **自动 Reshape 检测**：当检测到 RNN 层时，会检查其父层是否为 Reshape 层。如果父层已经是 Reshape 层，则直接使用父层的输出；如果父层不是 Reshape 层，则自动在生成的 Python 代码中添加 Reshape 层，将 4D 图像数据转换为 3D 序列格式。
 
 - **代码生成优化**：确保生成的 Python 代码能够正确处理图像数据，避免因数据格式不匹配导致的错误。
+
+ #### . `src/model/data.ts`
+-**修复了TypeScript编译错误：**: 修正了抽象方法的定义，移除了不兼容的async和abstract修饰符组合;修复了属性初始化顺序问题，将IMAGE_SIZE的计算移到构造函数中。
+-**增强了Cifar10Data类的load方法**：添加了tf.ready()调用来确保TensorFlow.js后端已准备就绪;增加了错误处理机制，捕获并报告加载过程中可能出现的任何错误;添加了对加载数据的验证，确保所有张量都正确创建;提供了更清晰的错误消息，便于调试。
 
 ---
 
@@ -280,14 +286,14 @@ Softmax 激活函数是多分类任务中常用的输出层激活函数，它的
 1. **新建文件**：创建了 3 个积木块实现文件：
    - `src/ui/shapes/layers/rnn.ts`：实现了 RNN 层的所有功能
    - `src/ui/shapes/layers/lstm.ts`：实现了 LSTM 层的所有功能
-   - `src/ui/shapes/layers/reshape.ts`：实现了 Reshape 层的所有功能（如果之前不存在）
+   - `src/ui/shapes/layers/reshape.ts`：实现了 Reshape 层的所有功能
 
 2. **修改文件**：修改了 4 个现有文件：
    - `src/ui/model_templates.ts`：添加了 RNN 和 LSTM 模板函数
    - `src/ui/app.ts`：集成了模板和积木块的创建逻辑，包括 Reshape 和 Softmax
    - `index.html`：添加了用户界面选项，包括 Reshape 积木块和 Softmax 激活函数
    - `src/model/code_generation.ts`：添加了 Python 代码生成的特殊处理
-   - `src/ui/shapes/activation.ts`：添加了 Softmax 激活函数类（如果之前不存在）
+   - `src/ui/shapes/activation.ts`：添加了 Softmax 激活函数类
 
 3. **核心功能**：
    - 可视化积木块：用户可以直观地看到和操作 RNN、LSTM、Reshape 积木块和 Softmax 激活函数
