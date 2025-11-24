@@ -16,7 +16,7 @@
 
 4. **Softmax 激活函数**：新增了 Softmax 激活函数积木块，用于多分类任务的输出层，可以将神经网络的输出转换为概率分布，方便用户构建分类模型。
 
-5.**修复了加载CIFAR-10数据集时出现的"Cannot read properties of undefined (reading 'backend')"错误** :可以成功对CIFAR-10数据集进行训练
+5. **修复了加载CIFAR-10数据集时出现的"Cannot read properties of undefined (reading 'backend')"错误** :可以成功对CIFAR-10数据集进行训练
 
 ---
 
@@ -105,6 +105,7 @@
 
  #### . `src/model/data.ts`
 -**修复了TypeScript编译错误：**: 修正了抽象方法的定义，移除了不兼容的async和abstract修饰符组合;修复了属性初始化顺序问题，将IMAGE_SIZE的计算移到构造函数中。
+
 -**增强了Cifar10Data类的load方法**：添加了tf.ready()调用来确保TensorFlow.js后端已准备就绪;增加了错误处理机制，捕获并报告加载过程中可能出现的任何错误;添加了对加载数据的验证，确保所有张量都正确创建;提供了更清晰的错误消息，便于调试。
 
 ---
