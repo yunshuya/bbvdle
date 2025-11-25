@@ -4,7 +4,7 @@ import { generateJulia, generatePython } from "../model/code_generation";
 import { changeDataset } from "../model/data";
 import { download, graphToJson } from "../model/export_model";
 import { setupPlots, setupTestResults, showPredictions } from "../model/graphs";
-import { train } from "../model/mnist_model";
+import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
@@ -27,9 +27,8 @@ import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
-import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready } from './taskModule';
+import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
-import { stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
 
 
 export interface IDraggableData {
@@ -38,11 +37,37 @@ export interface IDraggableData {
     output: Output;
 }
 
+interface IAiLayerContext {
+    layerType: string;
+    params: { [key: string]: any };
+}
+
+type AiAttachment =
+    | { kind: "layer"; layerType: string; params: { [key: string]: any } }
+    | { kind: "education"; text: string; displayText: string };
+
+type EducationAction = "explain" | "summarize" | "quiz";
+
+interface IEducationContextPayload {
+    text: string;
+    mode?: EducationAction | "custom";
+}
+
 export let svgData: IDraggableData = {
     draggable: [],
     input: null,
     output: null,
 };
+
+let aiAssistantDialogElement: HTMLElement | null = null;
+let aiDialogInputElement: HTMLInputElement | null = null;
+let aiDialogContentElement: HTMLElement | null = null;
+let aiContextAttachmentElement: HTMLElement | null = null;
+let aiContextTextElement: HTMLElement | null = null;
+let aiContextActionsElement: HTMLElement | null = null;
+let pendingAiAttachment: AiAttachment | null = null;
+let educationSelectionHandle: HTMLDivElement | null = null;
+let educationSelectionText: string | null = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -109,11 +134,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setupAiAssistant();
     const taskSteps = document.querySelector('#taskSteps') as HTMLElement;
-    const aiAssistantDialog = document.querySelector('#aiAssistantDialog') as HTMLElement;       
-    makeDraggable(taskSteps);
-    makeDraggable(aiAssistantDialog);
-    makeResizable(taskSteps);
-    makeResizable(aiAssistantDialog);
+    aiAssistantDialogElement = document.querySelector('#aiAssistantDialog') as HTMLElement;
+    aiContextAttachmentElement = document.getElementById("aiContextAttachment");
+    aiContextTextElement = aiContextAttachmentElement?.querySelector(".ai-context-text") as HTMLElement;
+    aiContextActionsElement = document.getElementById("aiContextActions");
+    const clearAiContextButton = document.getElementById("clearAiContext");
+    if (clearAiContextButton) {
+        clearAiContextButton.addEventListener("click", () => {
+            pendingAiAttachment = null;
+            updateAiContextAttachment();
+        });
+    }
+    if (aiContextActionsElement) {
+        aiContextActionsElement.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (!target || target.tagName !== "BUTTON") {
+                return;
+            }
+            const action = target.getAttribute("data-action") as EducationAction;
+            if (action) {
+                handleAiContextAction(action).catch((error) => console.error(error));
+            }
+        });
+    }
+    if (taskSteps) {
+        makeDraggable(taskSteps);
+        makeResizable(taskSteps);
+    }
+    if (aiAssistantDialogElement) {
+        makeDraggable(aiAssistantDialogElement);
+        makeResizable(aiAssistantDialogElement);
+    }
+    setupEducationSelectionWatcher();
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
@@ -154,11 +206,15 @@ function setupOptionOnClicks(): void {
     });
     //new
     const taskOptions = document.querySelectorAll("#tasks .option");
-    taskOptions.forEach(option => {
+    taskOptions.forEach((option) => {
         option.addEventListener("click", () => {
             const taskType = option.getAttribute("data-optionValue");
-            //点击任务，修改当前任务的全局变量
-            
+            if (!taskType) {
+                return;
+            }
+            // 高亮当前任务
+            selectOption("tasks", option as HTMLElement);
+            // 点击任务，修改当前任务的全局变量
             switchTask(taskType);
         });
     });
@@ -243,6 +299,19 @@ function setupIndividualOnClicks(): void {
         copyTextToClipboard(baseUrl + "#" + urlParam);
     });
 
+    const exportTrainingJsonBtn = document.getElementById("exportTrainingHistoryJson");
+    if (exportTrainingJsonBtn) {
+        exportTrainingJsonBtn.addEventListener("click", () => exportTrainingHistory("json"));
+    }
+    const exportTrainingCsvBtn = document.getElementById("exportTrainingHistoryCsv");
+    if (exportTrainingCsvBtn) {
+        exportTrainingCsvBtn.addEventListener("click", () => exportTrainingHistory("csv"));
+    }
+    const exportTrainingChartsBtn = document.getElementById("exportTrainingCharts");
+    if (exportTrainingChartsBtn) {
+        exportTrainingChartsBtn.addEventListener("click", () => exportTrainingCharts());
+    }
+
     document.getElementById("train").addEventListener("click", trainOnClick);
 
     document.getElementById("informationEducation").addEventListener("click", () => {
@@ -271,6 +340,149 @@ function deleteSelected(): void {
         windowProperties.selectedElement.delete();
         windowProperties.selectedElement = null;
     }
+}
+
+function exportTrainingHistory(format: "json" | "csv"): void {
+    const history = getTrainingHistory();
+    if (!history || history.batchMetrics.length === 0) {
+        displayError(new Error("请先完成一次训练，再导出训练数据。"));
+        return;
+    }
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    if (format === "json") {
+        const filename = `training_history_${timestamp}.json`;
+        download(JSON.stringify(history, null, 2), filename);
+        return;
+    }
+    const rows: Array<Array<string>> = [];
+    rows.push(["type", "step", "loss", "accuracy"]);
+    history.batchMetrics.forEach((metric) => {
+        rows.push(["batch", `${metric.batch}`, formatNumber(metric.loss), formatNumber(metric.accuracy)]);
+    });
+    history.epochMetrics.forEach((metric) => {
+        rows.push(["epoch", `${metric.epoch}`, formatNumber(metric.valLoss), formatNumber(metric.valAccuracy)]);
+    });
+    if (history.testMetrics) {
+        rows.push(["test", "final", formatNumber(history.testMetrics.loss), formatNumber(history.testMetrics.accuracy)]);
+    }
+    const metaLines = [
+        ["#dataset", history.dataset || ""],
+        ["#startedAt", history.startedAt || ""],
+        ["#finishedAt", history.finishedAt || ""],
+        ["#learningRate", `${history.hyperparameters.learningRate}`],
+        ["#batchSize", `${history.hyperparameters.batchSize}`],
+        ["#epochs", `${history.hyperparameters.epochs}`],
+        ["#optimizer", history.hyperparameters.optimizer || ""],
+        ["#loss", history.hyperparameters.loss || ""],
+    ];
+    const csvLines = [
+        ...metaLines.map((line) => line.join(",")),
+        ...rows.map((line) => line.join(",")),
+    ];
+    const filename = `training_history_${timestamp}.csv`;
+    download(csvLines.join("\n"), filename);
+}
+
+function exportTrainingCharts(): void {
+    const chartTargets = [
+        { id: "loss-canvas", name: "loss_curve" },
+        { id: "accuracy-canvas", name: "accuracy_curve" },
+        { id: "confusion-matrix-canvas", name: "confusion_matrix" },
+    ];
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    let exportedCount = 0;
+    const renderPromises = chartTargets.map(async (target) => {
+        const container = document.getElementById(target.id);
+        if (!container) {
+            return;
+        }
+        const dataUrl = await renderChartContainerToImage(container);
+        if (dataUrl) {
+            downloadDataUrl(dataUrl, `${target.name}_${timestamp}.png`);
+            exportedCount++;
+        }
+    });
+    Promise.all(renderPromises).then(() => {
+        if (exportedCount === 0) {
+            displayError(new Error("未找到可导出的图表，请先运行一次训练。"));
+        }
+    });
+}
+
+async function renderChartContainerToImage(container: HTMLElement): Promise<string | null> {
+    const rect = container.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+        return null;
+    }
+    const scale = window.devicePixelRatio || 1;
+    const composite = document.createElement("canvas");
+    composite.width = Math.ceil(rect.width * scale);
+    composite.height = Math.ceil(rect.height * scale);
+    const ctx = composite.getContext("2d");
+    ctx.scale(scale, scale);
+
+    const drawOperations: Array<Promise<void>> = [];
+
+    const drawCanvas = (canvas: HTMLCanvasElement): void => {
+        const canvasRect = canvas.getBoundingClientRect();
+        const offsetX = canvasRect.left - rect.left;
+        const offsetY = canvasRect.top - rect.top;
+        ctx.drawImage(canvas, offsetX, offsetY, canvasRect.width, canvasRect.height);
+    };
+
+    Array.from(container.querySelectorAll("canvas")).forEach((canvas) => {
+        if (canvas.width && canvas.height) {
+            drawCanvas(canvas);
+        }
+    });
+
+    const svgElements = Array.from(container.querySelectorAll("svg"));
+    svgElements.forEach((svg) => {
+        const promise = new Promise<void>((resolve) => {
+            const cloned = svg.cloneNode(true) as SVGSVGElement;
+            const svgRect = svg.getBoundingClientRect();
+            cloned.setAttribute("width", `${svgRect.width}`);
+            cloned.setAttribute("height", `${svgRect.height}`);
+
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(cloned);
+            const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                const offsetX = svgRect.left - rect.left;
+                const offsetY = svgRect.top - rect.top;
+                ctx.drawImage(img, offsetX, offsetY, svgRect.width, svgRect.height);
+                URL.revokeObjectURL(url);
+                resolve();
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                resolve();
+            };
+            img.src = url;
+        });
+        drawOperations.push(promise);
+    });
+
+    await Promise.all(drawOperations);
+    return composite.toDataURL("image/png");
+}
+
+function formatNumber(value: number | null | undefined): string {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+        return "";
+    }
+    return value.toString();
+}
+
+function downloadDataUrl(dataUrl: string, filename: string): void {
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // async function trainOnClick(): Promise<void> {
@@ -492,22 +704,232 @@ function setupAiAssistant(): void {
 
     if (!aiButton || !aiDialog || !dialogContent || !dialogInput || !sendButton) return;
 
+    aiAssistantDialogElement = aiDialog;
+    aiDialogInputElement = dialogInput;
+    aiDialogContentElement = dialogContent;
+
     // 显示/隐藏对话框
     aiButton.addEventListener("click", () => {
         aiDialog.classList.toggle("hidden");
     });
 
-    // 发送消息并模拟 AI 回复
+    // 发送消息
     sendButton.addEventListener("click", async () => {
         const userMessage = dialogInput.value.trim();
-        if (userMessage) {
-            appendMessage(dialogContent, "user", userMessage);
-            dialogInput.value = "";
-            const aiResponse = await fetchAiResponse(userMessage);
-            appendMessage(dialogContent, "assistant", aiResponse);
+        if (!userMessage) {
+            return;
         }
-       
+        dialogInput.value = "";
+        await sendAiMessage(userMessage);
     });
+}
+
+export function sendLayerContextToAi(layer: Layer): void {
+    if (!aiAssistantDialogElement || !aiDialogInputElement) {
+        return;
+    }
+    aiAssistantDialogElement.classList.remove("hidden");
+    pendingAiAttachment = {
+        kind: "layer",
+        layerType: layer.layerType,
+        params: layer.getParams()
+    };
+    updateAiContextAttachment();
+    aiDialogInputElement.focus();
+}
+
+function updateAiContextAttachment(): void {
+    if (!aiContextAttachmentElement || !aiContextTextElement) {
+        return;
+    }
+    if (!pendingAiAttachment) {
+        aiContextAttachmentElement.classList.add("hidden");
+        aiContextActionsElement?.classList.add("hidden");
+        return;
+    }
+
+    aiContextAttachmentElement.classList.remove("hidden");
+    if (pendingAiAttachment.kind === "layer") {
+        const params = pendingAiAttachment.params;
+        const paramText = Object.keys(params).length > 0
+            ? Object.entries(params).map(([key, value]) => `${key}: ${value}`).join(", ")
+            : "无参数";
+        aiContextTextElement.textContent = `已附加：${pendingAiAttachment.layerType}（${paramText}）`;
+        aiContextActionsElement?.classList.add("hidden");
+    } else {
+        aiContextTextElement.textContent = `已选内容：${pendingAiAttachment.displayText}`;
+        aiContextActionsElement?.classList.remove("hidden");
+    }
+}
+
+async function sendAiMessage(
+    userMessage: string,
+    overrides?: {
+        educationContext?: IEducationContextPayload;
+        layerContext?: IAiLayerContext;
+    }
+): Promise<void> {
+    if (!aiDialogContentElement) {
+        return;
+    }
+    appendMessage(aiDialogContentElement, "user", userMessage);
+
+    let layerContext: IAiLayerContext | undefined = overrides?.layerContext;
+    if (!layerContext && pendingAiAttachment?.kind === "layer") {
+        layerContext = {
+            layerType: pendingAiAttachment.layerType,
+            params: pendingAiAttachment.params
+        };
+    } else if (!layerContext && windowProperties.selectedElement instanceof Layer) {
+        const layer = windowProperties.selectedElement;
+        layerContext = {
+            layerType: layer.layerType,
+            params: layer.getParams()
+        };
+    }
+
+    let educationContext: IEducationContextPayload | undefined = overrides?.educationContext;
+    if (!educationContext && pendingAiAttachment?.kind === "education") {
+        educationContext = {
+            text: pendingAiAttachment.text,
+            mode: "custom"
+        };
+    }
+
+    const taskName = getCurrentTask();
+    const aiResponse = await fetchAiResponse(userMessage, layerContext, taskName, educationContext);
+    appendMessage(aiDialogContentElement, "assistant", aiResponse);
+    pendingAiAttachment = null;
+    updateAiContextAttachment();
+}
+
+async function handleAiContextAction(action: EducationAction): Promise<void> {
+    if (!pendingAiAttachment || pendingAiAttachment.kind !== "education") {
+        return;
+    }
+    const text = pendingAiAttachment.text;
+    let prompt = "";
+    switch (action) {
+        case "explain":
+            prompt = `请用通俗易懂的语言解释以下内容：\n${text}`;
+            break;
+        case "summarize":
+            prompt = `请概括以下内容的要点，突出关键信息：\n${text}`;
+            break;
+        case "quiz":
+            prompt = `请根据以下内容设计三道测验题，并给出参考答案：\n${text}`;
+            break;
+    }
+    aiAssistantDialogElement?.classList.remove("hidden");
+    if (aiDialogInputElement) {
+        aiDialogInputElement.value = "";
+    }
+    await sendAiMessage(prompt, { educationContext: { text, mode: action } });
+}
+
+function setupEducationSelectionWatcher(): void {
+    document.addEventListener("selectionchange", () => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed) {
+            hideEducationSelectionHandle();
+            return;
+        }
+        const text = selection.toString().trim();
+        if (!text) {
+            hideEducationSelectionHandle();
+            return;
+        }
+        const range = selection.getRangeAt(0);
+        if (!isNodeWithinEducation(range.commonAncestorContainer)) {
+            hideEducationSelectionHandle();
+            return;
+        }
+        const rect = getRangeRect(range);
+        if (!rect) {
+            hideEducationSelectionHandle();
+            return;
+        }
+        educationSelectionText = text;
+        showEducationSelectionHandle(rect);
+    });
+}
+
+function showEducationSelectionHandle(rect: DOMRect): void {
+    if (!educationSelectionHandle) {
+        educationSelectionHandle = document.createElement("div");
+        educationSelectionHandle.className = "education-ai-handle hidden";
+        educationSelectionHandle.textContent = "AI";
+        educationSelectionHandle.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        educationSelectionHandle.addEventListener("click", () => {
+            if (educationSelectionText) {
+                attachEducationSelection(educationSelectionText);
+            }
+        });
+        document.body.appendChild(educationSelectionHandle);
+    }
+    educationSelectionHandle.style.top = `${window.scrollY + rect.top - 30}px`;
+    educationSelectionHandle.style.left = `${window.scrollX + rect.right + 10}px`;
+    educationSelectionHandle.classList.remove("hidden");
+}
+
+function hideEducationSelectionHandle(): void {
+    if (educationSelectionHandle) {
+        educationSelectionHandle.classList.add("hidden");
+    }
+    educationSelectionText = null;
+}
+
+function attachEducationSelection(text: string): void {
+    const cleaned = text.trim();
+    if (!cleaned) {
+        return;
+    }
+    const displayText = cleaned.length > 180 ? `${cleaned.slice(0, 180)}...` : cleaned;
+    pendingAiAttachment = {
+        kind: "education",
+        text: cleaned,
+        displayText
+    };
+    updateAiContextAttachment();
+    aiAssistantDialogElement?.classList.remove("hidden");
+    aiDialogInputElement?.focus();
+    hideEducationSelectionHandle();
+    const selection = window.getSelection();
+    if (selection) {
+        selection.removeAllRanges();
+    }
+}
+
+function isNodeWithinEducation(node: Node | null): boolean {
+    while (node) {
+        if (node instanceof HTMLElement && node.id === "educationTab") {
+            return true;
+        }
+        let parent: Node | null = null;
+        if (node instanceof HTMLElement && node.parentElement) {
+            parent = node.parentElement;
+        }
+        if (!parent && node.parentNode) {
+            parent = node.parentNode;
+        }
+        node = parent;
+    }
+    return false;
+}
+
+function getRangeRect(range: Range): DOMRect | null {
+    const rect = range.getBoundingClientRect();
+    if (rect && rect.width > 0 && rect.height > 0) {
+        return rect;
+    }
+    const clientRects = range.getClientRects();
+    if (clientRects.length > 0) {
+        return clientRects[0];
+    }
+    return null;
 }
 
 async function trainOnClick(): Promise<void> {

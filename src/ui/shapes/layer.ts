@@ -2,7 +2,7 @@ import * as tf from "@tensorflow/tfjs";
 import * as d3 from "d3";
 import { generateTfjsModel, topologicalSort } from "../../model/build_network";
 import { changeDataset } from "../../model/data";
-import { svgData } from "../app";
+import { svgData, sendLayerContextToAi } from "../app";
 import { displayError } from "../error";
 import { parseString } from "../utils";
 import { windowProperties } from "../window";
@@ -58,6 +58,7 @@ export abstract class Layer extends Draggable {
                         .style("user-select", "none");
 
     private block: Shape[];
+    private aiHandle: d3.Selection<SVGGElement, unknown, HTMLElement, any> | null = null;
 
     constructor(block: Shape[], defaultLocation: Point) {
         super(defaultLocation);
@@ -75,17 +76,109 @@ export abstract class Layer extends Draggable {
         this.paramBox.style.position = "absolute";
         document.getElementById("paramtruck").appendChild(this.paramBox);
 
-        this.svgComponent.on("click", () => {
+        // 移除原有的点击事件，重新绑定以支持AI圆点
+        this.svgComponent.on("click.layer", function() {
                              this.select();
-                             
                              window.clearTimeout(this.moveTimeout);
                              this.hoverText.style("visibility", "hidden");
-                        });
+                        }.bind(this));
         this.populateParamBox();
+        this.initializeAiHandle();
     }
     public abstract lineOfPython(): string;
     public abstract getHoverText(): string;
     public abstract clone(): Layer;
+
+    private initializeAiHandle(): void {
+        this.aiHandle = this.svgComponent.append<SVGGElement>("g")
+            .attr("class", "ai-handle")
+            .style("display", "none")
+            .style("cursor", "pointer")
+            .style("pointer-events", "all"); // 确保可以接收点击事件
+
+        const circle = this.aiHandle.append("circle")
+            .attr("r", 10)
+            .style("pointer-events", "all");
+
+        this.aiHandle.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .text("AI")
+            .style("pointer-events", "none"); // 文本不接收事件，由circle接收
+
+        // 使用D3事件处理，阻止事件冒泡
+        this.aiHandle.on("click.ai-handle", function() {
+            const d3Event = d3.event;
+            if (d3Event) {
+                d3Event.stopPropagation();
+            }
+            console.log("AI圆点被点击，层类型:", this.layerType);
+            if (sendLayerContextToAi) {
+                sendLayerContextToAi(this);
+            }
+        }.bind(this));
+        
+        // 在circle上也绑定事件
+        circle.on("click.ai-handle", function() {
+            const d3Event = d3.event;
+            if (d3Event) {
+                d3Event.stopPropagation();
+            }
+            console.log("AI圆点被点击（circle），层类型:", this.layerType);
+            if (sendLayerContextToAi) {
+                sendLayerContextToAi(this);
+            }
+        }.bind(this));
+        
+        // 阻止mousedown事件冒泡，避免触发拖拽
+        this.aiHandle.on("mousedown.ai-handle", function() {
+            const d3Event = d3.event;
+            if (d3Event) {
+                d3Event.stopPropagation();
+            }
+        }.bind(this));
+        
+        circle.on("mousedown.ai-handle", function() {
+            const d3Event = d3.event;
+            if (d3Event) {
+                d3Event.stopPropagation();
+            }
+        }.bind(this));
+        
+        // 确保AI圆点在DOM中位于最后，这样在视觉上会显示在最上层
+        this.aiHandle.raise();
+    }
+
+    private positionAiHandle(): void {
+        if (!this.aiHandle) {
+            return;
+        }
+        const previousDisplay = this.aiHandle.style("display");
+        this.aiHandle.style("display", "none");
+        const bbox = this.outerBoundingBox();
+        this.aiHandle.style("display", previousDisplay);
+
+        const offset = 12;
+        const x = bbox.right + offset;
+        const y = bbox.top - offset;
+        this.aiHandle.attr("transform", `translate(${x}, ${y})`);
+    }
+
+    private showAiHandle(): void {
+        if (!this.aiHandle) {
+            return;
+        }
+        this.positionAiHandle();
+        this.aiHandle.style("display", "block");
+        // 确保AI圆点在视觉上位于最上层
+        this.aiHandle.raise();
+    }
+
+    private hideAiHandle(): void {
+        if (this.aiHandle) {
+            this.aiHandle.style("display", "none");
+        }
+    }
 
     public moveAction(): void {
         for (const wire of this.wires) {
@@ -94,6 +187,7 @@ export abstract class Layer extends Draggable {
 
         if (windowProperties.selectedElement === this) {
             windowProperties.shapeTextBox.setPosition(this.getPosition());
+            this.positionAiHandle();
         }
     }
 
@@ -116,6 +210,8 @@ export abstract class Layer extends Draggable {
         this.paramBox.style.visibility = "visible";
         this.svgComponent.selectAll("path").style("stroke", "yellow").style("stroke-width", "2");
         this.svgComponent.selectAll(".outerShape").style("stroke", "yellow").style("stroke-width", "2");
+        this.svgComponent.classed("layer-selected", true);
+        this.showAiHandle();
 
         const bbox = this.outerBoundingBox();
         windowProperties.shapeTextBox.setOffset(new Point((bbox.left + bbox.right) / 2, bbox.bottom + 25));
@@ -130,6 +226,8 @@ export abstract class Layer extends Draggable {
         this.paramBox.style.visibility = "hidden";
         this.svgComponent.selectAll("path").style("stroke", null).style("stroke-width", null);
         this.svgComponent.selectAll(".outerShape").style("stroke", null).style("stroke-width", null);
+        this.svgComponent.classed("layer-selected", false);
+        this.hideAiHandle();
         this.selectText.style("visibility", "hidden");
         windowProperties.shapeTextBox.hide();
 
