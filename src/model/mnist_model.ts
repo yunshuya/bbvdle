@@ -12,6 +12,39 @@ import {plotAccuracy,
 import {dataset} from "./data";
 import { model } from "./params_object";
 
+interface IBatchMetric {
+    batch: number;
+    loss: number | null;
+    accuracy: number | null;
+}
+
+interface IEpochMetric {
+    epoch: number;
+    valLoss: number | null;
+    valAccuracy: number | null;
+}
+
+interface ITestMetric {
+    loss: number;
+    accuracy: number;
+}
+
+export interface ITrainingHistory {
+    startedAt: string;
+    finishedAt?: string;
+    dataset: string;
+    hyperparameters: {
+        learningRate: number;
+        batchSize: number;
+        epochs: number;
+        optimizer: string;
+        loss: string;
+    };
+    batchMetrics: IBatchMetric[];
+    epochMetrics: IEpochMetric[];
+    testMetrics?: ITestMetric;
+}
+
 /**
  * Compile and train the given model.
  *
@@ -19,6 +52,7 @@ import { model } from "./params_object";
  */
 
 export let stopTraining = false;
+let trainingHistory: ITrainingHistory | null = null;
 
 export function stopTrainingHandler() {
     stopTraining = true;
@@ -30,12 +64,29 @@ export function resetTrainingFlag() {
     console.log("Training flag reset. Ready to start new training.");
 }
 
+export function getTrainingHistory(): ITrainingHistory | null {
+    return trainingHistory;
+}
+
 export async function train(): Promise<void> {
     // Set up all of the plots
     resetPlotValues();
     setupPlots();
     setupTestResults();
     await dataset.load();
+    trainingHistory = {
+        startedAt: new Date().toISOString(),
+        dataset: dataset.pythonName ?? dataset.constructor.name ?? "unknown",
+        hyperparameters: {
+            learningRate: model.params.learningRate,
+            batchSize: model.params.batchSize,
+            epochs: model.params.epochs,
+            optimizer: model.params.optimizer,
+            loss: model.params.loss,
+        },
+        batchMetrics: [],
+        epochMetrics: [],
+    };
 
     const onIteration = () => showPredictions();
     const optimizer = model.params.getOptimizer();
@@ -95,12 +146,20 @@ export async function train(): Promise<void> {
                   totalLoss = 0;
                   totalAccuracy = 0;
                 }
+                if (trainingHistory) {
+                    const batchMetric: IBatchMetric = {
+                        batch: trainBatchCount,
+                        loss: typeof logs.loss === "number" ? Number(logs.loss.toFixed(4)) : null,
+                        accuracy: typeof logs.acc === "number" ? Number(logs.acc.toFixed(4)) : null,
+                    };
+                    trainingHistory.batchMetrics.push(batchMetric);
+                }
                 if (batch % 60 === 0) {
                   onIteration();
                 }
                 await tf.nextFrame();
             },
-            onEpochEnd: async (_: number, logs: tf.Logs) => {
+            onEpochEnd: async (epoch: number, logs: tf.Logs) => {
 
                 if (stopTraining) {
                     console.log("Training stopped by user.");
@@ -119,6 +178,14 @@ export async function train(): Promise<void> {
                 plotAccuracy(trainBatchCount, logs.val_acc, "validation");
                 showConfusionMatrix();
                 onIteration();
+                if (trainingHistory) {
+                    const epochMetric: IEpochMetric = {
+                        epoch: epoch + 1,
+                        valLoss: typeof logs.val_loss === "number" ? Number(logs.val_loss.toFixed(4)) : null,
+                        valAccuracy: typeof logs.val_acc === "number" ? Number(logs.val_acc.toFixed(4)) : null,
+                    };
+                    trainingHistory.epochMetrics.push(epochMetric);
+                }
                 await tf.nextFrame();
             },
         },
@@ -131,4 +198,11 @@ export async function train(): Promise<void> {
     const vlossBox = document.getElementById("ti_vloss");
     vaccBox.children[1].innerHTML = String(Number((100 * testResult[1].dataSync()[0] ).toFixed(2)));
     vlossBox.children[1].innerHTML = String(Number((testResult[0].dataSync()[0]).toFixed(2)));
+    if (trainingHistory) {
+        trainingHistory.testMetrics = {
+            accuracy: Number(testResult[1].dataSync()[0].toFixed(4)),
+            loss: Number(testResult[0].dataSync()[0].toFixed(4)),
+        };
+        trainingHistory.finishedAt = new Date().toISOString();
+    }
 }

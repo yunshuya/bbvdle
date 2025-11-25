@@ -37,14 +37,28 @@ async function getServerIP() {
   }
 
 // 调用 Python 后端的 REST API 获取回复
-export async function fetchAiResponse(userMessage: string): Promise<string> {
+export async function fetchAiResponse(
+    userMessage: string,
+    selectedLayerInfo?: {
+        layerType: string;
+        params: { [key: string]: any };
+    },
+    taskName?: string,
+    educationContext?: {
+        text: string;
+        mode?: string;
+    }
+): Promise<string> {
     // return "你好，我是AI助手，有什么可以帮助你的吗？"
     const serverIP = await getServerIP();
     const apiUrl = `http://${serverIP}:5000/api/reply`;
 
     try {
         const response = await axios.post(apiUrl, {
-        message: userMessage
+            message: userMessage,
+            selectedLayer: selectedLayerInfo,
+            taskName: taskName,
+            educationContext
         });
         return response.data.reply;
     } catch (error) {

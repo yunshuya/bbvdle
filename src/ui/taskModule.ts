@@ -6,6 +6,11 @@ import { Draggable } from "./shapes/draggable";
 import { Activation,} from "./shapes/activation";
 // taskModule.ts
 let CurrentTask: string = "None";  // 当前学习的任务，全局变量，初始为 "None"
+
+// 导出当前任务，供其他模块使用
+export function getCurrentTask(): string {
+    return CurrentTask;
+}
 let taskSteps: { [key: string]: { step: string, requiredBlock: string, completed: boolean , parentLayer?: string  }[] } = {}; // 定义 taskSteps 类型,parentLayer是可选属性
 export const taskMapping = {
     MLP: "多层感知机",

@@ -308,6 +308,17 @@
 		<div id="aiAssistantDialog" class="ai-dialog hidden">
 			<div class="dialog-header">AI 助手</div>
 			<div class="dialog-content" id="dialogContent"></div>
+			<div id="aiContextAttachment" class="ai-context hidden">
+				<div class="ai-context-main">
+					<div class="ai-context-text"></div>
+					<div id="aiContextActions" class="ai-context-actions hidden">
+						<button class="ai-context-action" data-action="explain">解释说明</button>
+						<button class="ai-context-action" data-action="summarize">概括内容</button>
+						<button class="ai-context-action" data-action="quiz">出题测验</button>
+					</div>
+				</div>
+				<button id="clearAiContext" class="ai-context-remove" title="移除附件">×</button>
+			</div>
 			<div class="dialog-footer">
 				<input type="text" id="dialogInput" placeholder="输入消息..." />
 				<button id="sendButton">发送</button>
@@ -1082,6 +1093,15 @@
 			<div id="exportPython" class="select-option right-option">导出 Python</div>
 			<div id="exportJulia" class="select-option right-option">导出 Julia</div>
 			<div id="copyModel" class="select-option right-option">模型链接</div>
+			<div class="option-dropdown">
+				<div style="float:left">导出训练数据</div>
+				<div style="float:right">〉</div>
+				<div class="dropdown-content right">
+					<div id="exportTrainingHistoryJson" class="option select-option">导出 JSON</div>
+					<div id="exportTrainingHistoryCsv" class="option select-option last-dropdown">导出 CSV</div>
+				</div>
+			</div>
+			<div id="exportTrainingCharts" class="select-option right-option">导出训练图表</div>
 		</div>
 		<div id = 'networkParamshell'>
 
