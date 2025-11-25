@@ -500,6 +500,482 @@ a.overlayLinks {
   text-align: center;
   padding-bottom: 10px; }
 
+/* 做题链接部分样式 */
+.exercise-section {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #806cb7;
+}
+
+.exercise-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    font-family: Helvetica;
+}
+
+.exercise-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exercise-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #806cb7;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-family: Helvetica;
+    font-size: 16px;
+    text-align: center;
+}
+
+.exercise-link:hover {
+    background-color: #6a5a9c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.exercise-link.completed {
+    background-color: #28a745;
+    position: relative;
+}
+
+.exercise-link.completed::after {
+    content: " ✓";
+    font-weight: bold;
+}
+
+.exercise-progress {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+    font-family: Helvetica;
+}
+/* 做题对话框样式 */
+.exercise-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+}
+
+.exercise-dialog-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.exercise-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.exercise-dialog-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.exercise-dialog-footer {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.exercise-dialog-footer button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#submitExercise {
+    background-color: #806cb7;
+    color: white;
+}
+
+#closeExercise {
+    background-color: #6c757d;
+    color: white;
+}
+
+.question {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.options label {
+    display: block;
+    margin: 8px 0;
+    cursor: pointer;
+}
+
+.options input {
+    margin-right: 8px;
+}
+/* 可折叠面板样式 */
+.exercise-toggle {
+    cursor: pointer;
+    position: relative;
+    padding-right: 30px;
+    user-select: none;
+}
+
+.exercise-toggle::after {
+    content: '▶';
+    position: absolute;
+    right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.exercise-toggle.expanded::after {
+    transform: rotate(90deg);
+}
+
+.exercise-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.exercise-content.expanded {
+    max-height: 2000px; /* 足够大的值确保内容完全展开 */
+}
+
+/* 题目面板样式 */
+.questions-panel {
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.question-category {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.question-category:last-child {
+    border-bottom: none;
+}
+
+.question-toggle {
+    cursor: pointer;
+    margin: 0;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.question-toggle:hover {
+    background-color: #e9ecef;
+}
+
+.question-toggle::after {
+    content: '▶';
+    position: absolute;
+    right: 20px;
+    transition: transform 0.3s ease;
+}
+
+.question-toggle.expanded::after {
+    transform: rotate(90deg);
+}
+
+.questions-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background-color: white;
+}
+
+.questions-content.expanded {
+    max-height: 2000px;
+}
+
+/* 新的卡片式练习布局样式 */
+.learning-exercises {
+    margin: 30px 0;
+}
+
+.exercise-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.exercise-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #e0e0e0;
+}
+
+.exercise-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.exercise-card.completed {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
+}
+
+.card-header {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+}
+
+.card-header h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-text {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #28a745;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content p {
+    margin: 0 0 15px 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.start-exercise-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+}
+
+.start-exercise-btn:hover {
+    transform: scale(1.05);
+}
+
+.card-questions {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.close-exercise-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.close-exercise-btn:hover {
+    background: #5a6268;
+}
+
+/* 分数显示样式 */
+.score-display {
+    background: #e8f5e8;
+    border: 1px solid #28a745;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    text-align: center;
+    color: #155724;
+}
+
+.score-display div:first-child {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.score-display div:last-child {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .exercise-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .exercise-card {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+
+/* 题目样式 */
+.question {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.question:last-child {
+    border-bottom: none;
+}
+
+.question p {
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.options label {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.options label:hover {
+    background-color: #e9ecef;
+}
+
+.options input {
+    margin-right: 10px;
+}
+
+.submit-btn {
+    margin: 15px 20px;
+    padding: 10px 20px;
+    background-color: #806cb7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #6a5a9c;
+}
+
+/* 答案反馈样式 */
+.answer-feedback {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+}
+
+.answer-feedback.correct {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.answer-feedback.incorrect {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.score-display {
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    margin: 10px 0;
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
 #error {
   width: 200px;
   position: absolute;

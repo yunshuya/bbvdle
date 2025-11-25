@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("resize", resizeMiddleSVG);
     window.addEventListener("resize", setupPlots);
+    initializeExerciseSystem();
 
     resizeMiddleSVG();
 
@@ -167,6 +168,450 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setupEducationSelectionWatcher();
 });
+
+// 做题系统初始化
+function initializeExerciseSystem(): void {
+    // 使用事件委托来处理动态加载的内容
+    document.addEventListener('click', function(e) {
+        const target = e.target as HTMLElement;
+
+        // 处理做题链接点击
+        if (target.classList.contains('exercise-link') || target.closest('.exercise-link')) {
+            e.preventDefault();
+            const link = target.classList.contains('exercise-link') ? target : target.closest('.exercise-link') as HTMLElement;
+            const exerciseId = link.getAttribute('data-exercise');
+            if (exerciseId) {
+                startExercise(exerciseId);
+            }
+        }
+
+        // 处理主标题折叠功能
+        if (target.classList.contains('exercise-toggle') || target.closest('.exercise-toggle')) {
+            const toggle = target.classList.contains('exercise-toggle') ? target : target.closest('.exercise-toggle') as HTMLElement;
+            const content = toggle.nextElementSibling as HTMLElement;
+            if (content && content.classList.contains('exercise-content')) {
+                toggle.classList.toggle('expanded');
+                content.classList.toggle('expanded');
+            }
+        }
+
+        // 处理题目分类折叠功能
+        if (target.classList.contains('question-toggle') || target.closest('.question-toggle')) {
+            const toggle = target.classList.contains('question-toggle') ? target : target.closest('.question-toggle') as HTMLElement;
+            const content = toggle.nextElementSibling as HTMLElement;
+            if (content && content.classList.contains('questions-content')) {
+                toggle.classList.toggle('expanded');
+                content.classList.toggle('expanded');
+            }
+        }
+
+        // 处理提交按钮
+        if (target.classList.contains('submit-btn') || target.closest('.submit-btn')) {
+            const btn = target.classList.contains('submit-btn') ? target : target.closest('.submit-btn') as HTMLElement;
+            const category = btn.getAttribute('data-category');
+            if (category) {
+                submitCategoryAnswers(category);
+            }
+        }
+
+        // 处理开始练习按钮
+        if (target.classList.contains('start-exercise-btn') || target.closest('.start-exercise-btn')) {
+            e.preventDefault();
+            const btn = target.classList.contains('start-exercise-btn') ? target : target.closest('.start-exercise-btn') as HTMLElement;
+            const card = btn.closest('.exercise-card') as HTMLElement;
+            const questions = card.querySelector('.card-questions') as HTMLElement;
+            const content = card.querySelector('.card-content') as HTMLElement;
+
+            if (questions && content) {
+                content.style.display = 'none';
+                questions.style.display = 'block';
+                questions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // 处理收起练习按钮
+        if (target.classList.contains('close-exercise-btn') || target.closest('.close-exercise-btn')) {
+            e.preventDefault();
+            const btn = target.classList.contains('close-exercise-btn') ? target : target.closest('.close-exercise-btn') as HTMLElement;
+            const card = btn.closest('.exercise-card') as HTMLElement;
+            const questions = card.querySelector('.card-questions') as HTMLElement;
+            const content = card.querySelector('.card-content') as HTMLElement;
+
+            if (questions && content) {
+                questions.style.display = 'none';
+                content.style.display = 'block';
+            }
+        }
+    });
+
+    // 加载用户进度
+    loadUserProgress();
+}
+// 提交分类答案
+function submitCategoryAnswers(category: string): void {
+    // 首先尝试找到卡片式布局的容器
+    let questionsContainer = document.querySelector(`.exercise-card[data-exercise="${category}"] .card-questions`);
+
+    // 如果找不到卡片式布局，则尝试传统布局
+    if (!questionsContainer) {
+        questionsContainer = document.querySelector(`[data-category="${category}"]`)?.closest('.questions-content');
+    }
+
+    if (!questionsContainer) return;
+
+    const questions = questionsContainer.querySelectorAll('.question');
+    let score = 0;
+    const totalQuestions = questions.length;
+
+    // 定义正确答案（在实际应用中应该从服务器获取）
+    const correctAnswers = getCorrectAnswers(category);
+
+    questions.forEach((question, index) => {
+        const questionNumber = index + 1;
+        const selectedOption = question.querySelector('input[type="radio"]:checked') as HTMLInputElement;
+
+        // 移除之前的反馈
+        const existingFeedback = question.querySelector('.answer-feedback');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+
+        const feedback = document.createElement('div');
+
+        if (selectedOption) {
+            const userAnswer = selectedOption.value;
+            const correctAnswer = correctAnswers[questionNumber];
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedback.className = 'answer-feedback correct';
+                feedback.textContent = `✓ 正确！正确答案是 ${correctAnswer}`;
+            } else {
+                feedback.className = 'answer-feedback incorrect';
+                feedback.textContent = `✗ 错误。正确答案是 ${correctAnswer}`;
+            }
+        } else {
+            feedback.className = 'answer-feedback incorrect';
+            feedback.textContent = `⚠ 请选择答案。正确答案是 ${correctAnswers[questionNumber]}`;
+        }
+
+        question.appendChild(feedback);
+        feedback.style.display = 'block';
+    });
+
+    // 显示分数
+    showScore(questionsContainer, score, totalQuestions, category);
+}
+
+// 获取正确答案（模拟数据）
+function getCorrectAnswers(category: string): { [key: number]: string } {
+    const answers: { [key: string]: { [key: number]: string } } = {
+        'overview_quiz': {
+            1: 'B', 2: 'D', 3: 'B', 4: 'C', 5: 'A'
+        },
+        'basic_concepts': {
+            1: 'A', 2: 'C', 3: 'B', 4: 'D', 5: 'B'
+        },
+        'dl_fundamentals': {
+            1: 'B', 2: 'B', 3: 'C', 4: 'B', 5: 'B'
+        },
+        'convolution_quiz': {
+            1: 'B', 2: 'A', 3: 'C', 4: 'D', 5: 'B'
+        },
+        // 可以继续添加其他分类的答案...
+    };
+
+    return answers[category] || {};
+}
+
+// 显示分数
+function showScore(container: Element, score: number, total: number, category: string): void {
+    // 移除之前的分数显示
+    const existingScore = container.querySelector('.score-display');
+    if (existingScore) {
+        existingScore.remove();
+    }
+
+    const scoreDisplay = document.createElement('div');
+    scoreDisplay.className = 'score-display';
+    const percentage = Math.round((score / total) * 100);
+
+    scoreDisplay.innerHTML = `
+        <div>得分: ${score}/${total} (${percentage}%)</div>
+        <div>${getScoreMessage(percentage)}</div>
+    `;
+
+    // 查找正确的插入位置
+    const submitBtn = container.querySelector('.submit-btn');
+    const cardActions = container.querySelector('.card-actions');
+
+    if (cardActions) {
+        // 卡片布局：在操作按钮前插入
+        cardActions.insertBefore(scoreDisplay, cardActions.firstChild);
+    } else if (submitBtn) {
+        // 传统布局：在提交按钮前插入
+        container.insertBefore(scoreDisplay, submitBtn);
+    }
+
+    // 更新卡片状态和进度
+    updateCardProgress(category, percentage);
+
+    // 如果得分超过80%，标记为已完成
+    if (percentage >= 80) {
+        markExerciseAsCompleted(category);
+    }
+}
+
+// 更新卡片进度显示
+function updateCardProgress(category: string, percentage: number): void {
+    const card = document.querySelector(`.exercise-card[data-exercise="${category}"]`) as HTMLElement;
+    if (!card) return;
+
+    const progressText = card.querySelector('.progress-text') as HTMLElement;
+    const progressFill = card.querySelector('.progress-fill') as HTMLElement;
+
+    if (progressText && progressFill) {
+        if (percentage >= 80) {
+            progressText.textContent = '已完成';
+            progressText.style.color = '#28a745';
+            card.classList.add('completed');
+        } else {
+            progressText.textContent = `${percentage}%`;
+            progressText.style.color = '#ffc107';
+        }
+
+        progressFill.style.width = `${percentage}%`;
+
+        if (percentage >= 80) {
+            progressFill.style.background = '#28a745';
+        } else if (percentage >= 60) {
+            progressFill.style.background = '#ffc107';
+        } else {
+            progressFill.style.background = '#dc3545';
+        }
+    }
+}
+
+// 获取分数消息
+function getScoreMessage(percentage: number): string {
+    if (percentage >= 90) return '优秀！';
+    if (percentage >= 80) return '很好！';
+    if (percentage >= 70) return '不错！';
+    if (percentage >= 60) return '及格';
+    return '需要继续努力';
+}
+// 开始做题
+function startExercise(exerciseId: string): void {
+    console.log('开始做题:', exerciseId);
+
+    // 这里可以跳转到具体的做题页面，或者在当前页面显示题目
+    // 目前先实现一个简单的模拟功能
+
+    // 显示做题对话框
+    showExerciseDialog(exerciseId);
+
+    // 更新用户进度
+    updateUserProgress(exerciseId);
+}
+
+// 显示做题对话框
+function showExerciseDialog(exerciseId: string): void {
+    // 创建或显示做题对话框
+    let exerciseDialog = document.getElementById('exerciseDialog');
+
+    if (!exerciseDialog) {
+        // 创建做题对话框
+        exerciseDialog = document.createElement('div');
+        exerciseDialog.id = 'exerciseDialog';
+        exerciseDialog.className = 'exercise-dialog';
+        exerciseDialog.innerHTML = `
+            <div class="exercise-dialog-content">
+                <div class="exercise-dialog-header">
+                    <h3>练习题</h3>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="exercise-dialog-body" id="exerciseContent">
+                    <!-- 题目内容将动态加载到这里 -->
+                </div>
+                <div class="exercise-dialog-footer">
+                    <button id="submitExercise">提交答案</button>
+                    <button id="closeExercise">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(exerciseDialog);
+
+        // 添加事件监听
+        exerciseDialog.querySelector('.close-btn').addEventListener('click', () => {
+            exerciseDialog.style.display = 'none';
+        });
+
+        exerciseDialog.querySelector('#closeExercise').addEventListener('click', () => {
+            exerciseDialog.style.display = 'none';
+        });
+
+        exerciseDialog.querySelector('#submitExercise').addEventListener('click', () => {
+            submitExercise(exerciseId);
+        });
+    }
+
+    // 根据exerciseId加载不同的题目
+    loadExerciseContent(exerciseId);
+
+    // 显示对话框
+    exerciseDialog.style.display = 'block';
+}
+
+// 加载题目内容
+function loadExerciseContent(exerciseId: string): void {
+    const exerciseContent = document.getElementById('exerciseContent');
+    if (!exerciseContent) return;
+
+    // 根据不同的练习ID显示不同的题目
+    const exercises = {
+        'overview_quiz': {
+            title: '深度学习概述测试',
+            questions: [
+                {
+                    question: '深度学习与传统机器学习的主要区别是什么？',
+                    type: 'multiple',
+                    options: [
+                        'A. 深度学习需要更多的数据',
+                        'B. 深度学习能够自动学习特征',
+                        'C. 深度学习模型更简单',
+                        'D. 深度学习不需要调参'
+                    ],
+                    answer: 'B'
+                }
+            ]
+        },
+        'convolution_quiz': {
+            title: '卷积网络知识测试',
+            questions: [
+                {
+                    question: '卷积操作的主要作用是什么？',
+                    type: 'multiple',
+                    options: [
+                        'A. 降低计算复杂度',
+                        'B. 提取局部特征',
+                        'C. 增加模型深度',
+                        'D. 防止过拟合'
+                    ],
+                    answer: 'B'
+                }
+            ]
+        },
+        // 可以继续添加更多题目...
+    };
+
+    // @ts-ignore
+    const exercise = exercises[exerciseId];
+    if (exercise) {
+        let content = `<h4>${exercise.title}</h4>`;
+
+        exercise.questions.forEach((q: any, index: number) => {
+            content += `
+                <div class="question">
+                    <p><strong>问题 ${index + 1}:</strong> ${q.question}</p>
+                    <div class="options">
+                        ${q.options.map((opt: string) => `
+                            <label>
+                                <input type="radio" name="question${index}" value="${opt.charAt(0)}">
+                                ${opt}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        exerciseContent.innerHTML = content;
+    } else {
+        exerciseContent.innerHTML = '<p>题目加载中...</p>';
+    }
+}
+
+// 提交答案
+function submitExercise(exerciseId: string): void {
+    // 这里可以实现答案验证逻辑
+    alert('答案已提交！在实际应用中，这里会验证答案并给出反馈。');
+
+    // 标记为已完成
+    markExerciseAsCompleted(exerciseId);
+
+    // 关闭对话框
+    const exerciseDialog = document.getElementById('exerciseDialog');
+    if (exerciseDialog) {
+        exerciseDialog.style.display = 'none';
+    }
+}
+
+// 标记练习为已完成
+function markExerciseAsCompleted(exerciseId: string): void {
+    const exerciseLink = document.querySelector(`.exercise-link[data-exercise="${exerciseId}"]`);
+    if (exerciseLink) {
+        exerciseLink.classList.add('completed');
+        exerciseLink.innerHTML = exerciseLink.textContent + ' ✓';
+    }
+
+    // 保存到本地存储
+    saveUserProgress(exerciseId);
+}
+
+// 保存用户进度
+function saveUserProgress(exerciseId: string): void {
+    let progress = JSON.parse(localStorage.getItem('userExerciseProgress') || '{}');
+    progress[exerciseId] = true;
+    localStorage.setItem('userExerciseProgress', JSON.stringify(progress));
+
+    updateProgressDisplay();
+}
+
+// 加载用户进度
+function loadUserProgress(): void {
+    const progress = JSON.parse(localStorage.getItem('userExerciseProgress') || '{}');
+
+    Object.keys(progress).forEach(exerciseId => {
+        if (progress[exerciseId]) {
+            markExerciseAsCompleted(exerciseId);
+            // 更新卡片为完成状态
+            updateCardProgress(exerciseId, 100);
+        }
+    });
+
+    updateProgressDisplay();
+}
+
+// 更新进度显示
+function updateProgressDisplay(): void {
+    const progress = JSON.parse(localStorage.getItem('userExerciseProgress') || '{}');
+    const completedCount = Object.keys(progress).length;
+    const totalCount = document.querySelectorAll('.exercise-link').length;
+
+    // 可以在页面某个位置显示总体进度
+    const progressElement = document.getElementById('overallProgress');
+    if (!progressElement) {
+        // 创建进度显示元素
+        const progressElement = document.createElement('div');
+        progressElement.id = 'overallProgress';
+        progressElement.className = 'exercise-progress';
+        progressElement.innerHTML = `学习进度: ${completedCount}/${totalCount}`;
+
+        // 插入到教育页面顶部
+        const educationTab = document.getElementById('educationTab');
+        if (educationTab) {
+            educationTab.insertBefore(progressElement, educationTab.firstChild);
+        }
+    } else {
+        progressElement.innerHTML = `学习进度: ${completedCount}/${totalCount}`;
+    }
+}
+
+// 更新用户进度（在开始做题时调用）
+function updateUserProgress(exerciseId: string): void {
+    // 可以记录用户开始做题的时间等
+    console.log(`用户开始练习: ${exerciseId} at ${new Date().toLocaleString()}`);
+}
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
     for (const element of document.getElementById(categoryId).getElementsByClassName("option")) {
