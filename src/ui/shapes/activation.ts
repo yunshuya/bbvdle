@@ -148,4 +148,8 @@ export class Softmax extends Activation {
     }
 
     public getHoverText(): string { return "softmax"; }
+    
+    public clone(): Softmax {
+        return new Softmax(this.getPosition());
+    }
 }

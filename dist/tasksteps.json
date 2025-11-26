@@ -8,7 +8,7 @@
     { "step": "以上步骤描述了一个隐藏层。若需增加隐藏层，请重复上述操作。", "requiredBlock": "None", "completed": false }
   ],
   "CNN": [
-    { "step": "在积木块平台的‘输入’选项中，拖拽一个输入积木块，设定输入形状。", "requiredBlock": "input", "completed": false },
+    { "step": "模板中自动生成‘Input’层和‘Output’层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集。", "requiredBlock": "input", "completed": false },
     { "step": "找到‘Convolution’积木块，将其拖动并放置在‘Input’块之后，设置卷积核的数量和大小，并选择激活函数。", "requiredBlock": "conv2d", "completed": false },
     { "step": "选择‘Max Pooling’积木块，将其连接到‘Convolution’层之后，并设置池化窗口大小。", "requiredBlock": "maxpooling2d", "completed": false },
     { "step": "根据需要重复添加‘Convolution’层和‘Max Pooling’层。", "requiredBlock": "None", "completed": false },
@@ -18,13 +18,13 @@
     { "step": "连接‘测试模型’积木块，查看模型在测试集上的准确率，并通过图表积木块显示训练过程中的损失和准确率变化。", "requiredBlock": "None", "completed": false }
   ],
   "RNN": [
-    { "step": "在积木块平台的‘输入’选项中，拖拽一个输入积木块，设定输入形状。", "requiredBlock": "Input", "completed": false },
-    { "step": "找到‘Recurrent’积木块，将其拖动并放置在‘Input’块之后，设置单元数量和激活函数。", "requiredBlock": "Recurrent", "completed": false },
-    { "step": "选择‘Dropout’积木块，将其连接到‘Recurrent’层之后，并设置dropout比例。", "requiredBlock": "Dropout", "completed": false },
-    { "step": "根据需要重复添加‘Recurrent’层和‘Dropout’层。", "requiredBlock": "Recurrent", "completed": false },
-    { "step": "选择‘Dense’积木块，将其连接到最后一个‘Recurrent’或‘Dropout’层之后，并设置神经元数量和激活函数。", "requiredBlock": "Dense", "completed": false },
-    { "step": "添加‘Output’积木块，连接到‘Dense’层之后，并设置类别数和激活函数。", "requiredBlock": "Output", "completed": false },
-    { "step": "在‘训练设置’中，选择优化器、损失函数，设置批次大小和迭代次数，并添加‘训练模型’积木块。", "requiredBlock": "Train", "completed": false },
-    { "step": "连接‘测试模型’积木块，查看模型在测试集上的准确率，并通过图表积木块显示训练过程中的损失和准确率变化。", "requiredBlock": "Test", "completed": false }
+    { "step": "模板中自动生成'Input'层和'Output'层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集MNIST。", "requiredBlock": "input", "completed": false },
+    { "step": "找到'Reshape'积木块，将其拖动并放置在'Input'块之后，设置Target Shape 1为28，Target Shape 2为28，将图像数据转换为序列格式。", "requiredBlock": "reshape", "completed": false },
+    { "step": "找到'Recurrent'积木块，将其拖动并放置在'Reshape'块之后，设置单元数量为64，激活函数为tanh。", "requiredBlock": "recurrent", "completed": false, "parentLayer": "reshape" },
+    { "step": "选择'Dropout'积木块，将其连接到'Recurrent'层之后，并设置dropout比例为0.2以防止过拟合。", "requiredBlock": "dropout", "completed": false },
+    { "step": "根据需要可以重复添加'Recurrent'层和'Dropout'层来构建深层RNN网络。", "requiredBlock": "recurrent", "completed": false },
+    { "step": "选择'Dense'积木块，将其连接到最后一个'Dropout'层之后，设置神经元数量为10（对应10个类别）。注意：Dense层不需要激活函数，因为Output层会自动应用softmax。", "requiredBlock": "dense", "completed": false },
+    { "step": "在'训练设置'中，选择优化器（如Adam）、损失函数（如categoricalCrossentropy），设置批次大小为64，迭代次数为10，并点击'训练'按钮。", "requiredBlock": "train", "completed": false },
+    { "step": "训练完成后，可以在'结果可视化'标签页查看模型在测试集上的准确率，并通过图表查看训练过程中的损失和准确率变化。", "requiredBlock": "test", "completed": false }
   ]
 }

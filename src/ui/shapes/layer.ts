@@ -288,12 +288,18 @@ export abstract class Layer extends Draggable {
                 const selectElement: HTMLSelectElement =  line.children[1].children[0] as HTMLSelectElement;
                 params[name] = selectElement.options[selectElement.selectedIndex].value;
             } else {
-                const value = ( line.children[1] as HTMLInputElement).value;
-                // Need to not parse as integer for float parameters
-                if ((defaultParams[name].toString()).indexOf(".") >= 0) {
-                    params[name] = parseFloat(value);
+                const inputElement = line.children[1] as HTMLInputElement;
+                // 处理checkbox类型
+                if (inputElement.type === "checkbox") {
+                    params[name] = inputElement.checked;
                 } else {
-                    params[name] = parseString(value);
+                    const value = inputElement.value;
+                    // Need to not parse as integer for float parameters
+                    if ((defaultParams[name].toString()).indexOf(".") >= 0) {
+                        params[name] = parseFloat(value);
+                    } else {
+                        params[name] = parseString(value);
+                    }
                 }
             }
         }
@@ -309,12 +315,18 @@ export abstract class Layer extends Draggable {
                 const selectElement: HTMLSelectElement =  line.children[1].children[0] as HTMLSelectElement;
                 params[name] = selectElement.options[selectElement.selectedIndex].value;
             } else {
-                const value = ( line.children[1] as HTMLInputElement).value;
-                // Need to not parse as integer for float parameters
-                if ((defaultParams[name].toString()).indexOf(".") >= 0) {
-                    params[name] = parseFloat(value);
+                const inputElement = line.children[1] as HTMLInputElement;
+                // 处理checkbox类型
+                if (inputElement.type === "checkbox") {
+                    params[name] = inputElement.checked;
                 } else {
-                    params[name] = parseString(value);
+                    const value = inputElement.value;
+                    // Need to not parse as integer for float parameters
+                    if ((defaultParams[name].toString()).indexOf(".") >= 0) {
+                        params[name] = parseFloat(value);
+                    } else {
+                        params[name] = parseString(value);
+                    }
                 }
             }
         }

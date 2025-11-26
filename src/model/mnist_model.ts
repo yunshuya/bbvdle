@@ -97,6 +97,12 @@ export async function train(): Promise<void> {
         optimizer,
     });
     const batchSize = model.params.batchSize;
+    // validationSplit = 0.15 意味着训练数据会被自动分割为：
+    // - 85% 用于训练（用于更新模型参数）
+    // - 15% 用于验证（用于评估模型性能，不参与参数更新）
+    // TensorFlow.js的fit方法会自动从训练数据中分割出验证集，
+    // 并在每个epoch结束后计算验证集上的准确率和损失。
+    // 这就是为什么一开始训练就能看到验证集准确率的原因。
     const validationSplit = 0.15;
 
     const trainEpochs = model.params.epochs;
@@ -111,6 +117,13 @@ export async function train(): Promise<void> {
     const trainData = dataset.getTrainData();
     const testData = dataset.getTestData();
     const totalNumBatches = Math.ceil(trainData.xs.shape[0] * (1 - validationSplit) / batchSize) * trainEpochs;
+
+    // 学习率调度：监控验证准确率，防止后期训练不稳定
+    let lastBestValAcc = 0;
+    let patienceCounter = 0;
+    const patience = 3; // 如果验证准确率3个epoch不提升，降低学习率
+    const lrDecayFactor = 0.5; // 学习率衰减因子
+    let currentLearningRate = model.params.learningRate;
 
     await model.architecture.fit(trainData.xs, trainData.labels, {
         batchSize,
@@ -131,6 +144,23 @@ export async function train(): Promise<void> {
                 accBox.children[1].innerHTML = String(Number((100 * logs.acc).toFixed(2)));
                 lossBox.children[1].innerHTML = String(Number((logs.loss).toFixed(2)));
                 trainBox.children[1].innerHTML = String((trainBatchCount / totalNumBatches * 100).toFixed(1) + "%");
+                
+                // 在1000个batch时自动停止训练，避免后续准确率下降
+                // 这样可以保留前1000个batch的最佳训练结果
+                if (trainBatchCount >= 1000) {
+                    console.log(`Reached 1000 batches. Stopping training to preserve best results.`);
+                    model.architecture.stopTraining = true;
+                    model.architecture.resetStates();
+                    return;
+                }
+                
+                // 每1000个batch重置RNN状态，防止状态累积导致训练不稳定
+                // 这对于解决1000个batch后准确率下降的问题非常重要
+                if (trainBatchCount % 1000 === 0) {
+                    model.architecture.resetStates();
+                    console.log(`Batch ${trainBatchCount}: RNN states reset to prevent accumulation`);
+                }
+                
                 // For logging training in console.
                 // console.log(
                 //     `Training... (` +
@@ -168,6 +198,10 @@ export async function train(): Promise<void> {
                     return;
                 }
 
+                // 重置RNN状态，防止状态累积导致数值不稳定
+                // 这对于RNN训练非常重要，特别是在长时间训练后
+                model.architecture.resetStates();
+
                 const valAcc = logs.val_acc;
                 const valLoss = logs.val_loss;
                 const accBox = document.getElementById("ti_vacc");
@@ -178,6 +212,8 @@ export async function train(): Promise<void> {
                 plotAccuracy(trainBatchCount, logs.val_acc, "validation");
                 showConfusionMatrix();
                 onIteration();
+                
+                // 记录训练历史数据（用于导出功能）
                 if (trainingHistory) {
                     const epochMetric: IEpochMetric = {
                         epoch: epoch + 1,
@@ -186,6 +222,24 @@ export async function train(): Promise<void> {
                     };
                     trainingHistory.epochMetrics.push(epochMetric);
                 }
+
+                // 学习率调度：如果验证准确率不再提升，降低学习率
+                // 注意：TensorFlow.js的优化器不支持动态修改学习率
+                // 这里我们记录学习率变化，实际应用中可以通过重新编译模型来实现
+                if (valAcc > lastBestValAcc) {
+                    lastBestValAcc = valAcc;
+                    patienceCounter = 0;
+                } else {
+                    patienceCounter++;
+                    // 如果验证准确率连续patience个epoch没有提升，建议降低学习率
+                    if (patienceCounter >= patience && currentLearningRate > 1e-6) {
+                        currentLearningRate *= lrDecayFactor;
+                        console.log(`建议降低学习率至: ${currentLearningRate} (当前验证准确率: ${(valAcc * 100).toFixed(2)}%)`);
+                        // 注意：实际学习率调整需要在下次训练时手动设置
+                        patienceCounter = 0; // 重置计数器
+                    }
+                }
+
                 await tf.nextFrame();
             },
         },

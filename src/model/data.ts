@@ -21,7 +21,7 @@ export abstract class ImageData {
     public readonly IMAGE_HEIGHT: number;
     public readonly IMAGE_WIDTH: number;
     public readonly IMAGE_CHANNELS: number;
-    public readonly IMAGE_SIZE: number = this.IMAGE_HEIGHT * this.IMAGE_WIDTH * this.IMAGE_CHANNELS;
+    public readonly IMAGE_SIZE: number;
     public readonly NUM_CLASSES: number;
     public pythonName: string;
 
@@ -35,7 +35,7 @@ export abstract class ImageData {
     protected testLabels: Tensor<Rank>;
     protected datasetName: string;
 
-    public abstract async load(): Promise<void>;
+    public abstract load(): Promise<void>;
 
     /**
      * Get all training data as a data tensor and a labels tensor.
@@ -128,14 +128,19 @@ export class Cifar10Data extends ImageData {
     }
 
     private static instance: Cifar10Data;
-    public IMAGE_HEIGHT: number = 32;
-    public IMAGE_WIDTH: number = 32;
-    public IMAGE_CHANNELS: number = 3;
-    public IMAGE_SIZE: number = this.IMAGE_HEIGHT * this.IMAGE_WIDTH * this.IMAGE_CHANNELS;
-    public NUM_CLASSES: number = 10;
+    public readonly IMAGE_HEIGHT: number = 32;
+    public readonly IMAGE_WIDTH: number = 32;
+    public readonly IMAGE_CHANNELS: number = 3;
+    public readonly IMAGE_SIZE: number;
+    public readonly NUM_CLASSES: number = 10;
 
     public datasetName: string = "CIFAR-10";
     public pythonName: string = "cifar10";
+
+    constructor() {
+        super();
+        this.IMAGE_SIZE = this.IMAGE_HEIGHT * this.IMAGE_WIDTH * this.IMAGE_CHANNELS;
+    }
 
     public readonly classStrings: string[] =
         ["Airplane", "Automobile", "Bird", "Cat", "Deer", "Dog", "Frog", "Horse", "Ship", "Truck"];
@@ -147,19 +152,45 @@ export class Cifar10Data extends ImageData {
 
         this.toggleLoadingOverlay();
 
-        const data = new Cifar10();
-        await data.load();
-
-        const {xs: trainX, ys: trainY} = data.nextTrainBatch(15000);
-        const {xs: testX, ys: testY} = data.nextTestBatch(1500);
-        this.trainImages = trainX as unknown as Tensor<Rank.R4>;
-        this.trainLabels = trainY as unknown as Tensor<Rank.R4>;
-        this.testImages = testX as unknown as Tensor<Rank.R2>;
-        this.testLabels = testY as unknown as Tensor<Rank.R2>;
-
-        this.dataLoaded = true;
-
-        document.getElementById("loadingDataTab").style.display = "none";
+        try {
+            // Ensure TensorFlow.js backend is ready
+            await tf.ready();
+            
+            const data = new Cifar10();
+            await data.load();
+            
+            const {xs: trainX, ys: trainY} = data.nextTrainBatch(15000);
+            const {xs: testX, ys: testY} = data.nextTestBatch(1500);
+            
+            // Ensure tensors are properly created and convert them to the correct format
+            if (trainX && trainY && testX && testY) {
+                // Convert to proper tensor format using tf.tensor API
+                // CIFAR-10 train data: 15000 samples of 32x32x3 images
+                const trainXData = await trainX.data();
+                this.trainImages = tf.tensor4d(trainXData, [15000, 32, 32, 3]);
+                
+                // CIFAR-10 train labels: 15000 samples with 10 classes
+                const trainYData = await trainY.data();
+                this.trainLabels = tf.tensor2d(trainYData, [15000, 10]);
+                
+                // CIFAR-10 test data: 1500 samples of 32x32x3 images
+                const testXData = await testX.data();
+                this.testImages = tf.tensor4d(testXData, [1500, 32, 32, 3]);
+                
+                // CIFAR-10 test labels: 1500 samples with 10 classes
+                const testYData = await testY.data();
+                this.testLabels = tf.tensor2d(testYData, [1500, 10]);
+                
+                this.dataLoaded = true;
+            } else {
+                throw new Error("Failed to load CIFAR-10 data: tensors are undefined");
+            }
+        } catch (error) {
+            console.error("Error loading CIFAR-10 dataset:", error);
+            throw new Error(`Failed to load CIFAR-10 dataset: ${error.message}`);
+        } finally {
+            document.getElementById("loadingDataTab").style.display = "none";
+        }
     }
 
 }
