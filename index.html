@@ -249,8 +249,7 @@
 
 				<div class = 'option select-option education-option' data-optionValue = 'Overview'> 概述 </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Overfitting'> Overfitting</div>
-				<div class = 'option select-option education-option' data-optionValue = 'ResNets'>ResNets</div>
-			</div>
+				</div>
 
 			<div id = 'educationStory' class = 'category'>
 				<div class = 'categoryTitle' data-expanded = 'true'>
@@ -263,12 +262,15 @@
 						神经网络层
 					</div>
 				</div>
-
+                <div class = 'option select-option education-option' data-optionValue = 'ResNets'>ResNets</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Add'>Add</div>
+				<div class = 'option select-option education-option' data-optionValue = 'BatchNorm'>Batch Norm</div>
 				<div class = 'option select-option education-option' data-optionValue = 'Concatenate'> Concatenate </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Convolution'> Convolution </div>
+				<div class = 'option select-option education-option' data-optionValue = 'MaxPooling'>Max Pooling</div>
 				<div class = 'option select-option education-option' data-optionValue = 'Dropout'> Dropout </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Flatten'> Flatten </div>
-
+				<div class = 'option select-option education-option' data-optionValue = 'Dense'>Dense</div>
 			</div>
 			<div id = 'educationModel' class = 'category'>
 				<div class = 'categoryTitle data-expanded' = 'true'>
@@ -286,6 +288,47 @@
 				<div class = 'option select-option education-option' data-optionValue = 'newCNN'> 现代卷积神经网络 </div>
 				<div class = 'option select-option education-option' data-optionValue = 'RNN'> 循环神经网络 </div>
 				<div class = 'option select-option education-option' data-optionValue = 'newRNN'> 现代循环神经网络 </div>
+                <div class = 'option select-option education-option' data-optionValue = 'Transformer'>Transformer</div>
+			</div>
+
+
+            <div id = 'educationAct' class = 'category'>
+				<div class = 'categoryTitle data-expanded' = 'true'>
+					<div class = 'expander'>
+						<svg height="24px" width="24px">
+							<path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" style="fill:#FFFFFF;"></path>
+						</svg>
+					</div>
+					<div class='categoryTitleText'>
+						激活函数
+					</div>
+				</div>
+				<div class = 'option select-option education-option' data-optionValue = 'ReLU'> 
+					 <a href="#educationReLU" style="text-decoration: none; color: inherit; display: block;">
+                      ReLU
+                     </a>
+				</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Sigmoid'> 
+					 <a href="#educationSigmoid" style="text-decoration: none; color: inherit; display: block;">
+                     Sigmoid
+                     </a>
+				</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Tanh'>
+					 <a href="#educationTanh" style="text-decoration: none; color: inherit; display: block;">
+                     Tanh
+                    </a>
+				</div>
+                <div class = 'option select-option education-option' data-optionValue = 'Softmax'>
+					 <a href="#educationSoftmax" style="text-decoration: none; color: inherit; display: block;">
+                     Softmax
+                    </a>
+				</div>
+                <div class = 'option select-option education-option' data-optionValue = 'empty'>
+					 <a href="#educationempty" style="text-decoration: none; color: inherit; display: block;">
+                         
+                    </a>
+				</div>
+	
 			</div>
 		</div>
 		
@@ -383,6 +426,7 @@
 				</div>
 				<div style="text-align: center; font-size: 25px;"><a href="https://video.odl.mit.edu/videos/9101a72a7d994d53800d1398fd885b88/embed/?start=339" target="blank">Gilbert Strang: Deep Learning</a></div>
 				<!-- <iframe class="educationVideo" src="https://video.odl.mit.edu/videos/9101a72a7d994d53800d1398fd885b88/embed/?start=339" scrolling="no" frameborder="0" allowfullscreen></iframe> -->
+                 <div style="text-align: center; font-size: 25px;"><a href="https://web.stanford.edu/class/cs224n/" target="blank">Natural Language Processing with Deep Learning</a></div>
                 <!-- educationOverview 部分的做题链接改为 -->
                 <!-- 重新设计的学习练习区域 - 卡片式布局 -->
                 <div class="learning-exercises">
@@ -611,1213 +655,6 @@
                     </div>
                 </div>
 			</div>
-
-			<div id="educationConvolution">
-				<div class="educationTitle"> 卷积网络 </div>
-				<div class="educationAuthor">作者 <i>Gilbert Strang</i></div>
-
-				<div class="educationContent">
-					<p><strong>权重共享</strong> 这一词是卷积神经网络（CNNs）的核心思想。连接一层到另一层的权重矩阵<span class="math inline">\(A\)</span>  只有少数几个独立元素。 因此，优化这些权重的速度比全连接（密集）架构更快。</p>
-					<p>在一维问题中，假设输入层（第0层）由一个向量<span class="math inline">\(v = (v_1,...,v_n)\)</span>表示。 卷积层将 <span class="math inline">\(v\)</span> 与一个具有常数对角线的权重矩阵 <span class="math inline">\(A\)</span> 相乘。然后，整个层中将重复使用相同的权重集（假设是 3 个权重）： </p>
-					<p><span class="math display">\[A=
-					\begin{bmatrix}
-						a_{-1} &amp; a_0 &amp; a_1 &amp;  &amp;  \\
-						&amp; a_{-1} &amp; a_0 &amp; a_1 &amp;  \\
-						&amp; &amp; a_{-1} &amp; a_0 &amp; a_1 \\
-					\end{bmatrix}\]</span> 这个矩阵 <span class="math inline">\(A\)</span> 有 <span class="math inline">\(n = 5\)</span> 个输出和 <span class="math inline">\(m = 3\)</span> 个输出。 A 是<strong>平移不变</strong>的: 卷积 = 滤波器 = Toeplitz 矩阵。卷积对于有许多像素的图像尤其重要。那 <span class="math inline">\(3\)</span> 个独立的权重<span class="math inline">\(a_{-1}, a_0, a_1\)</span> 可能在二维中变成 <span class="math inline">\(3 \times 3=9\)</span> 个权重。这 9 个数是 <span class="math inline">\(a_{ij}\)</span> 其中 <span class="math inline">\(i = -1,0,1\)</span> 和 <span class="math inline">\(j = -1,0,1\)</span>。一个包含其 8 个邻居（在一个 <span class="math inline">\(3 \times 3\)</span> 的方块中的输入）将与 <span class="math inline">\(a_{00}\)</span> 及其   <span class="math inline">\(8\)</span> 个邻居相乘——这 9 项的和给出一个输出 <span class="math inline">\(Av\)</span>。像往常一样，偏置向量  <span class="math inline">\(b\)</span> 会被加到结果中，并且  <span class="math inline">\(Av + b\)</span> 的每个分量都会通过像 ReLU 这样的函数进行激活（或不激活）：新层包含 <span class="math inline">\(\textrm{ReLU}(Av + b)\)</span>.</p>
-					<p>这个二维矩阵 <span class="math inline">\(A\)</span> 并不容易显示。你应该可以看到，围绕一个大小为 <span class="math inline">\(n \times n\)</span> 的输入向量 <span class="math inline">\(v\)</span> 的一个 <span class="math inline">\(3 \times 3\)</span> 方块将产生一个大小为 <span class="math inline">\((n - 2) \times (n - 2)\)</span> 的输出，就像在一维中 5 个输入产生了 3 个输出一样。注意，在二维中我们只有 <span class="math inline">\(3 \times 3 = 9\)</span>（或者也许是 <span class="math inline">\(5 \times 5 = 25\)</span>）个独立的权重，因为卷积不仅是 <strong>共享权重</strong>，而且是 <strong>局部的</strong>。</p>
-				</div>
-                    <!-- 新增的做题链接部分 -->
-                <!-- 卷积网络练习区域 - 卡片式布局 -->
-                <div class="learning-exercises">
-                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🧠 卷积网络练习区</h3>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">完成以下练习来巩固卷积神经网络的相关知识</p>
-
-                    <div class="exercise-cards">
-                        <!-- 卷积知识测试卡片 -->
-                        <div class="exercise-card" data-exercise="convolution_quiz">
-                            <div class="card-header">
-                                <h4>📐 卷积知识测试</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>测试您对卷积操作、卷积核、特征提取等基本概念的理解。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 卷积操作的主要作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="conv_q1" value="A"> A. 降低计算复杂度</label>
-                                        <label><input type="radio" name="conv_q1" value="B"> B. 提取局部特征</label>
-                                        <label><input type="radio" name="conv_q1" value="C"> C. 增加模型深度</label>
-                                        <label><input type="radio" name="conv_q1" value="D"> D. 防止过拟合</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 卷积核的大小通常用什么表示？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="conv_q2" value="A"> A. 1×1</label>
-                                        <label><input type="radio" name="conv_q2" value="B"> B. 3×3</label>
-                                        <label><input type="radio" name="conv_q2" value="C"> C. 5×5</label>
-                                        <label><input type="radio" name="conv_q2" value="D"> D. 以上都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 填充（padding）的作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="conv_q3" value="A"> A. 增加输出特征图大小</label>
-                                        <label><input type="radio" name="conv_q3" value="B"> B. 保持输出特征图大小</label>
-                                        <label><input type="radio" name="conv_q3" value="C"> C. 减少输出特征图大小</label>
-                                        <label><input type="radio" name="conv_q3" value="D"> D. 增加通道数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 步长（stride）的默认值是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="conv_q4" value="A"> A. 0</label>
-                                        <label><input type="radio" name="conv_q4" value="B"> B. 1</label>
-                                        <label><input type="radio" name="conv_q4" value="C"> C. 2</label>
-                                        <label><input type="radio" name="conv_q4" value="D"> D. 3</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 以下哪种操作可以增加特征图的深度？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="conv_q5" value="A"> A. 池化操作</label>
-                                        <label><input type="radio" name="conv_q5" value="B"> B. 激活函数</label>
-                                        <label><input type="radio" name="conv_q5" value="C"> C. 使用多个卷积核</label>
-                                        <label><input type="radio" name="conv_q5" value="D"> D. 批量归一化</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="convolution_quiz">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 卷积核计算练习卡片 -->
-                        <div class="exercise-card" data-exercise="kernel_calculation">
-                            <div class="card-header">
-                                <h4>🔢 卷积核计算练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>练习卷积核的计算过程，理解卷积运算的数学原理。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 如果输入特征图大小为4×4，卷积核大小为3×3，步长为1，无填充，输出大小是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="kernel_q1" value="A"> A. 1×1</label>
-                                        <label><input type="radio" name="kernel_q1" value="B"> B. 2×2</label>
-                                        <label><input type="radio" name="kernel_q1" value="C"> C. 3×3</label>
-                                        <label><input type="radio" name="kernel_q1" value="D"> D. 4×4</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 卷积计算中，输出特征图的计算公式是什么？（输入大小为W，卷积核大小为K，步长为S，填充为P）</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="kernel_q2" value="A"> A. (W-K+2P)/S + 1</label>
-                                        <label><input type="radio" name="kernel_q2" value="B"> B. (W+K+2P)/S + 1</label>
-                                        <label><input type="radio" name="kernel_q2" value="C"> C. (W-K-2P)/S + 1</label>
-                                        <label><input type="radio" name="kernel_q2" value="D"> D. (W*K+2P)/S + 1</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 使用3×3卷积核对5×5输入进行卷积，步长为2，填充为1，输出特征图大小是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="kernel_q3" value="A"> A. 2×2</label>
-                                        <label><input type="radio" name="kernel_q3" value="B"> B. 3×3</label>
-                                        <label><input type="radio" name="kernel_q3" value="C"> C. 4×4</label>
-                                        <label><input type="radio" name="kernel_q3" value="D"> D. 5×5</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 如果要保持输入和输出特征图大小相同，使用3×3卷积核需要多少填充？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="kernel_q4" value="A"> A. 0</label>
-                                        <label><input type="radio" name="kernel_q4" value="B"> B. 1</label>
-                                        <label><input type="radio" name="kernel_q4" value="C"> C. 2</label>
-                                        <label><input type="radio" name="kernel_q4" value="D"> D. 3</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 转置卷积（deconvolution）通常用于什么任务？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="kernel_q5" value="A"> A. 图像分类</label>
-                                        <label><input type="radio" name="kernel_q5" value="B"> B. 图像分割</label>
-                                        <label><input type="radio" name="kernel_q5" value="C"> C. 图像生成</label>
-                                        <label><input type="radio" name="kernel_q5" value="D"> D. B和C都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="kernel_calculation">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 特征提取分析卡片 -->
-                        <div class="exercise-card" data-exercise="feature_extraction">
-                            <div class="card-header">
-                                <h4>🔍 特征提取分析</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>分析CNN如何通过多层卷积提取图像的层次化特征。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> CNN的浅层卷积核通常检测什么类型的特征？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="feature_q1" value="A"> A. 复杂形状</label>
-                                        <label><input type="radio" name="feature_q1" value="B"> B. 简单边缘和纹理</label>
-                                        <label><input type="radio" name="feature_q1" value="C"> C. 整体轮廓</label>
-                                        <label><input type="radio" name="feature_q1" value="D"> D. 颜色信息</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 随着网络深度的增加，卷积核学习的特征复杂度如何变化？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="feature_q2" value="A"> A. 从复杂到简单</label>
-                                        <label><input type="radio" name="feature_q2" value="B"> B. 从简单到复杂</label>
-                                        <label><input type="radio" name="feature_q2" value="C"> C. 保持不变</label>
-                                        <label><input type="radio" name="feature_q2" value="D"> D. 随机变化</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 感受野（receptive field）指的是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="feature_q3" value="A"> A. 卷积核的大小</label>
-                                        <label><input type="radio" name="feature_q3" value="B"> B. 输出像素对应的输入区域</label>
-                                        <label><input type="radio" name="feature_q3" value="C"> C. 特征图尺寸</label>
-                                        <label><input type="radio" name="feature_q3" value="D"> D. 通道数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 空洞卷积（dilated convolution）的主要优势是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="feature_q4" value="A"> A. 减少参数量</label>
-                                        <label><input type="radio" name="feature_q4" value="B"> B. 增加感受野而不增加参数</label>
-                                        <label><input type="radio" name="feature_q4" value="C"> C. 加速计算</label>
-                                        <label><input type="radio" name="feature_q4" value="D"> D. 减少过拟合</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 深度可分离卷积（depthwise separable convolution）相比标准卷积的优势是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="feature_q5" value="A"> A. 提高准确率</label>
-                                        <label><input type="radio" name="feature_q5" value="B"> B. 减少计算量和参数量</label>
-                                        <label><input type="radio" name="feature_q5" value="C"> C. 增加模型深度</label>
-                                        <label><input type="radio" name="feature_q5" value="D"> D. 简化训练过程</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="feature_extraction">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
-
-			<div id="educationResNets">
-				<div class="educationTitle"> 残差网络 (ResNets) </div>
-				<div class="educationAuthor">作者 <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
-
-				<div class="educationContent">
-					<p>2015 年，微软的一个研究团队凭借 ResNet 在 <a href="http://www.image-net.org/challenges/LSVRC/">ImageNet 大规模视觉识别挑战赛</a> 中获得了创纪录的表现。自 2015 年以来，ResNet 的变种一直主导着这一竞赛，超过了人类在该任务中的表现。它们已成为图像识别任务中广泛采用的架构，并且相对容易实现和训练。</p>
-					<div class="educationSection">ResNet 架构</div>
-					<p>ResNet 是一种卷积神经网络（CNN），具有 <strong>恒等捷径（identity shortcuts）</strong>，这是通过跳过某些层创建的网络路径，从而在网络中创建捷径。下面我们提供一个典型的 ResNet 示例：
-				
-						<img class="educationImage" src="dist/resnet.png" alt="Resnet image" width="50%">
-				
-						<div class="modelLink">
-							<a class="modelLink" target="_newtab" href="http://math.mit.edu/ennui/#%7B%22graph%22:%5B%7B%22layer_name%22:%22Input%22,%22children_ids%22:%5B5,9%5D,%22parent_ids%22:%5B%5D,%22params%22:%7B%22dataset%22:%22mnist%22%7D,%22id%22:0,%22xPosition%22:100,%22yPosition%22:377%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B6%5D,%22parent_ids%22:%5B0%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:5,%22xPosition%22:169,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B7,10%5D,%22parent_ids%22:%5B0,6%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:9,%22xPosition%22:276,%22yPosition%22:411%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B9%5D,%22parent_ids%22:%5B5%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:6,%22xPosition%22:294,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B8%5D,%22parent_ids%22:%5B9%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:7,%22xPosition%22:414,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B11%5D,%22parent_ids%22:%5B9,8%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:10,%22xPosition%22:521,%22yPosition%22:412%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B10%5D,%22parent_ids%22:%5B7%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:8,%22xPosition%22:541,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Flatten%22,%22children_ids%22:%5B12%5D,%22parent_ids%22:%5B10%5D,%22params%22:%7B%7D,%22id%22:11,%22xPosition%22:708,%22yPosition%22:463%7D,%7B%22layer_name%22:%22Dense%22,%22children_ids%22:%5B13%5D,%22parent_ids%22:%5B11%5D,%22params%22:%7B%22units%22:32,%22activation%22:%22relu%22%7D,%22id%22:12,%22xPosition%22:702,%22yPosition%22:434%7D,%7B%22layer_name%22:%22Dropout%22,%22children_ids%22:%5B1%5D,%22parent_ids%22:%5B12%5D,%22params%22:%7B%22rate%22:0.5%7D,%22id%22:13,%22xPosition%22:778,%22yPosition%22:365%7D,%7B%22layer_name%22:%22Output%22,%22children_ids%22:%5B%5D,%22parent_ids%22:%5B13%5D,%22params%22:%7B%7D,%22id%22:1,%22xPosition%22:900,%22yPosition%22:377%7D%5D,%22hyperparameters%22:%7B%22learningRate%22:0.01,%22batchSize%22:64,%22optimizer_id%22:%22defaultOptimizer%22,%22epochs%22:6,%22loss_id%22:%22defaultLoss%22%7D%7D">
-								模型链接
-							</a>
-						</div>
-				
-						恒等捷径意味着学习到的参数是残差。数学上，如果 <span class="math inline">\(R(x)\)</span> 是一系列卷积层与 ReLU 组合，称为 <strong>残差块</strong>，例如，假设 <span class="math display">\[R(x) = \textrm{Conv}(\textrm{ReLU}(\textrm{Conv}(x))).\]</span> 那么，残差块的输出将是 <span class="math inline">\(R(x) + x\)</span>，其中 <span class="math inline">\(x\)</span> 是恒等传递。如果神经网络试图逼近某个函数 <span class="math inline">\(F(x)\)</span>，那么一个完美的残差块 <span class="math inline">\(R^*(x)\)</span> 会使得 <span class="math inline">\(R^*(x) = F(x) - x\)</span>，这正是通过减去输入图像得到的残差。</p>
-					<div class="educationSection">ResNet 的优势</div>
-					<p>ResNet 的一个惊人特性是它的良好扩展性，使得深层神经网络仍然能够良好地训练。当网络变得更大时，许多问题会出现。</p>
-					<p>大规模网络往往训练速度较慢，但 CNN 的 <strong>权重共享</strong> 意味着每个残差块需要训练的参数相对较少。大规模网络还往往面临 <strong>梯度消失</strong> 问题——在梯度下降中，权重更新会逐渐变得微不足道，导致即使有更多的训练时间，网络也无法改进。ResNet 中的恒等捷径为梯度提供了流动路径，从而避免了梯度消失的问题。</p>
-				</div>
-                    <!-- 新增的做题链接部分 -->
-                <!-- ResNet练习区域 - 卡片式布局 -->
-                <div class="learning-exercises">
-                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🏗️ ResNet练习区</h3>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习残差网络的核心概念和设计原理</p>
-
-                    <div class="exercise-cards">
-                        <!-- 残差网络知识测试卡片 -->
-                        <div class="exercise-card" data-exercise="resnet_quiz">
-                            <div class="card-header">
-                                <h4>🔄 残差网络知识测试</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>测试您对残差网络基本概念和优势的理解。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 残差网络主要解决的是什么问题？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="resnet_q1" value="A"> A. 梯度消失</label>
-                                        <label><input type="radio" name="resnet_q1" value="B"> B. 过拟合</label>
-                                        <label><input type="radio" name="resnet_q1" value="C"> C. 计算效率</label>
-                                        <label><input type="radio" name="resnet_q1" value="D"> D. 数据预处理</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 残差块中的跳跃连接是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="resnet_q2" value="A"> A. 额外的卷积层</label>
-                                        <label><input type="radio" name="resnet_q2" value="B"> B. 恒等映射</label>
-                                        <label><input type="radio" name="resnet_q2" value="C"> C. 池化操作</label>
-                                        <label><input type="radio" name="resnet_q2" value="D"> D. 激活函数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> ResNet-50中的"50"代表什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="resnet_q3" value="A"> A. 输入图像大小</label>
-                                        <label><input type="radio" name="resnet_q3" value="B"> B. 网络层数</label>
-                                        <label><input type="radio" name="resnet_q3" value="C"> C. 参数数量</label>
-                                        <label><input type="radio" name="resnet_q3" value="D"> D. 准确率百分比</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 残差学习公式F(x) + x中的F(x)代表什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="resnet_q4" value="A"> A. 输入特征</label>
-                                        <label><input type="radio" name="resnet_q4" value="B"> B. 残差函数</label>
-                                        <label><input type="radio" name="resnet_q4" value="C"> C. 目标输出</label>
-                                        <label><input type="radio" name="resnet_q4" value="D"> D. 损失函数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> ResNet相比普通网络的主要优势是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="resnet_q5" value="A"> A. 参数更少</label>
-                                        <label><input type="radio" name="resnet_q5" value="B"> B. 更容易训练更深的网络</label>
-                                        <label><input type="radio" name="resnet_q5" value="C"> C. 计算更快</label>
-                                        <label><input type="radio" name="resnet_q5" value="D"> D. 内存占用更少</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="resnet_quiz">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 跳跃连接分析卡片 -->
-                        <div class="exercise-card" data-exercise="skip_connection">
-                            <div class="card-header">
-                                <h4>⏭️ 跳跃连接分析</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>深入理解跳跃连接的工作原理和设计理念。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 跳跃连接允许梯度如何传播？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="skip_q1" value="A"> A. 只能向前传播</label>
-                                        <label><input type="radio" name="skip_q1" value="B"> B. 直接跨越层传播</label>
-                                        <label><input type="radio" name="skip_q1" value="C"> C. 只在最后一层传播</label>
-                                        <label><input type="radio" name="skip_q1" value="D"> D. 随机传播</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 当残差块的输入输出维度不同时，如何处理跳跃连接？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="skip_q2" value="A"> A. 直接相加</label>
-                                        <label><input type="radio" name="skip_q2" value="B"> B. 使用1×1卷积调整维度</label>
-                                        <label><input type="radio" name="skip_q2" value="C"> C. 丢弃跳跃连接</label>
-                                        <label><input type="radio" name="skip_q2" value="D"> D. 使用池化调整</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 瓶颈结构（bottleneck）的主要作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="skip_q3" value="A"> A. 增加网络深度</label>
-                                        <label><input type="radio" name="skip_q3" value="B"> B. 减少参数量和计算量</label>
-                                        <label><input type="radio" name="skip_q3" value="C"> C. 提高准确率</label>
-                                        <label><input type="radio" name="skip_q3" value="D"> D. 简化训练</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> ResNeXt的创新点是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="skip_q4" value="A"> A. 更深的网络</label>
-                                        <label><input type="radio" name="skip_q4" value="B"> B. 分组卷积和基数设计</label>
-                                        <label><input type="radio" name="skip_q4" value="C"> C. 新的激活函数</label>
-                                        <label><input type="radio" name="skip_q4" value="D"> D. 更简单的结构</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> DenseNet与ResNet的主要区别是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="skip_q5" value="A"> A. DenseNet没有跳跃连接</label>
-                                        <label><input type="radio" name="skip_q5" value="B"> B. DenseNet连接所有层</label>
-                                        <label><input type="radio" name="skip_q5" value="C"> C. DenseNet更浅</label>
-                                        <label><input type="radio" name="skip_q5" value="D"> D. DenseNet参数更多</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="skip_connection">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 梯度流练习卡片 -->
-                        <div class="exercise-card" data-exercise="gradient_flow">
-                            <div class="card-header">
-                                <h4>🌊 梯度流练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>理解梯度在残差网络中的流动和反向传播机制。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 在残差网络中，梯度流是如何得到改善的？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="grad_q1" value="A"> A. 通过减少网络深度</label>
-                                        <label><input type="radio" name="grad_q1" value="B"> B. 通过提供更短的路径</label>
-                                        <label><input type="radio" name="grad_q1" value="C"> C. 通过增加学习率</label>
-                                        <label><input type="radio" name="grad_q1" value="D"> D. 通过减少参数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 什么是梯度消失问题？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="grad_q2" value="A"> A. 梯度变为0</label>
-                                        <label><input type="radio" name="grad_q2" value="B"> B. 梯度变得很大</label>
-                                        <label><input type="radio" name="grad_q2" value="C"> C. 梯度随机变化</label>
-                                        <label><input type="radio" name="grad_q2" value="D"> D. 梯度停止更新</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> Batch Normalization如何帮助梯度流动？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="grad_q3" value="A"> A. 减少内部协变量偏移</label>
-                                        <label><input type="radio" name="grad_q3" value="B"> B. 增加网络深度</label>
-                                        <label><input type="radio" name="grad_q3" value="C"> C. 减少过拟合</label>
-                                        <label><input type="radio" name="grad_q3" value="D"> D. 改变优化算法</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 残差网络中恒等映射的导数是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="grad_q4" value="A"> A. 0</label>
-                                        <label><input type="radio" name="grad_q4" value="B"> B. 1</label>
-                                        <label><input type="radio" name="grad_q4" value="C"> C. -1</label>
-                                        <label><input type="radio" name="grad_q4" value="D"> D. 随机值</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 为什么深层网络训练更困难？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="grad_q5" value="A"> A. 参数太多</label>
-                                        <label><input type="radio" name="grad_q5" value="B"> B. 梯度消失或爆炸</label>
-                                        <label><input type="radio" name="grad_q5" value="C"> C. 计算太慢</label>
-                                        <label><input type="radio" name="grad_q5" value="D"> D. 内存不足</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="gradient_flow">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
-
-			<div id="educationFlatten">
-				<div class="educationTitle"> 展平层（Flatten） </div>
-				<div class="educationAuthor">作者 <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
-
-				<div class="educationContent">
-					<p>展平层接受一个多维输入并产生一个一维输出。例如，CIFAR 数据集是一个包含图像的集合，它是三维的，因为它由32x32像素的二维图像组成，并且有3个颜色通道（红色、绿色、蓝色）。一个展平层可以将该数据集的数据作为输入，输出一个大小为 32*32*3 = 3072 的一维向量。</p>
-				</div>
-                <!-- 新增的做题链接部分 -->
-                <!-- 展平层练习区域 - 卡片式布局 -->
-                <div class="learning-exercises">
-                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">📏 展平层练习区</h3>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习展平操作及其在神经网络中的应用</p>
-
-                    <div class="exercise-cards">
-                        <!-- 展平层知识测试卡片 -->
-                        <div class="exercise-card" data-exercise="flatten_quiz">
-                            <div class="card-header">
-                                <h4>📊 展平层知识测试</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>测试您对展平层基本概念和作用的理解。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 展平层（Flatten）的输入通常是什么形状？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="flat_q1" value="A"> A. 一维向量</label>
-                                        <label><input type="radio" name="flat_q1" value="B"> B. 二维矩阵</label>
-                                        <label><input type="radio" name="flat_q1" value="C"> C. 三维张量</label>
-                                        <label><input type="radio" name="flat_q1" value="D"> D. 四维张量</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 展平层通常用于连接什么类型的层？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="flat_q2" value="A"> A. 卷积层到卷积层</label>
-                                        <label><input type="radio" name="flat_q2" value="B"> B. 卷积层到全连接层</label>
-                                        <label><input type="radio" name="flat_q2" value="C"> C. 全连接层到全连接层</label>
-                                        <label><input type="radio" name="flat_q2" value="D"> D. 池化层到池化层</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 展平操作是否会丢失空间信息？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="flat_q3" value="A"> A. 完全丢失</label>
-                                        <label><input type="radio" name="flat_q3" value="B"> B. 部分保留</label>
-                                        <label><input type="radio" name="flat_q3" value="C"> C. 完全保留</label>
-                                        <label><input type="radio" name="flat_q3" value="D"> D. 看情况而定</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 展平层之后的全连接层需要多少个神经元？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="flat_q4" value="A"> A. 输入通道数</label>
-                                        <label><input type="radio" name="flat_q4" value="B"> B. 展平后的元素总数</label>
-                                        <label><input type="radio" name="flat_q4" value="C"> C. 任意数量</label>
-                                        <label><input type="radio" name="flat_q4" value="D"> D. 等于类别数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 在CNN中，展平层的位置通常在哪里？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="flat_q5" value="A"> A. 网络开始处</label>
-                                        <label><input type="radio" name="flat_q5" value="B"> B. 卷积层和全连接层之间</label>
-                                        <label><input type="radio" name="flat_q5" value="C"> C. 网络结尾处</label>
-                                        <label><input type="radio" name="flat_q5" value="D"> D. 池化层之后</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="flatten_quiz">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 维度计算练习卡片 -->
-                        <div class="exercise-card" data-exercise="dimension_calculation">
-                            <div class="card-header">
-                                <h4>📐 维度计算练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>练习张量维度的计算，掌握展平操作的数学原理。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 32×32×3的图像展平后变成多少维向量？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="dim_q1" value="A"> A. 3072</label>
-                                        <label><input type="radio" name="dim_q1" value="B"> B. 1024</label>
-                                        <label><input type="radio" name="dim_q1" value="C"> C. 96</label>
-                                        <label><input type="radio" name="dim_q1" value="D"> D. 32</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 4×4×64的特征图展平后有多少元素？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="dim_q2" value="A"> A. 64</label>
-                                        <label><input type="radio" name="dim_q2" value="B"> B. 256</label>
-                                        <label><input type="radio" name="dim_q2" value="C"> C. 1024</label>
-                                        <label><input type="radio" name="dim_q2" value="D"> D. 16384</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 展平操作如何影响批量大小？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="dim_q3" value="A"> A. 批量大小变为1</label>
-                                        <label><input type="radio" name="dim_q3" value="B"> B. 批量大小保持不变</label>
-                                        <label><input type="radio" name="dim_q3" value="C"> C. 批量大小翻倍</label>
-                                        <label><input type="radio" name="dim_q3" value="D"> D. 批量大小减半</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 展平后的向量维度计算公式是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="dim_q4" value="A"> A. H × W × C</label>
-                                        <label><input type="radio" name="dim_q4" value="B"> B. H + W + C</label>
-                                        <label><input type="radio" name="dim_q4" value="C"> C. H × W ÷ C</label>
-                                        <label><input type="radio" name="dim_q4" value="D"> D. (H × W × C) ÷ batch_size</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> Global Average Pooling可以替代展平层吗？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="dim_q5" value="A"> A. 不可以，完全不同</label>
-                                        <label><input type="radio" name="dim_q5" value="B"> B. 可以，在某些情况下</label>
-                                        <label><input type="radio" name="dim_q5" value="C"> C. 可以，效果更好</label>
-                                        <label><input type="radio" name="dim_q5" value="D"> D. 可以，但更复杂</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="dimension_calculation">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 张量操作练习卡片 -->
-                        <div class="exercise-card" data-exercise="tensor_operations">
-                            <div class="card-header">
-                                <h4>🔄 张量操作练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>练习张量操作和变换，理解深度学习中的数据流。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 张量（tensor）的维度通常如何表示？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tensor_q1" value="A"> A. (batch_size, height, width)</label>
-                                        <label><input type="radio" name="tensor_q1" value="B"> B. (batch_size, channels, height, width)</label>
-                                        <label><input type="radio" name="tensor_q1" value="C"> C. (height, width, channels)</label>
-                                        <label><input type="radio" name="tensor_q1" value="D"> D. 以上都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> Reshape操作和展平操作有什么区别？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tensor_q2" value="A"> A. Reshape保持元素顺序</label>
-                                        <label><input type="radio" name="tensor_q2" value="B"> B. 展平只能变为一维</label>
-                                        <label><input type="radio" name="tensor_q2" value="C"> C. Reshape可以改变维度</label>
-                                        <label><input type="radio" name="tensor_q2" value="D"> D. 以上都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> Transpose操作通常用于什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tensor_q3" value="A"> A. 改变数据类型</label>
-                                        <label><input type="radio" name="tensor_q3" value="B"> B. 重新排列维度顺序</label>
-                                        <label><input type="radio" name="tensor_q3" value="C"> C. 增加维度</label>
-                                        <label><input type="radio" name="tensor_q3" value="D"> D. 减少维度</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> Squeeze操作的作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tensor_q4" value="A"> A. 移除大小为1的维度</label>
-                                        <label><input type="radio" name="tensor_q4" value="B"> B. 增加维度</label>
-                                        <label><input type="radio" name="tensor_q4" value="C"> C. 改变元素值</label>
-                                        <label><input type="radio" name="tensor_q4" value="D"> D. 复制张量</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> Concatenate操作在神经网络中最常用于？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tensor_q5" value="A"> A. 合并不同来源的特征</label>
-                                        <label><input type="radio" name="tensor_q5" value="B"> B. 分割特征图</label>
-                                        <label><input type="radio" name="tensor_q5" value="C"> C. 改变特征大小</label>
-                                        <label><input type="radio" name="tensor_q5" value="D"> D. 减少特征维度</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="tensor_operations">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
-
-			<div id="educationConcatenate">
-				<div class="educationTitle">拼接层（Concentrate）</div>
-				<div class="educationAuthor">作者<i>Zack Holbrook</i> 和 <i>Jesse Michel</i></div>
-			
-				<div class="educationContent">
-					<p>拼接层接受两个或更多层，并通过将输入堆叠在一起将它们的输出拼接成一个单一输出。例如，它可以将两个大小为 10 的向量拼接成一个大小为 20 的向量，方法是将一个向量堆叠在另一个向量的上面。</p>
-				</div>
-                    <!-- 新增的做题链接部分 -->
-                <!-- 拼接层练习区域 - 卡片式布局 -->
-                <div class="learning-exercises">
-                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🔗 拼接层练习区</h3>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习张量拼接和特征融合技术</p>
-
-                    <div class="exercise-cards">
-                        <!-- 拼接层知识测试卡片 -->
-                        <div class="exercise-card" data-exercise="concatenate_quiz">
-                            <div class="card-header">
-                                <h4>🔗 拼接层知识测试</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>测试您对拼接层基本概念和应用场景的理解。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> Concatenate操作是在哪个维度上拼接张量？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="concat_q1" value="A"> A. 最后一个维度</label>
-                                        <label><input type="radio" name="concat_q1" value="B"> B. 指定的维度</label>
-                                        <label><input type="radio" name="concat_q1" value="C"> C. 第一个维度</label>
-                                        <label><input type="radio" name="concat_q1" value="D"> D. 随机维度</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> Inception模块中大量使用了哪种操作？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="concat_q2" value="A"> A. Add</label>
-                                        <label><input type="radio" name="concat_q2" value="B"> B. Multiply</label>
-                                        <label><input type="radio" name="concat_q2" value="C"> C. Concatenate</label>
-                                        <label><input type="radio" name="concat_q2" value="D"> D. Subtract</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 拼接两个32×32×64的特征图，结果的通道数是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="concat_q3" value="A"> A. 32</label>
-                                        <label><input type="radio" name="concat_q3" value="B"> B. 64</label>
-                                        <label><input type="radio" name="concat_q3" value="C"> C. 128</label>
-                                        <label><input type="radio" name="concat_q3" value="D"> D. 96</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> Concatenate和Add操作的主要区别是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="concat_q4" value="A"> A. Concatenate增加通道数</label>
-                                        <label><input type="radio" name="concat_q4" value="B"> B. Add保持通道数不变</label>
-                                        <label><input type="radio" name="concat_q4" value="C"> C. Concatenate需要相同尺寸</label>
-                                        <label><input type="radio" name="concat_q4" value="D"> D. 以上都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> DenseNet的核心操作是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="concat_q5" value="A"> A. 残差连接</label>
-                                        <label><input type="radio" name="concat_q5" value="B"> B. 密集连接</label>
-                                        <label><input type="radio" name="concat_q5" value="C"> C. 跳跃连接</label>
-                                        <label><input type="radio" name="concat_q5" value="D"> D. 短连接</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="concatenate_quiz">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 张量拼接练习卡片 -->
-                        <div class="exercise-card" data-exercise="tensor_concatenation">
-                            <div class="card-header">
-                                <h4>📋 张量拼接练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>练习张量拼接的具体操作和维度计算。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 拼接两个形状为[2, 3, 4]的张量，维度为1，结果形状是？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tconcat_q1" value="A"> A. [2, 6, 4]</label>
-                                        <label><input type="radio" name="tconcat_q1" value="B"> B. [4, 3, 4]</label>
-                                        <label><input type="radio" name="tconcat_q1" value="C"> C. [2, 3, 8]</label>
-                                        <label><input type="radio" name="tconcat_q1" value="D"> D. [2, 3, 4]</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 要拼接在通道维度上，PyTorch中的dim参数应该是？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tconcat_q2" value="A"> A. 0</label>
-                                        <label><input type="radio" name="tconcat_q2" value="B"> B. 1</label>
-                                        <label><input type="radio" name="tconcat_q2" value="C"> C. 2</label>
-                                        <label><input type="radio" name="tconcat_q2" value="D"> D. 3</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 拼接操作要求张量在哪些维度上必须相同？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tconcat_q3" value="A"> A. 拼接维度</label>
-                                        <label><input type="radio" name="tconcat_q3" value="B"> B. 除拼接维度外的所有维度</label>
-                                        <label><input type="radio" name="tconcat_q3" value="C"> C. 所有维度</label>
-                                        <label><input type="radio" name="tconcat_q3" value="D"> D. 没有要求</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> U-Net中上下采样特征的拼接方式是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tconcat_q4" value="A"> A. 直接相加</label>
-                                        <label><input type="radio" name="tconcat_q4" value="B"> B. 通道维度拼接</label>
-                                        <label><input type="radio" name="tconcat_q4" value="C"> C. 空间维度拼接</label>
-                                        <label><input type="radio" name="tconcat_q4" value="D"> D. 批量维度拼接</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> Concatenate操作的输出通道数计算公式是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="tconcat_q5" value="A"> A. 输入通道数之和</label>
-                                        <label><input type="radio" name="tconcat_q5" value="B"> B. 输入通道数之差</label>
-                                        <label><input type="radio" name="tconcat_q5" value="C"> C. 输入通道数的最大值</label>
-                                        <label><input type="radio" name="tconcat_q5" value="D"> D. 输入通道数的平均值</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="tensor_concatenation">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 特征融合分析卡片 -->
-                        <div class="exercise-card" data-exercise="feature_fusion">
-                            <div class="card-header">
-                                <h4>🔬 特征融合分析</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>分析不同特征融合方法的特点和应用场景。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 特征融合最主要的目的是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="fusion_q1" value="A"> A. 减少参数量</label>
-                                        <label><input type="radio" name="fusion_q1" value="B"> B. 提高特征表示能力</label>
-                                        <label><input type="radio" name="fusion_q1" value="C"> C. 加速计算</label>
-                                        <label><input type="radio" name="fusion_q1" value="D"> D. 简化网络结构</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 多尺度特征融合通常用于解决什么问题？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="fusion_q2" value="A"> A. 目标检测中的尺度变化</label>
-                                        <label><input type="radio" name="fusion_q2" value="B"> B. 颜色变化</label>
-                                        <label><input type="radio" name="fusion_q2" value="C"> C. 光照变化</label>
-                                        <label><input type="radio" name="fusion_q2" value="D"> D. 噪声干扰</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> FPN（Feature Pyramid Network）使用什么融合方式？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="fusion_q3" value="A"> A. 简单的拼接</label>
-                                        <label><input type="radio" name="fusion_q3" value="B"> B. 横向连接和上采样</label>
-                                        <label><input type="radio" name="fusion_q3" value="C"> C. 直接相加</label>
-                                        <label><input type="radio" name="fusion_q3" value="D"> D. 注意力机制</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 早期融合和晚期融合有什么区别？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="fusion_q4" value="A"> A. 早期融合在输入层</label>
-                                        <label><input type="radio" name="fusion_q4" value="B"> B. 晚期融合在输出层</label>
-                                        <label><input type="radio" name="fusion_q4" value="C"> C. 早期融合更简单</label>
-                                        <label><input type="radio" name="fusion_q4" value="D"> D. 以上都是</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 在多模态学习中，特征融合最常遇到的问题是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="fusion_q5" value="A"> A. 模态异构性</label>
-                                        <label><input type="radio" name="fusion_q5" value="B"> B. 计算复杂度</label>
-                                        <label><input type="radio" name="fusion_q5" value="C"> C. 数据量不足</label>
-                                        <label><input type="radio" name="fusion_q5" value="D"> D. 标签不一致</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="feature_fusion">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
-			
-
-			<div id="educationDropout">
-				<div class="educationTitle">丢弃层（Dropout）</div>
-				<div class="educationAuthor">作者<i>Stefan Grosser</i> 和 <i>Jesse Michel</i></div>
-			
-				<div class="educationContent">
-					<p>丢弃层在训练期间忽略一部分输入单元。例如，如果丢弃率为 0.1，则在每次前向传播中，丢弃层会随机选择 10% 的权重并将它们设为 0。添加一个丢弃率为 0 的丢弃层不会对网络产生任何影响，而丢弃率为 1 时，丢弃层将输出 0。</p>
-			
-					<p>丢弃通常用于防止<strong>过拟合</strong>（有关更多信息，请参阅我们的相关文章）。可以将丢弃视为让网络学习一组弱分类器，在测试时将它们结合起来形成一个更强的分类器。对于熟悉这个术语的人来说，这类似于使用集成模型的提升方法。丢弃层还有一个方便的特点，即加速训练，因为每次前向传播时所需的权重较少。</p>
-				</div>
-                    <!-- 新增的做题链接部分 -->
-                <!-- Dropout练习区域 - 卡片式布局 -->
-                <div class="learning-exercises">
-                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🎲 Dropout练习区</h3>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习Dropout正则化技术和防止过拟合的方法</p>
-
-                    <div class="exercise-cards">
-                        <!-- Dropout知识测试卡片 -->
-                        <div class="exercise-card" data-exercise="dropout_quiz">
-                            <div class="card-header">
-                                <h4>🎯 Dropout知识测试</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>测试您对Dropout机制和原理的理解。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> Dropout的主要作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="drop_q1" value="A"> A. 加速训练</label>
-                                        <label><input type="radio" name="drop_q1" value="B"> B. 防止过拟合</label>
-                                        <label><input type="radio" name="drop_q1" value="C"> C. 增加准确率</label>
-                                        <label><input type="radio" name="drop_q1" value="D"> D. 减少参数</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> Dropout在训练和测试阶段的行为有什么不同？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="drop_q2" value="A"> A. 训练时随机丢弃，测试时使用全部</label>
-                                        <label><input type="radio" name="drop_q2" value="B"> B. 测试时也随机丢弃</label>
-                                        <label><input type="radio" name="drop_q2" value="C"> C. 训练时使用全部，测试时丢弃</label>
-                                        <label><input type="radio" name="drop_q2" value="D"> D. 训练和测试行为相同</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> Dropout的默认丢弃概率是多少？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="drop_q3" value="A"> A. 0.1</label>
-                                        <label><input type="radio" name="drop_q3" value="B"> B. 0.2</label>
-                                        <label><input type="radio" name="drop_q3" value="C"> C. 0.5</label>
-                                        <label><input type="radio" name="drop_q3" value="D"> D. 0.8</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> Dropout为什么能防止过拟合？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="drop_q4" value="A"> A. 减少模型复杂度</label>
-                                        <label><input type="radio" name="drop_q4" value="B"> B. 创建多个子网络集成</label>
-                                        <label><input type="radio" name="drop_q4" value="C"> C. 增加训练数据</label>
-                                        <label><input type="radio" name="drop_q4" value="D"> D. 改变优化算法</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 在测试时，Dropout如何处理被丢弃的神经元？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="drop_q5" value="A"> A. 完全移除</label>
-                                        <label><input type="radio" name="drop_q5" value="B"> B. 缩放输出权重</label>
-                                        <label><input type="radio" name="drop_q5" value="C"> C. 设为零</label>
-                                        <label><input type="radio" name="drop_q5" value="D"> D. 用平均值替代</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="dropout_quiz">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 过拟合防止练习卡片 -->
-                        <div class="exercise-card" data-exercise="overfitting_prevention">
-                            <div class="card-header">
-                                <h4>🛡️ 过拟合防止练习</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>学习识别和防止过拟合的各种方法和技术。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> 过拟合的典型表现是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="overfit_q1" value="A"> A. 训练准确率低</label>
-                                        <label><input type="radio" name="overfit_q1" value="B"> B. 训练和测试准确率差距大</label>
-                                        <label><input type="radio" name="overfit_q1" value="C"> C. 训练时间长</label>
-                                        <label><input type="radio" name="overfit_q1" value="D"> D. 参数量少</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> 数据增强的主要目的是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="overfit_q2" value="A"> A. 增加数据量</label>
-                                        <label><input type="radio" name="overfit_q2" value="B"> B. 提高数据质量</label>
-                                        <label><input type="radio" name="overfit_q2" value="C"> C. 减少噪声</label>
-                                        <label><input type="radio" name="overfit_q2" value="D"> D. 标准化数据</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 早停（Early Stopping）是如何工作的？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="overfit_q3" value="A"> A. 在训练开始时停止</label>
-                                        <label><input type="radio" name="overfit_q3" value="B"> B. 监控验证集性能</label>
-                                        <label><input type="radio" name="overfit_q3" value="C"> C. 随机停止训练</label>
-                                        <label><input type="radio" name="overfit_q3" value="D"> D. 根据训练时间停止</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> L2正则化的作用是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="overfit_q4" value="A"> A. 增加权重值</label>
-                                        <label><input type="radio" name="overfit_q4" value="B"> B. 惩罚大权重值</label>
-                                        <label><input type="radio" name="overfit_q4" value="C"> C. 减少权重值</label>
-                                        <label><input type="radio" name="overfit_q4" value="D"> D. 随机化权重</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 批量归一化（Batch Normalization）如何帮助防止过拟合？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="overfit_q5" value="A"> A. 减少内部协变量偏移</label>
-                                        <label><input type="radio" name="overfit_q5" value="B"> B. 直接减少参数量</label>
-                                        <label><input type="radio" name="overfit_q5" value="C"> C. 增加模型复杂度</label>
-                                        <label><input type="radio" name="overfit_q5" value="D"> D. 改变损失函数</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="overfitting_prevention">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 正则化技术分析卡片 -->
-                        <div class="exercise-card" data-exercise="regularization_techniques">
-                            <div class="card-header">
-                                <h4>📏 正则化技术分析</h4>
-                                <div class="progress-indicator">
-                                    <span class="progress-text">未完成</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-content">
-                                <p>深入分析各种正则化技术的原理和应用。</p>
-                                <button class="start-exercise-btn">开始练习</button>
-                            </div>
-                            <div class="card-questions" style="display: none;">
-                                <div class="question">
-                                    <p><strong>题目1:</strong> L1正则化和L2正则化的主要区别是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="reg_q1" value="A"> A. L1产生稀疏解</label>
-                                        <label><input type="radio" name="reg_q1" value="B"> B. L2计算更快</label>
-                                        <label><input type="radio" name="reg_q1" value="C"> A和B都是</label>
-                                        <label><input type="radio" name="reg_q1" value="D"> D. 没有区别</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目2:</strong> Dropout可以被视为一种什么形式的正则化？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="reg_q2" value="A"> A. 显式正则化</label>
-                                        <label><input type="radio" name="reg_q2" value="B"> B. 隐式正则化</label>
-                                        <label><input type="radio" name="reg_q2" value="C"> C. 数据增强</label>
-                                        <label><input type="radio" name="reg_q2" value="D"> D. 优化方法</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目3:</strong> 标签平滑（Label Smoothing）的目的是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="reg_q3" value="A"> A. 减少过拟合</label>
-                                        <label><input type="radio" name="reg_q3" value="B"> B. 提高收敛速度</label>
-                                        <label><input type="radio" name="reg_q3" value="C"> C. 增加模型容量</label>
-                                        <label><input type="radio" name="reg_q3" value="D"> D. 减少计算量</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目4:</strong> 权重衰减（Weight Decay）的数学原理是什么？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="reg_q4" value="A"> A. 在损失函数中添加权重惩罚项</label>
-                                        <label><input type="radio" name="reg_q4" value="B"> B. 随机初始化权重</label>
-                                        <label><input type="radio" name="reg_q4" value="C"> C. 改变学习率</label>
-                                        <label><input type="radio" name="reg_q4" value="D"> D. 增加训练数据</label>
-                                    </div>
-                                </div>
-
-                                <div class="question">
-                                    <p><strong>题目5:</strong> 集成学习为什么能提高泛化能力？</p>
-                                    <div class="options">
-                                        <label><input type="radio" name="reg_q5" value="A"> A. 减少方差</label>
-                                        <label><input type="radio" name="reg_q5" value="B"> B. 减少偏差</label>
-                                        <label><input type="radio" name="reg_q5" value="C"> C. 增加模型复杂度</label>
-                                        <label><input type="radio" name="reg_q5" value="D"> D. 加速训练</label>
-                                    </div>
-                                </div>
-
-                                <div class="card-actions">
-                                    <button class="submit-btn" data-category="regularization_techniques">提交答案</button>
-                                    <button class="close-exercise-btn">收起练习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-			</div>
-			
 
 			<div id="educationOverfitting">
 				<div class="educationTitle">过拟合（Overfitting）</div>
@@ -2169,6 +1006,1250 @@
                     </div>
                 </div>
 			</div>
+
+			<div id="educationResNets">
+				<div class="educationTitle"> 残差网络 (ResNets) </div>
+				<div class="educationAuthor">作者 <i>Zack Holbrook</i> and <i>Jesse Michel</i></div>
+
+				<div class="educationContent">
+					<p>2015 年，微软的一个研究团队凭借 ResNet 在 <a href="http://www.image-net.org/challenges/LSVRC/">ImageNet 大规模视觉识别挑战赛</a> 中获得了创纪录的表现。自 2015 年以来，ResNet 的变种一直主导着这一竞赛，超过了人类在该任务中的表现。它们已成为图像识别任务中广泛采用的架构，并且相对容易实现和训练。</p>
+					<div class="educationSection">ResNet 架构</div>
+					<p>ResNet 是一种卷积神经网络（CNN），具有 <strong>恒等捷径（identity shortcuts）</strong>，这是通过跳过某些层创建的网络路径，从而在网络中创建捷径。下面我们提供一个典型的 ResNet 示例：
+				
+						<img class="educationImage" src="dist/resnet.png" alt="Resnet image" width="50%">
+				
+						<div class="modelLink">
+							<a class="modelLink" target="_newtab" href="http://math.mit.edu/ennui/#%7B%22graph%22:%5B%7B%22layer_name%22:%22Input%22,%22children_ids%22:%5B5,9%5D,%22parent_ids%22:%5B%5D,%22params%22:%7B%22dataset%22:%22mnist%22%7D,%22id%22:0,%22xPosition%22:100,%22yPosition%22:377%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B6%5D,%22parent_ids%22:%5B0%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:5,%22xPosition%22:169,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B7,10%5D,%22parent_ids%22:%5B0,6%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:9,%22xPosition%22:276,%22yPosition%22:411%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B9%5D,%22parent_ids%22:%5B5%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:6,%22xPosition%22:294,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B8%5D,%22parent_ids%22:%5B9%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D,%22activation%22:%22relu%22%7D,%22id%22:7,%22xPosition%22:414,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Add%22,%22children_ids%22:%5B11%5D,%22parent_ids%22:%5B9,8%5D,%22params%22:%7B%22activation%22:%22relu%22%7D,%22id%22:10,%22xPosition%22:521,%22yPosition%22:412%7D,%7B%22layer_name%22:%22Conv2D%22,%22children_ids%22:%5B10%5D,%22parent_ids%22:%5B7%5D,%22params%22:%7B%22filters%22:16,%22kernelSize%22:%5B3,3%5D,%22strides%22:%5B1,1%5D%7D,%22id%22:8,%22xPosition%22:541,%22yPosition%22:280%7D,%7B%22layer_name%22:%22Flatten%22,%22children_ids%22:%5B12%5D,%22parent_ids%22:%5B10%5D,%22params%22:%7B%7D,%22id%22:11,%22xPosition%22:708,%22yPosition%22:463%7D,%7B%22layer_name%22:%22Dense%22,%22children_ids%22:%5B13%5D,%22parent_ids%22:%5B11%5D,%22params%22:%7B%22units%22:32,%22activation%22:%22relu%22%7D,%22id%22:12,%22xPosition%22:702,%22yPosition%22:434%7D,%7B%22layer_name%22:%22Dropout%22,%22children_ids%22:%5B1%5D,%22parent_ids%22:%5B12%5D,%22params%22:%7B%22rate%22:0.5%7D,%22id%22:13,%22xPosition%22:778,%22yPosition%22:365%7D,%7B%22layer_name%22:%22Output%22,%22children_ids%22:%5B%5D,%22parent_ids%22:%5B13%5D,%22params%22:%7B%7D,%22id%22:1,%22xPosition%22:900,%22yPosition%22:377%7D%5D,%22hyperparameters%22:%7B%22learningRate%22:0.01,%22batchSize%22:64,%22optimizer_id%22:%22defaultOptimizer%22,%22epochs%22:6,%22loss_id%22:%22defaultLoss%22%7D%7D">
+								模型链接
+							</a>
+						</div>
+				
+						恒等捷径意味着学习到的参数是残差。数学上，如果 <span class="math inline">\(R(x)\)</span> 是一系列卷积层与 ReLU 组合，称为 <strong>残差块</strong>，例如，假设 <span class="math display">\[R(x) = \textrm{Conv}(\textrm{ReLU}(\textrm{Conv}(x))).\]</span> 那么，残差块的输出将是 <span class="math inline">\(R(x) + x\)</span>，其中 <span class="math inline">\(x\)</span> 是恒等传递。如果神经网络试图逼近某个函数 <span class="math inline">\(F(x)\)</span>，那么一个完美的残差块 <span class="math inline">\(R^*(x)\)</span> 会使得 <span class="math inline">\(R^*(x) = F(x) - x\)</span>，这正是通过减去输入图像得到的残差。</p>
+					<div class="educationSection">ResNet 的优势</div>
+					<p>ResNet 的一个惊人特性是它的良好扩展性，使得深层神经网络仍然能够良好地训练。当网络变得更大时，许多问题会出现。</p>
+					<p>大规模网络往往训练速度较慢，但 CNN 的 <strong>权重共享</strong> 意味着每个残差块需要训练的参数相对较少。大规模网络还往往面临 <strong>梯度消失</strong> 问题——在梯度下降中，权重更新会逐渐变得微不足道，导致即使有更多的训练时间，网络也无法改进。ResNet 中的恒等捷径为梯度提供了流动路径，从而避免了梯度消失的问题。</p>
+				</div>
+                    <!-- 新增的做题链接部分 -->
+                <!-- ResNet练习区域 - 卡片式布局 -->
+                <div class="learning-exercises">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🏗️ ResNet练习区</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习残差网络的核心概念和设计原理</p>
+
+                    <div class="exercise-cards">
+                        <!-- 残差网络知识测试卡片 -->
+                        <div class="exercise-card" data-exercise="resnet_quiz">
+                            <div class="card-header">
+                                <h4>🔄 残差网络知识测试</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>测试您对残差网络基本概念和优势的理解。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 残差网络主要解决的是什么问题？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="resnet_q1" value="A"> A. 梯度消失</label>
+                                        <label><input type="radio" name="resnet_q1" value="B"> B. 过拟合</label>
+                                        <label><input type="radio" name="resnet_q1" value="C"> C. 计算效率</label>
+                                        <label><input type="radio" name="resnet_q1" value="D"> D. 数据预处理</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 残差块中的跳跃连接是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="resnet_q2" value="A"> A. 额外的卷积层</label>
+                                        <label><input type="radio" name="resnet_q2" value="B"> B. 恒等映射</label>
+                                        <label><input type="radio" name="resnet_q2" value="C"> C. 池化操作</label>
+                                        <label><input type="radio" name="resnet_q2" value="D"> D. 激活函数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> ResNet-50中的"50"代表什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="resnet_q3" value="A"> A. 输入图像大小</label>
+                                        <label><input type="radio" name="resnet_q3" value="B"> B. 网络层数</label>
+                                        <label><input type="radio" name="resnet_q3" value="C"> C. 参数数量</label>
+                                        <label><input type="radio" name="resnet_q3" value="D"> D. 准确率百分比</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 残差学习公式F(x) + x中的F(x)代表什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="resnet_q4" value="A"> A. 输入特征</label>
+                                        <label><input type="radio" name="resnet_q4" value="B"> B. 残差函数</label>
+                                        <label><input type="radio" name="resnet_q4" value="C"> C. 目标输出</label>
+                                        <label><input type="radio" name="resnet_q4" value="D"> D. 损失函数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> ResNet相比普通网络的主要优势是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="resnet_q5" value="A"> A. 参数更少</label>
+                                        <label><input type="radio" name="resnet_q5" value="B"> B. 更容易训练更深的网络</label>
+                                        <label><input type="radio" name="resnet_q5" value="C"> C. 计算更快</label>
+                                        <label><input type="radio" name="resnet_q5" value="D"> D. 内存占用更少</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="resnet_quiz">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 跳跃连接分析卡片 -->
+                        <div class="exercise-card" data-exercise="skip_connection">
+                            <div class="card-header">
+                                <h4>⏭️ 跳跃连接分析</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>深入理解跳跃连接的工作原理和设计理念。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 跳跃连接允许梯度如何传播？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="skip_q1" value="A"> A. 只能向前传播</label>
+                                        <label><input type="radio" name="skip_q1" value="B"> B. 直接跨越层传播</label>
+                                        <label><input type="radio" name="skip_q1" value="C"> C. 只在最后一层传播</label>
+                                        <label><input type="radio" name="skip_q1" value="D"> D. 随机传播</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 当残差块的输入输出维度不同时，如何处理跳跃连接？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="skip_q2" value="A"> A. 直接相加</label>
+                                        <label><input type="radio" name="skip_q2" value="B"> B. 使用1×1卷积调整维度</label>
+                                        <label><input type="radio" name="skip_q2" value="C"> C. 丢弃跳跃连接</label>
+                                        <label><input type="radio" name="skip_q2" value="D"> D. 使用池化调整</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 瓶颈结构（bottleneck）的主要作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="skip_q3" value="A"> A. 增加网络深度</label>
+                                        <label><input type="radio" name="skip_q3" value="B"> B. 减少参数量和计算量</label>
+                                        <label><input type="radio" name="skip_q3" value="C"> C. 提高准确率</label>
+                                        <label><input type="radio" name="skip_q3" value="D"> D. 简化训练</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> ResNeXt的创新点是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="skip_q4" value="A"> A. 更深的网络</label>
+                                        <label><input type="radio" name="skip_q4" value="B"> B. 分组卷积和基数设计</label>
+                                        <label><input type="radio" name="skip_q4" value="C"> C. 新的激活函数</label>
+                                        <label><input type="radio" name="skip_q4" value="D"> D. 更简单的结构</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> DenseNet与ResNet的主要区别是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="skip_q5" value="A"> A. DenseNet没有跳跃连接</label>
+                                        <label><input type="radio" name="skip_q5" value="B"> B. DenseNet连接所有层</label>
+                                        <label><input type="radio" name="skip_q5" value="C"> C. DenseNet更浅</label>
+                                        <label><input type="radio" name="skip_q5" value="D"> D. DenseNet参数更多</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="skip_connection">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 梯度流练习卡片 -->
+                        <div class="exercise-card" data-exercise="gradient_flow">
+                            <div class="card-header">
+                                <h4>🌊 梯度流练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>理解梯度在残差网络中的流动和反向传播机制。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 在残差网络中，梯度流是如何得到改善的？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="grad_q1" value="A"> A. 通过减少网络深度</label>
+                                        <label><input type="radio" name="grad_q1" value="B"> B. 通过提供更短的路径</label>
+                                        <label><input type="radio" name="grad_q1" value="C"> C. 通过增加学习率</label>
+                                        <label><input type="radio" name="grad_q1" value="D"> D. 通过减少参数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 什么是梯度消失问题？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="grad_q2" value="A"> A. 梯度变为0</label>
+                                        <label><input type="radio" name="grad_q2" value="B"> B. 梯度变得很大</label>
+                                        <label><input type="radio" name="grad_q2" value="C"> C. 梯度随机变化</label>
+                                        <label><input type="radio" name="grad_q2" value="D"> D. 梯度停止更新</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> Batch Normalization如何帮助梯度流动？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="grad_q3" value="A"> A. 减少内部协变量偏移</label>
+                                        <label><input type="radio" name="grad_q3" value="B"> B. 增加网络深度</label>
+                                        <label><input type="radio" name="grad_q3" value="C"> C. 减少过拟合</label>
+                                        <label><input type="radio" name="grad_q3" value="D"> D. 改变优化算法</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 残差网络中恒等映射的导数是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="grad_q4" value="A"> A. 0</label>
+                                        <label><input type="radio" name="grad_q4" value="B"> B. 1</label>
+                                        <label><input type="radio" name="grad_q4" value="C"> C. -1</label>
+                                        <label><input type="radio" name="grad_q4" value="D"> D. 随机值</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 为什么深层网络训练更困难？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="grad_q5" value="A"> A. 参数太多</label>
+                                        <label><input type="radio" name="grad_q5" value="B"> B. 梯度消失或爆炸</label>
+                                        <label><input type="radio" name="grad_q5" value="C"> C. 计算太慢</label>
+                                        <label><input type="radio" name="grad_q5" value="D"> D. 内存不足</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="gradient_flow">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+            
+            <div id="educationAdd">
+				<div class="educationTitle"> 相加层（Add） </div>
+
+				<div class="educationContent">
+					<p><strong>功能：</strong>将多个相同维度的输入张量进行逐元素相加。</p>
+				
+					<p><strong>作用：</strong>是构建残差网络（ResNets） 的关键。通过“快捷连接”将前一层的输出直接跳过多层加到后面层的输出上，有效解决了深层网络中的梯度消失和退化问题，使得训练非常深的网络成为可能。</p>
+				</div>
+			</div>
+			
+			<div id="educationBatchNorm">
+				<div class="educationTitle"> 批量归一化层（Batch Normalization） </div>
+
+				<div class="educationContent">
+					<p><strong>功能：</strong>对每一批（Batch）输入数据进行标准化处理，使其均值为0，方差为1</p>
+					<p><strong>作用：</strong>加速训练过程，允许使用更大的学习率。减少对参数初始化的依赖。有一定正则化效果，可以轻微减少过拟合。</p>
+					<p>通常放在卷积层或全连接层之后，激活函数之前。</p>
+				</div>
+			</div>
+
+            <div id="educationConcatenate">
+				<div class="educationTitle">连接层（Concatenate）</div>
+				
+				<div class="educationContent">
+					<p><strong>功能：</strong>将多个输入张量沿着指定的轴（通常是通道轴）连接在一起。</p>
+					<p><strong>作用：</strong>用于构建具有多分支结构的复杂网络（如Inception模块、U-Net等），将不同分支提取的特征融合在一起。</p>
+				</div>
+                    <!-- 新增的做题链接部分 -->
+                <!-- 拼接层练习区域 - 卡片式布局 -->
+                <div class="learning-exercises">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🔗 拼接层练习区</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习张量拼接和特征融合技术</p>
+
+                    <div class="exercise-cards">
+                        <!-- 拼接层知识测试卡片 -->
+                        <div class="exercise-card" data-exercise="concatenate_quiz">
+                            <div class="card-header">
+                                <h4>🔗 拼接层知识测试</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>测试您对拼接层基本概念和应用场景的理解。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> Concatenate操作是在哪个维度上拼接张量？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="concat_q1" value="A"> A. 最后一个维度</label>
+                                        <label><input type="radio" name="concat_q1" value="B"> B. 指定的维度</label>
+                                        <label><input type="radio" name="concat_q1" value="C"> C. 第一个维度</label>
+                                        <label><input type="radio" name="concat_q1" value="D"> D. 随机维度</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> Inception模块中大量使用了哪种操作？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="concat_q2" value="A"> A. Add</label>
+                                        <label><input type="radio" name="concat_q2" value="B"> B. Multiply</label>
+                                        <label><input type="radio" name="concat_q2" value="C"> C. Concatenate</label>
+                                        <label><input type="radio" name="concat_q2" value="D"> D. Subtract</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 拼接两个32×32×64的特征图，结果的通道数是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="concat_q3" value="A"> A. 32</label>
+                                        <label><input type="radio" name="concat_q3" value="B"> B. 64</label>
+                                        <label><input type="radio" name="concat_q3" value="C"> C. 128</label>
+                                        <label><input type="radio" name="concat_q3" value="D"> D. 96</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> Concatenate和Add操作的主要区别是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="concat_q4" value="A"> A. Concatenate增加通道数</label>
+                                        <label><input type="radio" name="concat_q4" value="B"> B. Add保持通道数不变</label>
+                                        <label><input type="radio" name="concat_q4" value="C"> C. Concatenate需要相同尺寸</label>
+                                        <label><input type="radio" name="concat_q4" value="D"> D. 以上都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> DenseNet的核心操作是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="concat_q5" value="A"> A. 残差连接</label>
+                                        <label><input type="radio" name="concat_q5" value="B"> B. 密集连接</label>
+                                        <label><input type="radio" name="concat_q5" value="C"> C. 跳跃连接</label>
+                                        <label><input type="radio" name="concat_q5" value="D"> D. 短连接</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="concatenate_quiz">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 张量拼接练习卡片 -->
+                        <div class="exercise-card" data-exercise="tensor_concatenation">
+                            <div class="card-header">
+                                <h4>📋 张量拼接练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>练习张量拼接的具体操作和维度计算。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 拼接两个形状为[2, 3, 4]的张量，维度为1，结果形状是？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tconcat_q1" value="A"> A. [2, 6, 4]</label>
+                                        <label><input type="radio" name="tconcat_q1" value="B"> B. [4, 3, 4]</label>
+                                        <label><input type="radio" name="tconcat_q1" value="C"> C. [2, 3, 8]</label>
+                                        <label><input type="radio" name="tconcat_q1" value="D"> D. [2, 3, 4]</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 要拼接在通道维度上，PyTorch中的dim参数应该是？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tconcat_q2" value="A"> A. 0</label>
+                                        <label><input type="radio" name="tconcat_q2" value="B"> B. 1</label>
+                                        <label><input type="radio" name="tconcat_q2" value="C"> C. 2</label>
+                                        <label><input type="radio" name="tconcat_q2" value="D"> D. 3</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 拼接操作要求张量在哪些维度上必须相同？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tconcat_q3" value="A"> A. 拼接维度</label>
+                                        <label><input type="radio" name="tconcat_q3" value="B"> B. 除拼接维度外的所有维度</label>
+                                        <label><input type="radio" name="tconcat_q3" value="C"> C. 所有维度</label>
+                                        <label><input type="radio" name="tconcat_q3" value="D"> D. 没有要求</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> U-Net中上下采样特征的拼接方式是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tconcat_q4" value="A"> A. 直接相加</label>
+                                        <label><input type="radio" name="tconcat_q4" value="B"> B. 通道维度拼接</label>
+                                        <label><input type="radio" name="tconcat_q4" value="C"> C. 空间维度拼接</label>
+                                        <label><input type="radio" name="tconcat_q4" value="D"> D. 批量维度拼接</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> Concatenate操作的输出通道数计算公式是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tconcat_q5" value="A"> A. 输入通道数之和</label>
+                                        <label><input type="radio" name="tconcat_q5" value="B"> B. 输入通道数之差</label>
+                                        <label><input type="radio" name="tconcat_q5" value="C"> C. 输入通道数的最大值</label>
+                                        <label><input type="radio" name="tconcat_q5" value="D"> D. 输入通道数的平均值</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="tensor_concatenation">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 特征融合分析卡片 -->
+                        <div class="exercise-card" data-exercise="feature_fusion">
+                            <div class="card-header">
+                                <h4>🔬 特征融合分析</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>分析不同特征融合方法的特点和应用场景。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 特征融合最主要的目的是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="fusion_q1" value="A"> A. 减少参数量</label>
+                                        <label><input type="radio" name="fusion_q1" value="B"> B. 提高特征表示能力</label>
+                                        <label><input type="radio" name="fusion_q1" value="C"> C. 加速计算</label>
+                                        <label><input type="radio" name="fusion_q1" value="D"> D. 简化网络结构</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 多尺度特征融合通常用于解决什么问题？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="fusion_q2" value="A"> A. 目标检测中的尺度变化</label>
+                                        <label><input type="radio" name="fusion_q2" value="B"> B. 颜色变化</label>
+                                        <label><input type="radio" name="fusion_q2" value="C"> C. 光照变化</label>
+                                        <label><input type="radio" name="fusion_q2" value="D"> D. 噪声干扰</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> FPN（Feature Pyramid Network）使用什么融合方式？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="fusion_q3" value="A"> A. 简单的拼接</label>
+                                        <label><input type="radio" name="fusion_q3" value="B"> B. 横向连接和上采样</label>
+                                        <label><input type="radio" name="fusion_q3" value="C"> C. 直接相加</label>
+                                        <label><input type="radio" name="fusion_q3" value="D"> D. 注意力机制</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 早期融合和晚期融合有什么区别？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="fusion_q4" value="A"> A. 早期融合在输入层</label>
+                                        <label><input type="radio" name="fusion_q4" value="B"> B. 晚期融合在输出层</label>
+                                        <label><input type="radio" name="fusion_q4" value="C"> C. 早期融合更简单</label>
+                                        <label><input type="radio" name="fusion_q4" value="D"> D. 以上都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 在多模态学习中，特征融合最常遇到的问题是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="fusion_q5" value="A"> A. 模态异构性</label>
+                                        <label><input type="radio" name="fusion_q5" value="B"> B. 计算复杂度</label>
+                                        <label><input type="radio" name="fusion_q5" value="C"> C. 数据量不足</label>
+                                        <label><input type="radio" name="fusion_q5" value="D"> D. 标签不一致</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="feature_fusion">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+
+            <div id="educationConvolution">
+				<div class="educationTitle"> 卷积层（Convolution）</div>
+
+				<div class="educationContent">
+					<p><strong>功能：</strong> 使用一个小的“滤波器”在输入数据（通常是图像）上滑动，计算局部区域的点积。</p>
+					<p><strong>作用：</strong>卓越地提取局部特征，如边缘、角点、纹理等。通过参数共享，大大减少了模型的参数量。是卷积神经网络（CNN） 的核心。</p>
+					<p><strong>主要应用：</strong>图像处理、视频分析、自然语言处理。</p>
+				</div>
+                    <!-- 新增的做题链接部分 -->
+                <!-- 卷积网络练习区域 - 卡片式布局 -->
+                <div class="learning-exercises">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🧠 卷积网络练习区</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">完成以下练习来巩固卷积神经网络的相关知识</p>
+
+                    <div class="exercise-cards">
+                        <!-- 卷积知识测试卡片 -->
+                        <div class="exercise-card" data-exercise="convolution_quiz">
+                            <div class="card-header">
+                                <h4>📐 卷积知识测试</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>测试您对卷积操作、卷积核、特征提取等基本概念的理解。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 卷积操作的主要作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="conv_q1" value="A"> A. 降低计算复杂度</label>
+                                        <label><input type="radio" name="conv_q1" value="B"> B. 提取局部特征</label>
+                                        <label><input type="radio" name="conv_q1" value="C"> C. 增加模型深度</label>
+                                        <label><input type="radio" name="conv_q1" value="D"> D. 防止过拟合</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 卷积核的大小通常用什么表示？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="conv_q2" value="A"> A. 1×1</label>
+                                        <label><input type="radio" name="conv_q2" value="B"> B. 3×3</label>
+                                        <label><input type="radio" name="conv_q2" value="C"> C. 5×5</label>
+                                        <label><input type="radio" name="conv_q2" value="D"> D. 以上都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 填充（padding）的作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="conv_q3" value="A"> A. 增加输出特征图大小</label>
+                                        <label><input type="radio" name="conv_q3" value="B"> B. 保持输出特征图大小</label>
+                                        <label><input type="radio" name="conv_q3" value="C"> C. 减少输出特征图大小</label>
+                                        <label><input type="radio" name="conv_q3" value="D"> D. 增加通道数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 步长（stride）的默认值是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="conv_q4" value="A"> A. 0</label>
+                                        <label><input type="radio" name="conv_q4" value="B"> B. 1</label>
+                                        <label><input type="radio" name="conv_q4" value="C"> C. 2</label>
+                                        <label><input type="radio" name="conv_q4" value="D"> D. 3</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 以下哪种操作可以增加特征图的深度？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="conv_q5" value="A"> A. 池化操作</label>
+                                        <label><input type="radio" name="conv_q5" value="B"> B. 激活函数</label>
+                                        <label><input type="radio" name="conv_q5" value="C"> C. 使用多个卷积核</label>
+                                        <label><input type="radio" name="conv_q5" value="D"> D. 批量归一化</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="convolution_quiz">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 卷积核计算练习卡片 -->
+                        <div class="exercise-card" data-exercise="kernel_calculation">
+                            <div class="card-header">
+                                <h4>🔢 卷积核计算练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>练习卷积核的计算过程，理解卷积运算的数学原理。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 如果输入特征图大小为4×4，卷积核大小为3×3，步长为1，无填充，输出大小是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="kernel_q1" value="A"> A. 1×1</label>
+                                        <label><input type="radio" name="kernel_q1" value="B"> B. 2×2</label>
+                                        <label><input type="radio" name="kernel_q1" value="C"> C. 3×3</label>
+                                        <label><input type="radio" name="kernel_q1" value="D"> D. 4×4</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 卷积计算中，输出特征图的计算公式是什么？（输入大小为W，卷积核大小为K，步长为S，填充为P）</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="kernel_q2" value="A"> A. (W-K+2P)/S + 1</label>
+                                        <label><input type="radio" name="kernel_q2" value="B"> B. (W+K+2P)/S + 1</label>
+                                        <label><input type="radio" name="kernel_q2" value="C"> C. (W-K-2P)/S + 1</label>
+                                        <label><input type="radio" name="kernel_q2" value="D"> D. (W*K+2P)/S + 1</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 使用3×3卷积核对5×5输入进行卷积，步长为2，填充为1，输出特征图大小是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="kernel_q3" value="A"> A. 2×2</label>
+                                        <label><input type="radio" name="kernel_q3" value="B"> B. 3×3</label>
+                                        <label><input type="radio" name="kernel_q3" value="C"> C. 4×4</label>
+                                        <label><input type="radio" name="kernel_q3" value="D"> D. 5×5</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 如果要保持输入和输出特征图大小相同，使用3×3卷积核需要多少填充？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="kernel_q4" value="A"> A. 0</label>
+                                        <label><input type="radio" name="kernel_q4" value="B"> B. 1</label>
+                                        <label><input type="radio" name="kernel_q4" value="C"> C. 2</label>
+                                        <label><input type="radio" name="kernel_q4" value="D"> D. 3</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 转置卷积（deconvolution）通常用于什么任务？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="kernel_q5" value="A"> A. 图像分类</label>
+                                        <label><input type="radio" name="kernel_q5" value="B"> B. 图像分割</label>
+                                        <label><input type="radio" name="kernel_q5" value="C"> C. 图像生成</label>
+                                        <label><input type="radio" name="kernel_q5" value="D"> D. B和C都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="kernel_calculation">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 特征提取分析卡片 -->
+                        <div class="exercise-card" data-exercise="feature_extraction">
+                            <div class="card-header">
+                                <h4>🔍 特征提取分析</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>分析CNN如何通过多层卷积提取图像的层次化特征。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> CNN的浅层卷积核通常检测什么类型的特征？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="feature_q1" value="A"> A. 复杂形状</label>
+                                        <label><input type="radio" name="feature_q1" value="B"> B. 简单边缘和纹理</label>
+                                        <label><input type="radio" name="feature_q1" value="C"> C. 整体轮廓</label>
+                                        <label><input type="radio" name="feature_q1" value="D"> D. 颜色信息</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 随着网络深度的增加，卷积核学习的特征复杂度如何变化？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="feature_q2" value="A"> A. 从复杂到简单</label>
+                                        <label><input type="radio" name="feature_q2" value="B"> B. 从简单到复杂</label>
+                                        <label><input type="radio" name="feature_q2" value="C"> C. 保持不变</label>
+                                        <label><input type="radio" name="feature_q2" value="D"> D. 随机变化</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 感受野（receptive field）指的是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="feature_q3" value="A"> A. 卷积核的大小</label>
+                                        <label><input type="radio" name="feature_q3" value="B"> B. 输出像素对应的输入区域</label>
+                                        <label><input type="radio" name="feature_q3" value="C"> C. 特征图尺寸</label>
+                                        <label><input type="radio" name="feature_q3" value="D"> D. 通道数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 空洞卷积（dilated convolution）的主要优势是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="feature_q4" value="A"> A. 减少参数量</label>
+                                        <label><input type="radio" name="feature_q4" value="B"> B. 增加感受野而不增加参数</label>
+                                        <label><input type="radio" name="feature_q4" value="C"> C. 加速计算</label>
+                                        <label><input type="radio" name="feature_q4" value="D"> D. 减少过拟合</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 深度可分离卷积（depthwise separable convolution）相比标准卷积的优势是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="feature_q5" value="A"> A. 提高准确率</label>
+                                        <label><input type="radio" name="feature_q5" value="B"> B. 减少计算量和参数量</label>
+                                        <label><input type="radio" name="feature_q5" value="C"> C. 增加模型深度</label>
+                                        <label><input type="radio" name="feature_q5" value="D"> D. 简化训练过程</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="feature_extraction">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+            <div id="educationMaxPooling">
+				<div class="educationTitle"> 最大池化层（Max Pooling） </div>
+				
+				<div class="educationContent">
+					<p><strong>功能：</strong> 对输入数据的一个小区域（如2x2窗口）进行下采样，只输出该区域内的最大值。</p>
+					<p><strong>作用：</strong>神降低数据维度，减少计算量和参数，防止过拟合。保持特征的平移不变性（即无论特征在输入中的哪个位置，都能被检测到）。</p>
+					<p>通常紧随卷积层之后使用。</p>
+				</div>
+			</div>
+            
+            <div id="educationDropout">
+				<div class="educationTitle">丢弃层（Dropout）</div>
+				
+			
+				<div class="educationContent">
+					<p><strong>功能：</strong>在训练过程中，随机“关闭”（将其输出置为零）网络中一部分神经元。</p>
+					<p><strong>作用：</strong>一种非常有效的正则化技术，用于防止过拟合。通过随机丢弃，可以强制网络不依赖于任何单个神经元，从而学习到更鲁棒、更泛化的特征。</p>
+				</div>
+                    <!-- 新增的做题链接部分 -->
+                <!-- Dropout练习区域 - 卡片式布局 -->
+                <div class="learning-exercises">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">🎲 Dropout练习区</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习Dropout正则化技术和防止过拟合的方法</p>
+
+                    <div class="exercise-cards">
+                        <!-- Dropout知识测试卡片 -->
+                        <div class="exercise-card" data-exercise="dropout_quiz">
+                            <div class="card-header">
+                                <h4>🎯 Dropout知识测试</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>测试您对Dropout机制和原理的理解。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> Dropout的主要作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="drop_q1" value="A"> A. 加速训练</label>
+                                        <label><input type="radio" name="drop_q1" value="B"> B. 防止过拟合</label>
+                                        <label><input type="radio" name="drop_q1" value="C"> C. 增加准确率</label>
+                                        <label><input type="radio" name="drop_q1" value="D"> D. 减少参数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> Dropout在训练和测试阶段的行为有什么不同？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="drop_q2" value="A"> A. 训练时随机丢弃，测试时使用全部</label>
+                                        <label><input type="radio" name="drop_q2" value="B"> B. 测试时也随机丢弃</label>
+                                        <label><input type="radio" name="drop_q2" value="C"> C. 训练时使用全部，测试时丢弃</label>
+                                        <label><input type="radio" name="drop_q2" value="D"> D. 训练和测试行为相同</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> Dropout的默认丢弃概率是多少？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="drop_q3" value="A"> A. 0.1</label>
+                                        <label><input type="radio" name="drop_q3" value="B"> B. 0.2</label>
+                                        <label><input type="radio" name="drop_q3" value="C"> C. 0.5</label>
+                                        <label><input type="radio" name="drop_q3" value="D"> D. 0.8</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> Dropout为什么能防止过拟合？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="drop_q4" value="A"> A. 减少模型复杂度</label>
+                                        <label><input type="radio" name="drop_q4" value="B"> B. 创建多个子网络集成</label>
+                                        <label><input type="radio" name="drop_q4" value="C"> C. 增加训练数据</label>
+                                        <label><input type="radio" name="drop_q4" value="D"> D. 改变优化算法</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 在测试时，Dropout如何处理被丢弃的神经元？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="drop_q5" value="A"> A. 完全移除</label>
+                                        <label><input type="radio" name="drop_q5" value="B"> B. 缩放输出权重</label>
+                                        <label><input type="radio" name="drop_q5" value="C"> C. 设为零</label>
+                                        <label><input type="radio" name="drop_q5" value="D"> D. 用平均值替代</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="dropout_quiz">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 过拟合防止练习卡片 -->
+                        <div class="exercise-card" data-exercise="overfitting_prevention">
+                            <div class="card-header">
+                                <h4>🛡️ 过拟合防止练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>学习识别和防止过拟合的各种方法和技术。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 过拟合的典型表现是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="overfit_q1" value="A"> A. 训练准确率低</label>
+                                        <label><input type="radio" name="overfit_q1" value="B"> B. 训练和测试准确率差距大</label>
+                                        <label><input type="radio" name="overfit_q1" value="C"> C. 训练时间长</label>
+                                        <label><input type="radio" name="overfit_q1" value="D"> D. 参数量少</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 数据增强的主要目的是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="overfit_q2" value="A"> A. 增加数据量</label>
+                                        <label><input type="radio" name="overfit_q2" value="B"> B. 提高数据质量</label>
+                                        <label><input type="radio" name="overfit_q2" value="C"> C. 减少噪声</label>
+                                        <label><input type="radio" name="overfit_q2" value="D"> D. 标准化数据</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 早停（Early Stopping）是如何工作的？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="overfit_q3" value="A"> A. 在训练开始时停止</label>
+                                        <label><input type="radio" name="overfit_q3" value="B"> B. 监控验证集性能</label>
+                                        <label><input type="radio" name="overfit_q3" value="C"> C. 随机停止训练</label>
+                                        <label><input type="radio" name="overfit_q3" value="D"> D. 根据训练时间停止</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> L2正则化的作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="overfit_q4" value="A"> A. 增加权重值</label>
+                                        <label><input type="radio" name="overfit_q4" value="B"> B. 惩罚大权重值</label>
+                                        <label><input type="radio" name="overfit_q4" value="C"> C. 减少权重值</label>
+                                        <label><input type="radio" name="overfit_q4" value="D"> D. 随机化权重</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 批量归一化（Batch Normalization）如何帮助防止过拟合？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="overfit_q5" value="A"> A. 减少内部协变量偏移</label>
+                                        <label><input type="radio" name="overfit_q5" value="B"> B. 直接减少参数量</label>
+                                        <label><input type="radio" name="overfit_q5" value="C"> C. 增加模型复杂度</label>
+                                        <label><input type="radio" name="overfit_q5" value="D"> D. 改变损失函数</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="overfitting_prevention">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 正则化技术分析卡片 -->
+                        <div class="exercise-card" data-exercise="regularization_techniques">
+                            <div class="card-header">
+                                <h4>📏 正则化技术分析</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>深入分析各种正则化技术的原理和应用。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> L1正则化和L2正则化的主要区别是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="reg_q1" value="A"> A. L1产生稀疏解</label>
+                                        <label><input type="radio" name="reg_q1" value="B"> B. L2计算更快</label>
+                                        <label><input type="radio" name="reg_q1" value="C"> A和B都是</label>
+                                        <label><input type="radio" name="reg_q1" value="D"> D. 没有区别</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> Dropout可以被视为一种什么形式的正则化？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="reg_q2" value="A"> A. 显式正则化</label>
+                                        <label><input type="radio" name="reg_q2" value="B"> B. 隐式正则化</label>
+                                        <label><input type="radio" name="reg_q2" value="C"> C. 数据增强</label>
+                                        <label><input type="radio" name="reg_q2" value="D"> D. 优化方法</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 标签平滑（Label Smoothing）的目的是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="reg_q3" value="A"> A. 减少过拟合</label>
+                                        <label><input type="radio" name="reg_q3" value="B"> B. 提高收敛速度</label>
+                                        <label><input type="radio" name="reg_q3" value="C"> C. 增加模型容量</label>
+                                        <label><input type="radio" name="reg_q3" value="D"> D. 减少计算量</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 权重衰减（Weight Decay）的数学原理是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="reg_q4" value="A"> A. 在损失函数中添加权重惩罚项</label>
+                                        <label><input type="radio" name="reg_q4" value="B"> B. 随机初始化权重</label>
+                                        <label><input type="radio" name="reg_q4" value="C"> C. 改变学习率</label>
+                                        <label><input type="radio" name="reg_q4" value="D"> D. 增加训练数据</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 集成学习为什么能提高泛化能力？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="reg_q5" value="A"> A. 减少方差</label>
+                                        <label><input type="radio" name="reg_q5" value="B"> B. 减少偏差</label>
+                                        <label><input type="radio" name="reg_q5" value="C"> C. 增加模型复杂度</label>
+                                        <label><input type="radio" name="reg_q5" value="D"> D. 加速训练</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="regularization_techniques">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+			<div id="educationFlatten">
+				<div class="educationTitle"> 展平层（Flatten） </div>
+				<p><strong>功能：</strong>将多维的输入数据“压平”成一维数据。</p>
+					<p><strong>作用：</strong>作为卷积层到全连接层之间的过渡。因为全连接层需要一维输入，而卷积层的输出是二维或三维的特征图。</p>
+
+				<div class="educationContent">
+					<p>展平层接受一个多维输入并产生一个一维输出。例如，CIFAR 数据集是一个包含图像的集合，它是三维的，因为它由32x32像素的二维图像组成，并且有3个颜色通道（红色、绿色、蓝色）。一个展平层可以将该数据集的数据作为输入，输出一个大小为 32*32*3 = 3072 的一维向量。</p>
+				</div>
+                <!-- 新增的做题链接部分 -->
+                <!-- 展平层练习区域 - 卡片式布局 -->
+                <div class="learning-exercises">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">📏 展平层练习区</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">学习展平操作及其在神经网络中的应用</p>
+
+                    <div class="exercise-cards">
+                        <!-- 展平层知识测试卡片 -->
+                        <div class="exercise-card" data-exercise="flatten_quiz">
+                            <div class="card-header">
+                                <h4>📊 展平层知识测试</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>测试您对展平层基本概念和作用的理解。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 展平层（Flatten）的输入通常是什么形状？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="flat_q1" value="A"> A. 一维向量</label>
+                                        <label><input type="radio" name="flat_q1" value="B"> B. 二维矩阵</label>
+                                        <label><input type="radio" name="flat_q1" value="C"> C. 三维张量</label>
+                                        <label><input type="radio" name="flat_q1" value="D"> D. 四维张量</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 展平层通常用于连接什么类型的层？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="flat_q2" value="A"> A. 卷积层到卷积层</label>
+                                        <label><input type="radio" name="flat_q2" value="B"> B. 卷积层到全连接层</label>
+                                        <label><input type="radio" name="flat_q2" value="C"> C. 全连接层到全连接层</label>
+                                        <label><input type="radio" name="flat_q2" value="D"> D. 池化层到池化层</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 展平操作是否会丢失空间信息？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="flat_q3" value="A"> A. 完全丢失</label>
+                                        <label><input type="radio" name="flat_q3" value="B"> B. 部分保留</label>
+                                        <label><input type="radio" name="flat_q3" value="C"> C. 完全保留</label>
+                                        <label><input type="radio" name="flat_q3" value="D"> D. 看情况而定</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 展平层之后的全连接层需要多少个神经元？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="flat_q4" value="A"> A. 输入通道数</label>
+                                        <label><input type="radio" name="flat_q4" value="B"> B. 展平后的元素总数</label>
+                                        <label><input type="radio" name="flat_q4" value="C"> C. 任意数量</label>
+                                        <label><input type="radio" name="flat_q4" value="D"> D. 等于类别数</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> 在CNN中，展平层的位置通常在哪里？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="flat_q5" value="A"> A. 网络开始处</label>
+                                        <label><input type="radio" name="flat_q5" value="B"> B. 卷积层和全连接层之间</label>
+                                        <label><input type="radio" name="flat_q5" value="C"> C. 网络结尾处</label>
+                                        <label><input type="radio" name="flat_q5" value="D"> D. 池化层之后</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="flatten_quiz">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 维度计算练习卡片 -->
+                        <div class="exercise-card" data-exercise="dimension_calculation">
+                            <div class="card-header">
+                                <h4>📐 维度计算练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>练习张量维度的计算，掌握展平操作的数学原理。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 32×32×3的图像展平后变成多少维向量？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="dim_q1" value="A"> A. 3072</label>
+                                        <label><input type="radio" name="dim_q1" value="B"> B. 1024</label>
+                                        <label><input type="radio" name="dim_q1" value="C"> C. 96</label>
+                                        <label><input type="radio" name="dim_q1" value="D"> D. 32</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> 4×4×64的特征图展平后有多少元素？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="dim_q2" value="A"> A. 64</label>
+                                        <label><input type="radio" name="dim_q2" value="B"> B. 256</label>
+                                        <label><input type="radio" name="dim_q2" value="C"> C. 1024</label>
+                                        <label><input type="radio" name="dim_q2" value="D"> D. 16384</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> 展平操作如何影响批量大小？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="dim_q3" value="A"> A. 批量大小变为1</label>
+                                        <label><input type="radio" name="dim_q3" value="B"> B. 批量大小保持不变</label>
+                                        <label><input type="radio" name="dim_q3" value="C"> C. 批量大小翻倍</label>
+                                        <label><input type="radio" name="dim_q3" value="D"> D. 批量大小减半</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> 展平后的向量维度计算公式是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="dim_q4" value="A"> A. H × W × C</label>
+                                        <label><input type="radio" name="dim_q4" value="B"> B. H + W + C</label>
+                                        <label><input type="radio" name="dim_q4" value="C"> C. H × W ÷ C</label>
+                                        <label><input type="radio" name="dim_q4" value="D"> D. (H × W × C) ÷ batch_size</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> Global Average Pooling可以替代展平层吗？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="dim_q5" value="A"> A. 不可以，完全不同</label>
+                                        <label><input type="radio" name="dim_q5" value="B"> B. 可以，在某些情况下</label>
+                                        <label><input type="radio" name="dim_q5" value="C"> C. 可以，效果更好</label>
+                                        <label><input type="radio" name="dim_q5" value="D"> D. 可以，但更复杂</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="dimension_calculation">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 张量操作练习卡片 -->
+                        <div class="exercise-card" data-exercise="tensor_operations">
+                            <div class="card-header">
+                                <h4>🔄 张量操作练习</h4>
+                                <div class="progress-indicator">
+                                    <span class="progress-text">未完成</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-content">
+                                <p>练习张量操作和变换，理解深度学习中的数据流。</p>
+                                <button class="start-exercise-btn">开始练习</button>
+                            </div>
+                            <div class="card-questions" style="display: none;">
+                                <div class="question">
+                                    <p><strong>题目1:</strong> 张量（tensor）的维度通常如何表示？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tensor_q1" value="A"> A. (batch_size, height, width)</label>
+                                        <label><input type="radio" name="tensor_q1" value="B"> B. (batch_size, channels, height, width)</label>
+                                        <label><input type="radio" name="tensor_q1" value="C"> C. (height, width, channels)</label>
+                                        <label><input type="radio" name="tensor_q1" value="D"> D. 以上都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目2:</strong> Reshape操作和展平操作有什么区别？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tensor_q2" value="A"> A. Reshape保持元素顺序</label>
+                                        <label><input type="radio" name="tensor_q2" value="B"> B. 展平只能变为一维</label>
+                                        <label><input type="radio" name="tensor_q2" value="C"> C. Reshape可以改变维度</label>
+                                        <label><input type="radio" name="tensor_q2" value="D"> D. 以上都是</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目3:</strong> Transpose操作通常用于什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tensor_q3" value="A"> A. 改变数据类型</label>
+                                        <label><input type="radio" name="tensor_q3" value="B"> B. 重新排列维度顺序</label>
+                                        <label><input type="radio" name="tensor_q3" value="C"> C. 增加维度</label>
+                                        <label><input type="radio" name="tensor_q3" value="D"> D. 减少维度</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目4:</strong> Squeeze操作的作用是什么？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tensor_q4" value="A"> A. 移除大小为1的维度</label>
+                                        <label><input type="radio" name="tensor_q4" value="B"> B. 增加维度</label>
+                                        <label><input type="radio" name="tensor_q4" value="C"> C. 改变元素值</label>
+                                        <label><input type="radio" name="tensor_q4" value="D"> D. 复制张量</label>
+                                    </div>
+                                </div>
+
+                                <div class="question">
+                                    <p><strong>题目5:</strong> Concatenate操作在神经网络中最常用于？</p>
+                                    <div class="options">
+                                        <label><input type="radio" name="tensor_q5" value="A"> A. 合并不同来源的特征</label>
+                                        <label><input type="radio" name="tensor_q5" value="B"> B. 分割特征图</label>
+                                        <label><input type="radio" name="tensor_q5" value="C"> C. 改变特征大小</label>
+                                        <label><input type="radio" name="tensor_q5" value="D"> D. 减少特征维度</label>
+                                    </div>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="submit-btn" data-category="tensor_operations">提交答案</button>
+                                    <button class="close-exercise-btn">收起练习</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+
+			<div id="educationDense">
+				<div class="educationTitle"> 全连接层（Dense） </div>
+				
+				<div class="educationContent">
+					<p><strong>功能：</strong> 最基础、最常见的层。层中的每个神经元都与上一层的所有神经元相连。</p>
+					<p><strong>作用：</strong>用于学习输入特征之间的全局模式。通常用在网络的最后几层进行分类或回归。</p>
+					<p><strong>类比：</strong>像一个传统的“多层感知机”。</p>
+				</div>
+			</div>
+
+			
+
+			
 			<div id="educationMLP">
 				<div class="educationTitle">感知机</div>
 				<div class="educationContent">
@@ -4451,9 +4532,105 @@
                 </div>
             </div>
 
+			<div id="educationTransformer">
+				    <div class="educationTitle">注意力机制（Transformer）</div>
+					<div class="educationContent">
+						<p>在过去几年中，Transformer 模型已经成为高级深度学习和深度神经网络领域的热门话题。自从其在 2017 年被引入以来，Transformer 深度学习模型架构已经在几乎所有可能的领域中得到了广泛应用和演进。该模型不仅在自然语言处理任务中表现出色，还对于其他领域，尤其是时间序列预测方面，也具有巨大的帮助和潜力。</p>
+						<p>Transformer 模型是一种深度学习架构，自 2017 年推出以来，彻底改变了自然语言处理 (NLP) 领域。该模型由 Vaswani 等人提出，并已成为 NLP 界最具影响力的模型之一。</p>
+						<p>通常而言，传统的顺序模型（例如循环神经网络 (RNN)）在捕获远程依赖性和实现并行计算方面存在局限性。为了解决这些问题，Transformer 模型引入了自注意力机制，通过广泛使用该机制，模型能够在生成输出时权衡输入序列中不同位置的重要性。</p>
+			            <p>Transformer 模型通过自注意力机制和并行计算的优势，能够更好地处理长距离依赖关系，提高了模型的训练和推理效率。它在机器翻译、文本摘要、问答系统等多个 NLP 任务中取得了显著的性能提升。</p>
+						<p>除此之外，Transformer 模型的突破性表现使得它成为现代 NLP 研究和应用中的重要组成部分。它能够捕捉复杂的语义关系和上下文信息，极大地推动了自然语言处理的发展。</p>
+						<div class="educationSection">Transformer 模型历史发展</div>
+						<p>Transformer 在神经网络中的历史可以追溯到20世纪90年代初，当时 Jürgen Schmidhuber 提出了第一个 Transformer 模型的概念。这个模型被称为"快速权重控制器"，它采用了自注意力机制来学习句子中单词之间的关系。然而，尽管这个早期的 Transformer 模型在概念上是先进的，但由于其效率较低，它并未得到广泛的应用。</p>
+						<p>随着时间的推移和深度学习技术的发展，Transformer 在2017年的一篇开创性论文中被正式引入，并取得了巨大的成功。通过引入自注意力机制和位置编码层，有效地捕捉输入序列中的长距离依赖关系，并且在处理长序列时表现出色。此外，Transformer 模型的并行化计算能力也使得训练速度更快，推动了深度学习在自然语言处理领域的重大突破，如机器翻译任务中的BERT（Bidirectional Encoder Representations from Transformers）模型等。</p>
+						<p>因此，尽管早期的"快速权重控制器"并未受到广泛应用，但通过 Vaswani 等人的论文，Transformer 模型得到了重新定义和改进，成为现代深度学习的前沿技术之一，并在自然语言处理等领域取得了令人瞩目的成就。</p>
+			    	    <p> Transformer 之所以如此成功，是因为它能够学习句子中单词之间的长距离依赖关系，这对于许多自然语言处理（NLP）任务至关重要，因为它允许模型理解单词在句子中的上下文。Transformer 利用自注意力机制来实现这一点，该机制使得模型在解码输出标记时能够聚焦于句子中最相关的单词。</p>
+						<p>Transformer 对 NLP 领域产生了重大影响。它现在被广泛应用于许多 NLP 任务，并且不断进行改进。未来，Transformer 很可能被用于解决更广泛的 NLP 任务，并且它们将变得更加高效和强大。</p>
+						<p>有关神经网络 Transformer 历史上的一些关键发展事件，我们可参考如下所示：</p>
+						<li>1、1990年：Jürgen Schmidhuber 提出了第一个 Transformer 模型，即"快速权重控制器"。</li>
+						<li>2、2017年：Vaswani 等人发表了论文《Attention is All You Need》，介绍了 Transformer 模型的核心思想。</li>
+						<li>3、2018年：Transformer 模型在各种 NLP 任务中取得了最先进的结果，包括机器翻译、文本摘要和问答等。</li>
+						<li>4、2019年：Transformer 被用于创建大型语言模型（LLM），例如 BERT 和 GPT-2，这些模型在各种 NLP 任务中取得了重要突破。</li>
+						<li> 5、2020年：Transformer 继续被用于创建更强大的模型，例如 GPT-3，它在自然语言生成和理解方面取得了惊人的成果。</li>
+						<p>总的来说，Transformer 模型的引入对于 NLP 领域产生了革命性的影响。它的能力在于学习长距离依赖关系并理解上下文，使得它成为众多 NLP 任务的首选方法，并为未来的发展提供了广阔的可能性。</p>
+						<div class="educationSection">Transformer 模型通用架构设计</div>
+						<p>Transformer 架构是从 RNN（循环神经网络）的编码器-解码器架构中汲取灵感而来，其引入了注意力机制。它被广泛应用于序列到序列（seq2seq）任务，并且相比于 RNN， Transformer 摒弃了顺序处理的方式。</p>
+						<p>不同于 RNN，Transformer 以并行化的方式处理数据，从而实现更大规模的并行计算和更快速的训练。这得益于 Transformer 架构中的自注意力机制，它使得模型能够同时考虑输入序列中的所有位置，而无需按顺序逐步处理。自注意力机制允许模型根据输入序列中的不同位置之间的关系，对每个位置进行加权处理，从而捕捉全局上下文信息。</p>
+						<image class="educationImage" src="resources/educationimages/transformer_1.png"  alt="transformer_1" ></image>
+						<p>基于如上的 Transformer 深度学习模型的整体架构参考模型图，我们可以看到：它由两个主要组件组成：</p>
+						<li><strong> 1、编码器堆栈 </strong></li>
+						<p>这是由 Nx 个相同的编码器层组成的堆栈（在原始论文中，Nx=6）。每个编码器层都由两个子层组成：多头自注意力机制和前馈神经网络。多头自注意力机制用于对输入序列中的不同位置之间的关系进行建模，而前馈神经网络则用于对每个位置进行非线性转换。编码器堆栈的作用是将输入序列转换为一系列高级特征表示。</p>
+						<li><strong> 2、解码器堆栈 </strong></li>
+						<p>这也是由 Nx 个相同的解码器层组成的堆栈（在原始论文中，Nx=6）。每个解码器层除了包含编码器层的两个子层外，还包含一个额外的多头自注意力机制子层。这个额外的自注意力机制用于对编码器堆栈的输出进行关注，并帮助解码器对输入序列中的信息进行解码和生成输出序列。</p>
+						<p>在编码器和解码器堆栈之间，还有一个位置编码层。这个位置编码层的作用是利用序列的顺序信息，为输入序列中的每个位置提供一个固定的编码表示。这样，模型可以在没有递归或卷积操作的情况下，利用位置编码层来处理序列的顺序信息。</p>
+						<div class="educationSection">什么是 Transformer 神经网络？</div>
+						<p>众所周知，Transformer 在处理文本序列、基因组序列、声音和时间序列数据等神经网络设计中起着关键作用。其中，自然语言处理是 Transformer 神经网络最常见的应用领域。</p>
+						<p>当给定一个向量序列时，Transformer 神经网络会对这些向量进行编码，并将其解码回原始形式。而 Transformer 的注意力机制则是其不可或缺的核心组成部分。注意力机制表明了在输入序列中，对于给定标记的编码，其周围其他标记的上下文信息的重要性。</p>
+					    <P>打个比方，在机器翻译模型中，注意力机制使得 Transformer 能够根据所有相关单词的上下文，将英语中的"it"正确翻译为法语或西班牙语中的性别对应的词汇。 Transformers 能够利用注意力机制来确定如何翻译当前单词，同时考虑其周围单词的影响。</P>
+						<p>然而，需要注意的是，Transformer 神经网络取代了早期的循环神经网络（RNN）、长短期记忆（LSTM）和门控循环单元（GRU）等模型，成为了更为先进和有效的选择。</p>
+						<p>通常而言，Transformer 神经网络接受输入句子并将其编码为两个不同的序列：</p>
+						<li><strong>1、词向量嵌入序列</strong></li>
+						<p>词向量嵌入是文本的数字表示形式。在这种情况下，神经网络只能处理转换为嵌入表示的单词。字典中的单词在嵌入表示中表示为向量。</p>
+						<li><strong>2、位置编码器序列</strong></li>
+						<p>位置编码器将原始文本中单词的位置表示为向量。Transformer 将词向量嵌入和位置编码结合起来。然后，它将组合结果发送到各个编码器，然后是解码器。</p>
+						<p>与 RNN 和 LSTM 按顺序提供输入不同，Transformer 同时提供输入。每个编码器将其输入转换为另一个向量序列，称为编码。</p>
+						<p>解码器以相反的顺序工作。它将编码转换回概率，并根据概率生成输出单词。通过使用 softmax 函数，Transformer 可以根据输出概率生成句子。</p>
+						<p>每个解码器和编码器中都有一个称为注意力机制的组件。它允许一个输入单词使用其他单词的相关信息进行处理，同时屏蔽不包含相关信息的单词。</p>
+						<p>为了充分利用 GPU 提供的并行计算能力，Transformer 使用多头注意力机制进行并行实现。多头注意力机制允许同时处理多个注意力机制，从而提高计算效率。</p>
+						<p>相比于 LSTM 和 RNN，Transformer 深度学习模型的优势之一是能够同时处理多个单词。这得益于 Transformer 的并行计算能力，使得它能够更高效地处理序列数据。</p>
+                    </div>
+
+				
+			</div>
 			
-			
-			
+			<div class="educationTitle">激活函数</div>
+                        <p>激活函数为神经网络引入了非线性，使其能够学习并模拟复杂的数据模式。没有它，神经网络就只是一堆线性回归的堆叠。</p>
+			<div id="educationReLU">
+				 <div class="educationTitle">ReLU-线性整流函数</div>
+				 <div class="educationContent">
+					    <p><strong>公式：</strong>f(x) = max(0, x)</p>
+					    <p><strong>特点：</strong>目前最常用的激活函数。计算简单，能有效缓解梯度消失问题。</p>
+						<p><strong>缺点：</strong>在输入为负数时，梯度为零，可能导致“神经元死亡”。</p>
+				 </div>
+			</div>
+
+			<div id="educationSigmoid">
+				 <div class="educationTitle">Sigmoid</div>
+				 <div class="educationContent">
+					<p><strong>公式：</strong>f(x) = 1 / (1 + e^(-x))</p>
+					<p><strong>特点：</strong>将输入压缩到(0, 1) 区间。输出可以解释为概率。</p>
+					<p><strong>用途：</strong>常用于二分类问题的输出层。</p>
+					<p><strong>缺点：</strong>两端饱和区容易导致梯度消失；输出不是零中心的。</p>
+				 </div>
+			</div>
+
+			<div id="educationTanh">
+				 <div class="educationTitle">Tanh-双曲正切函数</div>
+				 <div class="educationContent">
+					<p><strong>公式：</strong>f(x) = (e^x - e^(-x)) / (e^x + e^(-x))</p>
+					<p><strong>特点：</strong>将输入压缩到(-1, 1) 区间。是零中心的。</p>
+					<p><strong>用途：</strong>常通常比Sigmoid表现更好，尤其在隐藏层中。</p>
+					<p><strong>缺点：</strong>两端饱和区容易导致梯度消失；输出不是零中心的。</p>
+				 </div>
+			</div>
+
+            <div id="educationSoftmax">
+				 <div class="educationTitle">Softmax</div>
+				 <div class="educationContent">
+					<p><strong>核心作用:</strong></p>
+					<li>1.将任意实数值的分数转换为概率分布。</li>
+					<li>2.放大分数间的差异，使得最大值在概率上更加突出。</li>
+					<p><strong>公式：</strong></p>
+					<p>对于一个包含K个类别的向量<span class="math inline">\(Z=[z_1,z_2,...,z_K]\)</span>Softmax的计算如下：</p>
+					<p><span class="math inline">\[\sigma(z_i)=e^{z_i}/{\sum_{j=1}^{K}e^{z_{j}}}\]</span></p>
+					<p><strong>结果解释：</strong></p>
+					<li>每个经过 Softmax处理后的输出<span class="math inline">\(\sigma(z_i)\)</span>都是一个介于0和1之间的值。</li>
+					<li>所有输出的总和为1</li>
+					<li>因此，输出可以被解释为每个类别的概率。</li>
+
+					<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+				 </div>
+			</div>
 
 
 			<div style="height:100px;"> </div>
