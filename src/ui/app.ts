@@ -32,6 +32,7 @@ import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
+import { initializeExerciseSystem } from "./exercises";
 
 
 export interface IDraggableData {
@@ -169,6 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
         makeResizable(aiAssistantDialogElement);
     }
     setupEducationSelectionWatcher();
+    // 初始化教学模块做题系统
+    initializeExerciseSystem();
 });
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {

@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="欢迎来到BBVDLE，让您能够智能化、可视化地学习神经网络。">
 	<title>BBVDLE ~ 基于可视化积木编程的深度学习教学平台 ~</title>
 
@@ -1148,11 +1149,9 @@
 						<p>为了充分利用 GPU 提供的并行计算能力，Transformer 使用多头注意力机制进行并行实现。多头注意力机制允许同时处理多个注意力机制，从而提高计算效率。</p>
 						<p>相比于 LSTM 和 RNN，Transformer 深度学习模型的优势之一是能够同时处理多个单词。这得益于 Transformer 的并行计算能力，使得它能够更高效地处理序列数据。</p>
                     </div>
-
-				
 			</div>
-        
-						<div class="educationTitle">激活函数</div>
+
+			<div class="educationTitle">激活函数</div>
                         <p>激活函数为神经网络引入了非线性，使其能够学习并模拟复杂的数据模式。没有它，神经网络就只是一堆线性回归的堆叠。</p>
 			<div id="educationReLU">
 				 <div class="educationTitle">ReLU-线性整流函数</div>
@@ -1208,13 +1207,460 @@
 					<p>    </p>
 					<p>    </p>
 					<p>    </p>
-					
 				 </div>
 			</div>
-			
 
+			<!-- 教学模块统一练习区 -->
+			<div class="learning-exercises">
+				<h2 class="exercise-main-title">教学模块综合练习</h2>
+				<p class="exercise-main-desc">
+					在完成上面的理论学习后，可以通过下面的练习卡片进行自测。每个卡片对应一个教学模块，包含 3 道单选题。
+				</p>
+				<div class="exercise-cards">
 
-			<div style="height:100px;"> </div>
+					<!-- 概述练习 -->
+					<div class="exercise-card" data-exercise="overview_quiz">
+						<div class="card-header">
+							<h4>📖 概述：深度学习基础理解</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>检测你对“关于深度学习神经网络”与“深度学习基本知识”板块的整体理解。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> 深度学习相较于传统机器学习最大的优势之一是？</p>
+								<div class="options">
+									<label><input type="radio" name="overview_q1" value="A"> A. 不需要大量数据</label>
+									<label><input type="radio" name="overview_q1" value="B"> B. 能自动从数据中学习多层次特征表示</label>
+									<label><input type="radio" name="overview_q1" value="C"> C. 只能处理图像数据</label>
+									<label><input type="radio" name="overview_q1" value="D"> D. 不需要任何计算资源</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 在平台中，拖拽式搭建网络的主要目的是？</p>
+								<div class="options">
+									<label><input type="radio" name="overview_q2" value="A"> A. 仅用于美观展示</label>
+									<label><input type="radio" name="overview_q2" value="B"> B. 替代所有代码实现</label>
+									<label><input type="radio" name="overview_q2" value="C"> C. 帮助初学者以可视化方式理解网络结构</label>
+									<label><input type="radio" name="overview_q2" value="D"> D. 只用于导出 Python 代码</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 深度学习中“泛化能力”主要指的是？</p>
+								<div class="options">
+									<label><input type="radio" name="overview_q3" value="A"> A. 在训练集上达到 100% 准确率</label>
+									<label><input type="radio" name="overview_q3" value="B"> B. 在未见过的新数据上仍有良好表现</label>
+									<label><input type="radio" name="overview_q3" value="C"> C. 模型参数越多越好</label>
+									<label><input type="radio" name="overview_q3" value="D"> D. 训练越久越好</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="overview_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- 过拟合练习 -->
+					<div class="exercise-card" data-exercise="overfitting_quiz">
+						<div class="card-header">
+							<h4>📉 过拟合与正则化</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>围绕“过拟合（Overfitting）”章节，检查你对正则化、Dropout 等概念的掌握情况。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> 下面哪一种现象最符合“过拟合”？</p>
+								<div class="options">
+									<label><input type="radio" name="overfit_q1" value="A"> A. 训练集与测试集准确率都很低</label>
+									<label><input type="radio" name="overfit_q1" value="B"> B. 训练集与测试集准确率都很高</label>
+									<label><input type="radio" name="overfit_q1" value="C"> C. 训练集准确率很高而测试集准确率明显偏低</label>
+									<label><input type="radio" name="overfit_q1" value="D"> D. 训练过程损失震荡不收敛</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> L2 正则化的核心目的是？</p>
+								<div class="options">
+									<label><input type="radio" name="overfit_q2" value="A"> A. 增大权重范数，使模型更复杂</label>
+									<label><input type="radio" name="overfit_q2" value="B"> B. 惩罚过大的权重，鼓励更“简单”的模型</label>
+									<label><input type="radio" name="overfit_q2" value="C"> C. 提高学习率</label>
+									<label><input type="radio" name="overfit_q2" value="D"> D. 减小数据集规模</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> Dropout 的直观理解更接近于？</p>
+								<div class="options">
+									<label><input type="radio" name="overfit_q3" value="A"> A. 集成若干个子网络的平均效果</label>
+									<label><input type="radio" name="overfit_q3" value="B"> B. 只训练网络的输出层</label>
+									<label><input type="radio" name="overfit_q3" value="C"> C. 冻结所有权重不更新</label>
+									<label><input type="radio" name="overfit_q3" value="D"> D. 数据增强</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="overfitting_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- 感知机 / MLP 练习 -->
+					<div class="exercise-card" data-exercise="mlp_quiz">
+						<div class="card-header">
+							<h4>🧠 多层感知机（MLP）</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>结合“感知机”章节，理解输入层、隐藏层、输出层及激活函数的作用。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> 多层感知机之所以“多层”，主要是因为？</p>
+								<div class="options">
+									<label><input type="radio" name="mlp_q1" value="A"> A. 含有一个或多个隐藏层</label>
+									<label><input type="radio" name="mlp_q1" value="B"> B. 输入层神经元非常多</label>
+									<label><input type="radio" name="mlp_q1" value="C"> C. 输出层有多个类别</label>
+									<label><input type="radio" name="mlp_q1" value="D"> D. 训练轮数很多</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 下列哪一项不是隐藏层的主要作用？</p>
+								<div class="options">
+									<label><input type="radio" name="mlp_q2" value="A"> A. 提取非线性特征</label>
+									<label><input type="radio" name="mlp_q2" value="B"> B. 直接与外部数据交互（如读取文件）</label>
+									<label><input type="radio" name="mlp_q2" value="C"> C. 通过权重和偏置变换输入</label>
+									<label><input type="radio" name="mlp_q2" value="D"> D. 通过激活函数增加表达能力</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 下面哪种激活函数更适合作为隐藏层默认选择？</p>
+								<div class="options">
+									<label><input type="radio" name="mlp_q3" value="A"> A. ReLU</label>
+									<label><input type="radio" name="mlp_q3" value="B"> B. 线性函数</label>
+									<label><input type="radio" name="mlp_q3" value="C"> C. 恒等函数</label>
+									<label><input type="radio" name="mlp_q3" value="D"> D. 常数函数</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="mlp_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- CNN 练习 -->
+					<div class="exercise-card" data-exercise="cnn_quiz">
+						<div class="card-header">
+							<h4>🖼️ 卷积神经网络（CNN）</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>对应“卷积神经网络”章节，检查你对卷积核、池化、展平和全连接的理解。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> 卷积层相比全连接层的一个关键优势是？</p>
+								<div class="options">
+									<label><input type="radio" name="cnn_q1" value="A"> A. 参数更多，表达能力更强</label>
+									<label><input type="radio" name="cnn_q1" value="B"> B. 通过权重共享显著减少参数数量</label>
+									<label><input type="radio" name="cnn_q1" value="C"> C. 不需要激活函数</label>
+									<label><input type="radio" name="cnn_q1" value="D"> D. 只能用于灰度图像</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 最大池化（Max Pooling）的主要作用不包括？</p>
+								<div class="options">
+									<label><input type="radio" name="cnn_q2" value="A"> A. 降低特征图空间尺寸</label>
+									<label><input type="radio" name="cnn_q2" value="B"> B. 一定程度提高平移不变性</label>
+									<label><input type="radio" name="cnn_q2" value="C"> C. 减少计算量</label>
+									<label><input type="radio" name="cnn_q2" value="D"> D. 增加参数数量</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 展平层（Flatten）通常位于网络的哪个位置？</p>
+								<div class="options">
+									<label><input type="radio" name="cnn_q3" value="A"> A. 输入层之前</label>
+									<label><input type="radio" name="cnn_q3" value="B"> B. 所有卷积与池化层之后、全连接层之前</label>
+									<label><input type="radio" name="cnn_q3" value="C"> C. 输出层之后</label>
+									<label><input type="radio" name="cnn_q3" value="D"> D. 随机位置</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="cnn_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- 现代 CNN 练习 -->
+					<div class="exercise-card" data-exercise="modern_cnn_quiz">
+						<div class="card-header">
+							<h4>🏗️ 现代卷积网络（AlexNet / VGG / ResNet 等）</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>结合“现代卷积神经网络”章节，理解典型架构演化如 AlexNet、VGG、ResNet、DenseNet 等。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> VGG 网络相较 AlexNet 的一个显著特点是？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_cnn_q1" value="A"> A. 使用更大的卷积核（11×11 为主）</label>
+									<label><input type="radio" name="modern_cnn_q1" value="B"> B. 完全取消卷积层</label>
+									<label><input type="radio" name="modern_cnn_q1" value="C"> C. 通过重复使用 3×3 卷积块堆叠深层网络</label>
+									<label><input type="radio" name="modern_cnn_q1" value="D"> D. 不再使用最大池化</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> ResNet 引入残差块的主要目的是？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_cnn_q2" value="A"> A. 增加参数量</label>
+									<label><input type="radio" name="modern_cnn_q2" value="B"> B. 让网络更浅</label>
+									<label><input type="radio" name="modern_cnn_q2" value="C"> C. 通过恒等捷径缓解梯度消失，训练更深网络</label>
+									<label><input type="radio" name="modern_cnn_q2" value="D"> D. 只用于减少计算量</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> DenseNet 与 ResNet 在跨层连接上的主要差异是？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_cnn_q3" value="A"> A. DenseNet 只连接相邻两层</label>
+									<label><input type="radio" name="modern_cnn_q3" value="B"> B. ResNet 使用拼接，DenseNet 使用相加</label>
+									<label><input type="radio" name="modern_cnn_q3" value="C"> C. ResNet 使用相加，DenseNet 使用特征图连结</label>
+									<label><input type="radio" name="modern_cnn_q3" value="D"> D. 两者完全相同</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="modern_cnn_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- RNN 练习 -->
+					<div class="exercise-card" data-exercise="rnn_quiz">
+						<div class="card-header">
+							<h4>🔁 循环神经网络（RNN）</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>针对“循环神经网络”章节，理解隐藏状态、时间展开和 BPTT 的基本思想。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> RNN 相比普通前馈网络的核心区别是？</p>
+								<div class="options">
+									<label><input type="radio" name="rnn_q1" value="A"> A. 引入隐藏状态在时间维度上传递</label>
+									<label><input type="radio" name="rnn_q1" value="B"> B. 不使用激活函数</label>
+									<label><input type="radio" name="rnn_q1" value="C"> C. 不需要权重参数</label>
+									<label><input type="radio" name="rnn_q1" value="D"> D. 只能处理固定长度输入</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 时间反向传播（BPTT）的主要目的是？</p>
+								<div class="options">
+									<label><input type="radio" name="rnn_q2" value="A"> A. 只在最后一个时间步更新参数</label>
+									<label><input type="radio" name="rnn_q2" value="B"> B. 将 RNN 在时间上展开，对每个时间步执行反向传播</label>
+									<label><input type="radio" name="rnn_q2" value="C"> C. 用于初始化权重</label>
+									<label><input type="radio" name="rnn_q2" value="D"> D. 只更新输入层权重</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 下列哪个场景更适合 N→1 结构的 RNN？</p>
+								<div class="options">
+									<label><input type="radio" name="rnn_q3" value="A"> A. 文本情感分类</label>
+									<label><input type="radio" name="rnn_q3" value="B"> B. 机器翻译</label>
+									<label><input type="radio" name="rnn_q3" value="C"> C. 语音转文字</label>
+									<label><input type="radio" name="rnn_q3" value="D"> D. 音乐生成</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="rnn_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- 现代 RNN / GRU / LSTM / 双向 RNN 练习 -->
+					<div class="exercise-card" data-exercise="modern_rnn_quiz">
+						<div class="card-header">
+							<h4>⚙️ 现代循环网络（GRU / LSTM / 双向 RNN）</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>围绕“现代循环神经网络”章节，理解门机制、记忆单元与双向结构的优势。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> GRU 中“更新门”的作用更接近于？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_rnn_q1" value="A"> A. 决定遗忘多少旧信息、保留多少新信息</label>
+									<label><input type="radio" name="modern_rnn_q1" value="B"> B. 决定输入序列长度</label>
+									<label><input type="radio" name="modern_rnn_q1" value="C"> C. 决定学习率大小</label>
+									<label><input type="radio" name="modern_rnn_q1" value="D"> D. 决定损失函数形式</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> LSTM 中记忆元 \(C_t\) 的特点是？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_rnn_q2" value="A"> A. 不参与梯度传播</label>
+									<label><input type="radio" name="modern_rnn_q2" value="B"> B. 通过遗忘门与输入门共同更新，适合长期信息传递</label>
+									<label><input type="radio" name="modern_rnn_q2" value="C"> C. 与隐藏状态完全相同</label>
+									<label><input type="radio" name="modern_rnn_q2" value="D"> D. 只能存储当前时间步信息</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 双向 RNN 相比单向 RNN 的一个优势是？</p>
+								<div class="options">
+									<label><input type="radio" name="modern_rnn_q3" value="A"> A. 不再需要隐藏状态</label>
+									<label><input type="radio" name="modern_rnn_q3" value="B"> B. 同时利用前后文信息，适合依赖双向上下文的任务</label>
+									<label><input type="radio" name="modern_rnn_q3" value="C"> C. 只能用于图像任务</label>
+									<label><input type="radio" name="modern_rnn_q3" value="D"> D. 不再需要反向传播</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="modern_rnn_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- Transformer 练习 -->
+					<div class="exercise-card" data-exercise="transformer_quiz">
+						<div class="card-header">
+							<h4>🧩 Transformer 与自注意力</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>针对“注意力机制（Transformer）”章节，检查你对自注意力、编码器-解码器结构的理解。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> Transformer 相比传统 RNN 的一个关键优势是？</p>
+								<div class="options">
+									<label><input type="radio" name="trans_q1" value="A"> A. 不需要任何矩阵运算</label>
+									<label><input type="radio" name="trans_q1" value="B"> B. 只能处理短序列</label>
+									<label><input type="radio" name="trans_q1" value="C"> C. 通过自注意力机制实现更好的并行和长距离依赖建模</label>
+									<label><input type="radio" name="trans_q1" value="D"> D. 不再需要优化器</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 位置编码（Positional Encoding）在 Transformer 中的作用是？</p>
+								<div class="options">
+									<label><input type="radio" name="trans_q2" value="A"> A. 控制学习率</label>
+									<label><input type="radio" name="trans_q2" value="B"> B. 引入序列位置信息，弥补自注意力对顺序不敏感的问题</label>
+									<label><input type="radio" name="trans_q2" value="C"> C. 只用于解码器</label>
+									<label><input type="radio" name="trans_q2" value="D"> D. 替代词向量</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> 多头自注意力（Multi-Head Attention）的好处包括？</p>
+								<div class="options">
+									<label><input type="radio" name="trans_q3" value="A"> A. 只保留单一尺度的注意力模式</label>
+									<label><input type="radio" name="trans_q3" value="B"> B. 并行计算多个注意力头，捕捉不同子空间的关系</label>
+									<label><input type="radio" name="trans_q3" value="C"> C. 减少模型容量</label>
+									<label><input type="radio" name="trans_q3" value="D"> D. 完全替代前馈网络</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="transformer_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+					<!-- 激活函数综合练习 -->
+					<div class="exercise-card" data-exercise="activations_quiz">
+						<div class="card-header">
+							<h4>⚡ 激活函数综合测试</h4>
+							<div class="progress-indicator">
+								<span class="progress-text">未作答</span>
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: 0%"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-content">
+							<p>对应“激活函数”小节，梳理 ReLU、Sigmoid、Tanh 与 Softmax 的特点与适用场景。</p>
+							<button class="start-exercise-btn">开始练习</button>
+						</div>
+						<div class="card-questions" style="display:none;">
+							<div class="question">
+								<p><strong>题目 1：</strong> 下列哪种激活函数通常用于输出多分类概率？</p>
+								<div class="options">
+									<label><input type="radio" name="act_q1" value="A"> A. ReLU</label>
+									<label><input type="radio" name="act_q1" value="B"> B. Softmax</label>
+									<label><input type="radio" name="act_q1" value="C"> C. Tanh</label>
+									<label><input type="radio" name="act_q1" value="D"> D. 恒等函数</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 2：</strong> 下面关于 ReLU 的说法哪一项是正确的？</p>
+								<div class="options">
+									<label><input type="radio" name="act_q2" value="A"> A. 计算简单，有利于缓解梯度消失</label>
+									<label><input type="radio" name="act_q2" value="B"> B. 输出范围为 (0, 1)</label>
+									<label><input type="radio" name="act_q2" value="C"> C. 适合作为二分类输出层激活</label>
+									<label><input type="radio" name="act_q2" value="D"> D. 恒为线性函数</label>
+								</div>
+							</div>
+							<div class="question">
+								<p><strong>题目 3：</strong> Tanh 相比 Sigmoid 的一个优势是？</p>
+								<div class="options">
+									<label><input type="radio" name="act_q3" value="A"> A. 更容易导致梯度消失</label>
+									<label><input type="radio" name="act_q3" value="B"> B. 输出是零中心的，有利于优化</label>
+									<label><input type="radio" name="act_q3" value="C"> C. 完全没有非线性</label>
+									<label><input type="radio" name="act_q3" value="D"> D. 不需要反向传播</label>
+								</div>
+							</div>
+							<div class="score-display"></div>
+							<button class="submit-quiz-btn" data-category="activations_quiz">提交答案</button>
+							<button class="close-exercise-btn">收起练习</button>
+						</div>
+					</div>
+
+				</div>
+			</div>
 
 
 		</div>
@@ -1329,16 +1775,31 @@
 				</div>
 				<div class = 'parambox'>
 					<div class = 'paramline'>
-						<div class="paramname" data-name="lr">Learning Rate: </div>
-						<input id="learningRate" class="paramvalue hyperparamvalue" value="0.01">
+						<label class="paramname" for="learningRate" data-name="lr">Learning Rate: </label>
+						<input
+							id="learningRate"
+							class="paramvalue hyperparamvalue"
+							value="0.01"
+							title="学习率（Learning Rate）"
+							placeholder="Learning Rate">
 					</div>
 					<div class = 'paramline'>
-						<div class="paramname" data-name="epochs">Epochs: </div>
-						<input id="epochs" class="paramvalue hyperparamvalue" value="6">
+						<label class="paramname" for="epochs" data-name="epochs">Epochs: </label>
+						<input
+							id="epochs"
+							class="paramvalue hyperparamvalue"
+							value="6"
+							title="训练轮数（Epochs）"
+							placeholder="Epochs">
 					</div>
 					<div class = 'paramline'>
-						<div class="paramname" data-name="lr">Batch Size: </div>
-						<input id="batchSize" class="paramvalue hyperparamvalue" value="64">
+						<label class="paramname" for="batchSize" data-name="lr">Batch Size: </label>
+						<input
+							id="batchSize"
+							class="paramvalue hyperparamvalue"
+							value="64"
+							title="批大小（Batch Size）"
+							placeholder="Batch Size">
 					</div>
 				</div>
 			</div>

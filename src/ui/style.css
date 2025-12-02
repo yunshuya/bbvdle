@@ -899,3 +899,168 @@ label {
   /* 失败步骤的背景色，淡红色 */
   border-left: 5px solid red;
   /* 失败步骤时，左侧添加红色边框 */ }
+
+/* ============ 教学模块练习卡片样式 ============ */
+.learning-exercises {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  padding: 24px 20px 30px 20px;
+  background: #f4f7fb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+
+.exercise-main-title {
+  font-size: 26px;
+  margin: 0 0 10px 0;
+  text-align: center;
+  font-family: Helvetica;
+  font-weight: bold;
+  color: #333; }
+
+.exercise-main-desc {
+  font-size: 16px;
+  text-align: center;
+  color: #555;
+  margin-bottom: 20px; }
+
+.exercise-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center; }
+
+.exercise-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e4f0;
+  width: 360px;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(15, 35, 95, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+
+.exercise-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(15, 35, 95, 0.12); }
+
+.exercise-card.completed {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 1px rgba(46, 125, 50, 0.2); }
+
+.card-header {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; }
+
+.card-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600; }
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px; }
+
+.progress-text {
+  font-size: 13px; }
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  overflow: hidden; }
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #4caf50;
+  transition: width 0.3s ease; }
+
+.card-content {
+  padding: 16px 18px 18px 18px;
+  font-size: 14px;
+  color: #444; }
+
+.card-questions {
+  padding: 16px 18px 18px 18px;
+  border-top: 1px solid #eceff5;
+  font-size: 14px; }
+
+.question {
+  margin-bottom: 12px; }
+
+.question p {
+  margin: 0 0 6px 0;
+  font-weight: 500;
+  color: #333; }
+
+.options label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  cursor: pointer; }
+
+.options input[type="radio"] {
+  margin-right: 6px; }
+
+.start-exercise-btn,
+.submit-quiz-btn,
+.close-exercise-btn {
+  display: inline-block;
+  border: none;
+  padding: 8px 16px;
+  margin-top: 10px;
+  margin-right: 8px;
+  border-radius: 20px;
+  background: #667eea;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease; }
+
+.start-exercise-btn:hover,
+.submit-quiz-btn:hover,
+.close-exercise-btn:hover {
+  background: #5a6fd6;
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4); }
+
+.close-exercise-btn {
+  background: #9e9e9e; }
+
+.close-exercise-btn:hover {
+  background: #757575; }
+
+.answer-feedback {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px; }
+
+.answer-feedback.correct {
+  background: #e8f5e9;
+  color: #2e7d32; }
+
+.answer-feedback.incorrect {
+  background: #ffebee;
+  color: #c62828; }
+
+.score-display {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333; }
+
+@media (max-width: 900px) {
+  .exercise-cards {
+    flex-direction: column;
+    align-items: stretch; }
+
+  .exercise-card {
+    width: 100%; } }
