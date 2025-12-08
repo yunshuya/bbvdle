@@ -1,5 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { svgData } from "../../app";
+import { dataset, AirPassengersData } from "../../../model/data";
 import { Layer } from "../layer";
 import { ActivationLayer } from "../activationlayer";
 import { PathShape, Point } from "../shape";
@@ -103,6 +104,28 @@ export class Reshape extends Layer {
         const parentLayer = parent.getTfjsLayer();
         const parentShape = parentLayer.shape;
         
+        // 检测是否为时序数据（AirPassengers）
+        const isTimeSeries = dataset instanceof AirPassengersData;
+        
+        console.log(`Reshape layer: parentShape=${JSON.stringify(parentShape)}, isTimeSeries=${isTimeSeries}, targetShape=[${parameters.targetShape1}, ${parameters.targetShape2}]`);
+        
+        // 对于时序数据，如果输入已经是3D格式[null, timeSteps, features]（如[null, 12, 1]）
+        // 不应该尝试reshape，因为这会导致元素总数不匹配
+        if (isTimeSeries && parentShape.length === 3) {
+            // 时序数据的3D输入，检查是否已经是正确的格式
+            const timeSteps = parentShape[1];
+            const features = parentShape[2];
+            
+            // 如果目标形状与输入形状不匹配，说明这是错误的Reshape操作
+            // 对于时序数据，Reshape层不应该存在，但为了兼容性，我们直接传递输入
+            if (timeSteps === dataset.IMAGE_HEIGHT && features === dataset.IMAGE_WIDTH) {
+                console.warn("Reshape layer detected for time series data. This should not happen. Passing through input.");
+                // 直接传递输入，不进行reshape
+                this.tfjsLayer = parentLayer;
+                return;
+            }
+        }
+        
         // 如果输入是4D张量（批次，高度，宽度，通道），需要自动调整目标形状
         // 确保元素总数匹配，避免"Total size of new array must be unchanged"错误
         if (parentShape.length === 4) {
@@ -118,12 +141,30 @@ export class Reshape extends Layer {
                 const timeSteps = parentShape[1]; // 高度
                 const features = parentShape[2] * parentShape[3]; // 宽度 * 通道数
                 parameters.targetShape = [timeSteps, features];
+                console.log(`Reshape: Auto-adjusting target shape to [${timeSteps}, ${features}] to match input size ${inputSize}`);
             } else {
                 // 如果元素总数匹配，使用用户指定的形状
                 parameters.targetShape = [parameters.targetShape1, parameters.targetShape2];
             }
+        } else if (parentShape.length === 3 && !isTimeSeries) {
+            // 对于非时序数据的3D输入，检查元素总数是否匹配
+            const inputSize = parentShape[1] * parentShape[2];
+            const targetSize = parameters.targetShape1 * parameters.targetShape2;
+            
+            if (inputSize !== targetSize) {
+                console.error(`Reshape error: Input size ${inputSize} does not match target size ${targetSize}`);
+                throw new Error(`Cannot reshape from [${parentShape[1]}, ${parentShape[2]}] to [${parameters.targetShape1}, ${parameters.targetShape2}]: element count mismatch`);
+            }
+            
+            parameters.targetShape = [parameters.targetShape1, parameters.targetShape2];
+        } else if (parentShape.length === 3 && isTimeSeries) {
+            // 时序数据的3D输入，不应该reshape（已经在上面处理了）
+            // 如果到达这里，说明上面的检查没有匹配，直接传递
+            console.warn("Reshape layer for time series 3D input - passing through");
+            this.tfjsLayer = parentLayer;
+            return;
         } else {
-            // 对于非4D输入，直接使用用户指定的形状
+            // 对于其他情况（2D输入等），直接使用用户指定的形状
             parameters.targetShape = [parameters.targetShape1, parameters.targetShape2];
         }
         

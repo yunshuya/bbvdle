@@ -142,8 +142,25 @@ export function topologicalSort(input: Input, showErrors: boolean = true): Layer
  * @param sorted topologically sorted list of layers
  */
 export function generateTfjsModel(sorted: Layer[]): tf.LayersModel {
-    sorted.forEach((layer) => layer.generateTfjsLayer());
-    const input = sorted[0].getTfjsLayer();
-    const output = sorted[sorted.length - 1].getTfjsLayer();
-    return tf.model({ inputs: input, outputs: output });
+    try {
+        sorted.forEach((layer) => {
+            try {
+                layer.generateTfjsLayer();
+            } catch (error) {
+                console.error(`Error generating layer ${layer.layerType} (uid: ${layer.uid}):`, error);
+                throw error;
+            }
+        });
+        const input = sorted[0].getTfjsLayer();
+        const output = sorted[sorted.length - 1].getTfjsLayer();
+        
+        // 打印输入和输出的形状信息以便调试
+        console.log("Input layer shape:", input.shape);
+        console.log("Output layer shape:", output.shape);
+        
+        return tf.model({ inputs: input, outputs: output });
+    } catch (error) {
+        console.error("Error building model:", error);
+        throw error;
+    }
 }

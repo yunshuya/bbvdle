@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { displayError } from "../../error";
 import { getSvgOriginalBoundingBox } from "../../utils";
+import { dataset, AirPassengersData } from "../../../model/data";
 import { ActivationLayer } from "../activationlayer";
 import { Layer } from "../layer";
 import { Point, Rectangle } from "../shape";
@@ -30,7 +31,16 @@ export class Output extends ActivationLayer {
     public populateParamBox(): void {return; }
 
     public lineOfPython(): string {
-        return `Dense(10, activation='softmax')`;
+        // 检测是否为时序数据（回归任务）
+        const isTimeSeries = dataset instanceof AirPassengersData;
+        
+        if (isTimeSeries) {
+            // 回归任务：1个输出单元，无激活函数
+            return `Dense(1)`;
+        } else {
+            // 分类任务：使用数据集类别数，softmax激活
+            return `Dense(${dataset.NUM_CLASSES}, activation='softmax')`;
+        }
     }
 
     public initLineOfJulia(): string {
@@ -55,5 +65,22 @@ export class Output extends ActivationLayer {
 
     public addChild(_: Layer): void {
         displayError(new Error("Output cannot have children. "));
+    }
+
+    public generateTfjsLayer(): void {
+        // Output层仅作为模型输出标记，直接复用父层（通常是Dense层）的输出
+        // 不需要创建新的Dense层，因为Dense层已经在模型结构中独立定义
+        let parent: Layer = null;
+        for (const p of this.parents) { 
+            parent = p; 
+            break; 
+        }
+
+        if (!parent) {
+            throw new Error("Output层必须有一个父层");
+        }
+
+        // 直接复用父层的输出，无需重新创建Dense层
+        this.tfjsLayer = parent.getTfjsLayer();
     }
 }

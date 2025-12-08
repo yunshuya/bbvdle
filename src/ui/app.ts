@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { buildNetworkDAG, topologicalSort } from "../model/build_network";
 import { generateJulia, generatePython } from "../model/code_generation";
-import { changeDataset } from "../model/data";
+import { changeDataset, dataset, AirPassengersData } from "../model/data";
 import { download, graphToJson } from "../model/export_model";
 import { setupPlots, setupTestResults, showPredictions } from "../model/graphs";
 import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
@@ -657,6 +657,29 @@ export function tabSelected(): string {
     }
 }
 
+/**
+ * 根据dataset类型更新visualizationMenu的显示
+ * 当dataset为airpassengers时，隐藏分类菜单；当为其他dataset时，显示分类菜单
+ */
+function updateVisualizationMenu(): void {
+    const classesCategory = document.getElementById("classes");
+    if (!classesCategory) {
+        return;
+    }
+    
+    // 检测是否为时序数据（AirPassengers）
+    const isTimeSeries = dataset instanceof AirPassengersData;
+    
+    // 根据dataset类型显示/隐藏分类菜单
+    if (isTimeSeries) {
+        // 时序数据：隐藏分类菜单
+        classesCategory.style.display = "none";
+    } else {
+        // 分类数据：显示分类菜单
+        classesCategory.style.display = "block";
+    }
+}
+
 function switchTab(tabType: string): void {
     // Hide all tabs
     document.getElementById("networkTab").style.display = "none";
@@ -700,6 +723,11 @@ function switchTab(tabType: string): void {
     // Show taskSteps only for "network" tab
     if (tabType === "network" && taskSteps) {
         taskSteps.style.display = "block";
+    }
+
+    // 当切换到visualization标签时，根据dataset类型更新菜单显示
+    if (tabType === "visualization") {
+        updateVisualizationMenu();
     }
 
     switch (tabType) {

@@ -3,6 +3,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { Rank, Tensor } from "@tensorflow/tfjs";
 import { Cifar10 } from "tfjs-cifar10-web";
+import { model } from "./params_object";
 
 const NUM_DATASET_ELEMENTS = 65000;
 
@@ -288,18 +289,462 @@ export class MnistData extends ImageData {
 
 }
 
-export let dataset: ImageData = MnistData.Instance;
+/**
+ * AirPassengers时序数据集
+ * 1949年1月到1960年12月，共144个月的国际航空乘客数量
+ * 用于LSTM时序预测任务
+ */
+export class AirPassengersData {
+    public static get Instance(): AirPassengersData {
+        return this.instance || (this.instance = new this());
+    }
+
+    private static instance: AirPassengersData;
+    
+    // 为了兼容现有代码，提供这些属性
+    // 对于LSTM，输入形状应该是[timeSteps, features]，即[12, 1]
+    // 注意：IMAGE_HEIGHT现在是动态的，会根据timestep参数变化
+    public get IMAGE_HEIGHT(): number { return this.timeSteps; }  // 时间步数（滑动窗口大小）
+    public readonly IMAGE_WIDTH: number = 1;   // 特征数（单变量时序）
+    public readonly IMAGE_CHANNELS: number = 1; // 保持兼容性
+    public get IMAGE_SIZE(): number { return this.timeSteps; }
+    public readonly NUM_CLASSES: number = 1;     // 回归任务，输出1个值
+    public pythonName: string = "airpassengers";
+    public datasetName: string = "AirPassengers";
+    public dataLoaded: boolean = false;
+    public readonly classStrings: string[] = null;
+
+    // AirPassengers原始数据（1949-1960，共144个月）
+    // 数据来源：R语言内置的AirPassengers数据集
+    // 格式：每月乘客数量（单位：千人），从1949年1月到1960年12月
+    private readonly rawData: number[] = [
+        112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118,  // 1949年1-12月
+        115, 126, 141, 135, 125, 149, 170, 170, 158, 133, 114, 140,  // 1950年1-12月
+        145, 150, 178, 163, 172, 178, 199, 199, 184, 162, 146, 166,  // 1951年1-12月
+        171, 180, 193, 181, 183, 218, 230, 242, 209, 191, 172, 194,  // 1952年1-12月
+        196, 196, 236, 235, 229, 243, 264, 272, 237, 211, 180, 201,  // 1953年1-12月
+        204, 188, 235, 227, 234, 264, 302, 293, 259, 229, 203, 229,  // 1954年1-12月
+        242, 233, 267, 269, 270, 315, 364, 347, 312, 274, 237, 278,  // 1955年1-12月
+        284, 277, 317, 313, 318, 374, 413, 405, 355, 306, 271, 306,  // 1956年1-12月
+        315, 301, 356, 348, 355, 422, 465, 467, 404, 347, 305, 336,  // 1957年1-12月
+        340, 318, 362, 348, 363, 435, 491, 505, 404, 359, 310, 337,  // 1958年1-12月
+        360, 342, 406, 396, 420, 472, 548, 559, 463, 407, 362, 405,  // 1959年1-12月
+        417, 391, 419, 461, 472, 535, 622, 606, 508, 461, 390, 432   // 1960年1-12月
+    ];
+
+    private trainData: Tensor<Rank.R3> | null = null;  // [samples, timeSteps, features]
+    private testData: Tensor<Rank.R3> | null = null;
+    private trainLabels: Tensor<Rank.R2> | null = null; // [samples, 1] 回归任务
+    private testLabels: Tensor<Rank.R2> | null = null;
+    private minValue: number = 0;  // 归一化参数，在load()中基于全量数据计算
+    private maxValue: number = 0;  // 归一化参数，在load()中基于全量数据计算
+    private timeSteps: number = 12; // 使用12个月预测下1个月
+
+    constructor() {
+        // minValue和maxValue将在load()方法中基于全量数据计算
+        // 这样可以确保归一化参数基于完整的训练+测试集，避免数据泄露
+    }
+
+    /**
+     * 归一化数据到[0, 1]范围
+     * 注意：此方法依赖minValue和maxValue，必须在load()方法中先计算
+     */
+    private normalize(value: number): number {
+        if (this.maxValue === this.minValue) {
+            // 如果所有值相同，返回0（避免除以0）
+            return 0;
+        }
+        return (value - this.minValue) / (this.maxValue - this.minValue);
+    }
+    
+    /**
+     * 反归一化：将归一化的值还原为原始值
+     * 注意：此方法依赖minValue和maxValue，必须在load()方法中先计算
+     */
+    public denormalize(value: number): number {
+        if (!this.dataLoaded) {
+            console.warn("警告：数据尚未加载，minValue和maxValue可能未初始化。请先调用load()方法。");
+        }
+        if (this.maxValue === this.minValue) {
+            // 如果所有值相同，返回minValue
+            return this.minValue;
+        }
+        return value * (this.maxValue - this.minValue) + this.minValue;
+    }
+    
+    /**
+     * 设置时间窗口大小（timestep）
+     * 当LSTM层的timestep参数改变时调用此方法
+     */
+    public setTimeSteps(newTimeSteps: number): void {
+        if (newTimeSteps > 0 && newTimeSteps <= 50) {
+            const oldTimeSteps = this.timeSteps;
+            this.timeSteps = newTimeSteps;
+            console.log(`时间窗口大小从 ${oldTimeSteps} 更新为 ${newTimeSteps}`);
+            // 如果数据已加载，标记为需要重新加载
+            if (this.dataLoaded) {
+                this.dataLoaded = false;
+            }
+        } else {
+            console.warn(`无效的timestep值: ${newTimeSteps}，应在1-50之间`);
+        }
+    }
+
+    /**
+     * 获取当前的时间窗口大小
+     */
+    public getTimeSteps(): number {
+        return this.timeSteps;
+    }
+    
+    /**
+     * 获取原始数据（用于可视化）
+     */
+    public getRawData(): number[] {
+        return [...this.rawData];
+    }
+    
+    /**
+     * 获取测试集的原始索引范围（用于时间轴）
+     */
+    public getTestDataTimeRange(): {start: number, end: number} {
+        // 参考PyTorch代码：split=120，测试集从索引120开始
+        const splitIndex = 120;
+        // 测试集的第一个序列对应的原始数据索引
+        // 测试集的第一个序列使用原始数据索引[splitIndex, splitIndex+timeSteps-1]
+        // 对应的目标值是索引splitIndex+timeSteps
+        const startIndex = splitIndex + this.timeSteps; // 120+12=132
+        return {
+            start: startIndex, // 测试集的第一个目标值对应的原始数据索引
+            end: this.rawData.length - 1 // 最后一个数据点
+        };
+    }
+
+
+    /**
+     * 创建滑动窗口数据集
+     * 使用前timeSteps个月预测下1个月
+     */
+    private createSequences(data: number[], timeSteps: number): {sequences: number[][], targets: number[]} {
+        const sequences: number[][] = [];
+        const targets: number[] = [];
+
+        for (let i = 0; i < data.length - timeSteps; i++) {
+            const seq = data.slice(i, i + timeSteps).map(v => this.normalize(v));
+            const target = this.normalize(data[i + timeSteps]);
+            sequences.push(seq);
+            targets.push(target);
+        }
+
+        return {sequences, targets};
+    }
+
+    public async load(): Promise<void> {
+        if (this.dataLoaded) {
+            return;
+        }
+
+        // 如果之前有加载的数据，先释放旧的Tensor
+        if (this.trainData || this.testData || this.trainLabels || this.testLabels) {
+            this.dispose();
+        }
+
+        this.toggleLoadingOverlay();
+
+        try {
+            await tf.ready();
+
+            // 重要：计算全量数据的min/max（训练+测试集，时序预测需全局归一化）
+            // 必须在划分数据之前计算，确保归一化参数基于完整数据集，避免数据泄露
+            this.minValue = Math.min(...this.rawData);
+            this.maxValue = Math.max(...this.rawData);
+            
+            console.log(`AirPassengers数据归一化参数: min=${this.minValue}, max=${this.maxValue} (基于全量${this.rawData.length}个数据点)`);
+
+            // 参考PyTorch代码：先划分原始数据（split=120），再分别创建序列
+            // 这样可以确保训练集和测试集完全分离，避免数据泄露
+            const splitIndex = 120; // 参考代码：split = 120，前120个月训练，后24个月测试
+            
+            // 划分原始数据
+            const trainRawData = this.rawData.slice(0, splitIndex); // 前120个月
+            const testRawData = this.rawData.slice(splitIndex);     // 后24个月
+            
+            console.log(`原始数据划分: 训练集${trainRawData.length}个月, 测试集${testRawData.length}个月`);
+
+            // 分别在训练集和测试集上创建序列
+            // 训练序列：120-12=108个序列
+            const {sequences: trainSequences, targets: trainTargets} = this.createSequences(trainRawData, this.timeSteps);
+            // 测试序列：24-12=12个序列
+            const {sequences: testSequences, targets: testTargets} = this.createSequences(testRawData, this.timeSteps);
+            
+            console.log(`序列创建: 训练集${trainSequences.length}个序列, 测试集${testSequences.length}个序列`);
+
+            // 转换为Tensor
+            // 训练数据: [samples, timeSteps, features]
+            // 需要将每个序列转换为[samples, timeSteps, 1]格式
+            const trainDataArray: number[][][] = trainSequences.map(seq => seq.map(val => [val]));
+            this.trainData = tf.tensor3d(trainDataArray, [trainSequences.length, this.timeSteps, 1]);
+            // 训练标签: [samples, 1]
+            this.trainLabels = tf.tensor2d(trainTargets, [trainTargets.length, 1]);
+
+            // 测试数据
+            const testDataArray: number[][][] = testSequences.map(seq => seq.map(val => [val]));
+            this.testData = tf.tensor3d(testDataArray, [testSequences.length, this.timeSteps, 1]);
+            // 测试标签
+            this.testLabels = tf.tensor2d(testTargets, [testTargets.length, 1]);
+
+            this.dataLoaded = true;
+            console.log(`AirPassengers数据加载完成: 训练样本${trainSequences.length}个, 测试样本${testSequences.length}个`);
+        } catch (error) {
+            console.error("加载AirPassengers数据集错误:", error);
+            throw new Error(`加载AirPassengers数据集失败: ${error.message}`);
+        } finally {
+            document.getElementById("loadingDataTab").style.display = "none";
+        }
+    }
+
+    /**
+     * 释放Tensor资源，避免内存泄漏
+     */
+    public dispose(): void {
+        if (this.trainData) {
+            this.trainData.dispose();
+            this.trainData = null;
+        }
+        if (this.testData) {
+            this.testData.dispose();
+            this.testData = null;
+        }
+        if (this.trainLabels) {
+            this.trainLabels.dispose();
+            this.trainLabels = null;
+        }
+        if (this.testLabels) {
+            this.testLabels.dispose();
+            this.testLabels = null;
+        }
+        this.dataLoaded = false;
+    }
+
+    /**
+     * 获取训练数据
+     * 返回格式: xs为3D张量[samples, timeSteps, features], labels为2D张量[samples, 1]
+     */
+    public getTrainData(numExamples?: number): {xs: Tensor<Rank.R3>, labels: Tensor<Rank.R2>} {
+        if (!this.dataLoaded || !this.trainData || !this.trainLabels) {
+            throw new Error("数据尚未加载，请先调用load()方法");
+        }
+
+        let xs = this.trainData;
+        let labels = this.trainLabels;
+
+        if (numExamples != null && numExamples < xs.shape[0]) {
+            xs = xs.slice([0, 0, 0], [numExamples, this.timeSteps, 1]) as Tensor<Rank.R3>;
+            labels = labels.slice([0, 0], [numExamples, 1]) as Tensor<Rank.R2>;
+        }
+
+        return {xs, labels};
+    }
+
+    /**
+     * 获取测试数据
+     */
+    public getTestData(numExamples?: number): {xs: Tensor<Rank.R3>, labels: Tensor<Rank.R2>} {
+        if (!this.dataLoaded || !this.testData || !this.testLabels) {
+            throw new Error("数据尚未加载，请先调用load()方法");
+        }
+
+        let xs = this.testData;
+        let labels = this.testLabels;
+
+        if (numExamples != null && numExamples < xs.shape[0]) {
+            xs = xs.slice([0, 0, 0], [numExamples, this.timeSteps, 1]) as Tensor<Rank.R3>;
+            labels = labels.slice([0, 0], [numExamples, 1]) as Tensor<Rank.R2>;
+        }
+
+        return {xs, labels};
+    }
+
+    /**
+     * 获取验证数据（从训练集的末尾取15%，保持时间顺序）
+     * 这与训练时使用的验证集划分方式一致
+     */
+    public getValidationData(): {xs: Tensor<Rank.R3>, labels: Tensor<Rank.R2>} {
+        if (!this.dataLoaded || !this.trainData || !this.trainLabels) {
+            throw new Error("数据尚未加载，请先调用load()方法");
+        }
+
+        const totalTrainSamples = this.trainData.shape[0];
+        const valSize = Math.floor(totalTrainSamples * 0.15);
+        const trainSize = totalTrainSamples - valSize;
+
+        // 验证集：从训练集的末尾取15%（保持时间顺序）
+        const valXs = (this.trainData as tf.Tensor<tf.Rank.R3>).slice(
+            [trainSize, 0, 0], 
+            [valSize, this.timeSteps, 1]
+        ) as Tensor<Rank.R3>;
+        const valLabels = (this.trainLabels as tf.Tensor<tf.Rank.R2>).slice(
+            [trainSize, 0], 
+            [valSize, 1]
+        ) as Tensor<Rank.R2>;
+
+        return {xs: valXs, labels: valLabels};
+    }
+
+    /**
+     * 获取验证集的时间范围（用于可视化）
+     */
+    public getValidationDataTimeRange(): {start: number, end: number} {
+        // 验证集来自训练集的末尾15%
+        // 训练集对应原始数据的前80%（split=120）
+        // 验证集是训练集的末尾15%，所以对应原始数据索引范围需要计算
+        const splitIndex = 120; // 训练/测试分割点
+        const fullTrainData = this.rawData.slice(0, splitIndex); // 前120个月
+        const totalTrainSequences = fullTrainData.length - this.timeSteps; // 108个序列
+        const valSize = Math.floor(totalTrainSequences * 0.15); // 约16个序列
+        const trainSize = totalTrainSequences - valSize; // 约92个序列
+        
+        // 验证集的第一个序列对应的原始数据索引
+        const startIndex = trainSize + this.timeSteps; // 92+12=104
+        const endIndex = splitIndex - 1; // 119（训练集的最后一个数据点）
+        
+        return {
+            start: startIndex,
+            end: endIndex
+        };
+    }
+
+    /**
+     * 为了兼容ImageData接口，提供这个方法（时序数据不需要）
+     */
+    public async getTestDataWithLabel(numExamples: number, _label: string): Promise<{xs: Tensor<Rank.R4>, labels: Tensor<Rank.R2>}> {
+        const {xs, labels} = this.getTestData(numExamples);
+        // 转换为4D以兼容接口（虽然时序数据是3D）
+        const xs4d = xs.reshape([xs.shape[0], 1, xs.shape[1], xs.shape[2]]) as Tensor<Rank.R4>;
+        return {xs: xs4d, labels};
+    }
+
+    protected toggleLoadingOverlay(): void {
+        if (document.getElementById("loadingDataTab").style.display === "none") {
+            document.getElementById("datasetLoadingName").innerText = this.datasetName;
+            document.getElementById("loadingDataTab").style.display = "block";
+        } else {
+            document.getElementById("loadingDataTab").style.display = "none";
+        }
+    }
+}
+
+export let dataset: ImageData | AirPassengersData = MnistData.Instance;
 
 export function changeDataset(newDataset: string): void {
+    // 在切换数据集之前，释放旧数据集的Tensor资源（如果存在dispose方法）
+    if (dataset && typeof (dataset as any).dispose === 'function') {
+        (dataset as any).dispose();
+    }
+    
     switch (newDataset) {
         case "mnist": dataset = MnistData.Instance; break;
         case "cifar": dataset = Cifar10Data.Instance; break;
+        case "airpassengers": dataset = AirPassengersData.Instance; break;
     }
 
     // Set the image visualizations divs with class name identifiers
-    Array.from(document.getElementById("classes").getElementsByClassName("option")).forEach((element, i) => {
-        if (i !== 0) { // Skip the first since it represents 'Any' class
-            element.innerHTML = (i - 1) + ( dataset.classStrings != null ? ` (${dataset.classStrings[i]})` : "");
+    if (dataset instanceof ImageData) {
+        const classesElement = document.getElementById("classes");
+        if (classesElement) {
+            Array.from(classesElement.getElementsByClassName("option")).forEach((element, i) => {
+                if (i !== 0) { // Skip the first since it represents 'Any' class
+                    element.innerHTML = (i - 1) + ( dataset.classStrings != null ? ` (${dataset.classStrings[i]})` : "");
+                }
+            });
         }
-    });
+    }
+    
+    // 根据数据集类型更新visualizationMenu的显示
+    updateVisualizationMenuForDataset();
+    
+    // 根据数据集类型建议损失函数，但不强制覆盖用户的选择
+    // 对于时序数据（AirPassengers），建议使用MSE或MAE；对于分类数据，建议使用交叉熵
+    const isTimeSeries = newDataset === "airpassengers";
+    
+    // 只在用户当前没有选择合适损失函数时，才自动切换
+    // 如果用户已经选择了合适的损失函数（如MAE），则保持用户的选择
+    const currentLoss = model && model.params ? model.params.loss : "categoricalCrossentropy";
+    const isRegressionLoss = currentLoss === "meanSquaredError" || currentLoss === "meanAbsoluteError";
+    
+    if (isTimeSeries && !isRegressionLoss) {
+        // 对于时序数据，如果当前损失函数不适合回归任务，自动切换到MSE
+        const targetLossId = "meanSquaredError";
+        
+        // 更新损失函数的UI选择
+        const lossesContainer = document.getElementById("losses");
+        if (lossesContainer) {
+            // 移除所有选项的selected类
+            Array.from(lossesContainer.getElementsByClassName("option")).forEach((option) => {
+                option.classList.remove("selected");
+            });
+            
+            // 找到目标损失函数选项并选中
+            const targetLossOption = Array.from(lossesContainer.getElementsByClassName("option")).find(
+                (option) => (option as HTMLElement).getAttribute("data-optionValue") === targetLossId
+            );
+            
+            if (targetLossOption) {
+                targetLossOption.classList.add("selected");
+                // 同时更新model.params.loss
+                if (model && model.params) {
+                    model.params.loss = targetLossId;
+                }
+            }
+        }
+    } else if (!isTimeSeries && isRegressionLoss) {
+        // 对于分类数据，如果当前损失函数不适合分类任务，自动切换到交叉熵
+        const targetLossId = "categoricalCrossentropy";
+        
+        // 更新损失函数的UI选择
+        const lossesContainer = document.getElementById("losses");
+        if (lossesContainer) {
+            // 移除所有选项的selected类
+            Array.from(lossesContainer.getElementsByClassName("option")).forEach((option) => {
+                option.classList.remove("selected");
+            });
+            
+            // 找到目标损失函数选项并选中
+            const targetLossOption = Array.from(lossesContainer.getElementsByClassName("option")).find(
+                (option) => (option as HTMLElement).getAttribute("data-optionValue") === targetLossId
+            );
+            
+            if (targetLossOption) {
+                targetLossOption.classList.add("selected");
+                // 同时更新model.params.loss
+                if (model && model.params) {
+                    model.params.loss = targetLossId;
+                }
+            }
+        }
+    }
+    // 如果用户已经选择了合适的损失函数，不做任何更改，保持用户的选择
+}
+
+/**
+ * 根据dataset类型更新visualizationMenu的显示
+ * 当dataset为airpassengers时，隐藏分类菜单；当为其他dataset时，显示分类菜单
+ */
+function updateVisualizationMenuForDataset(): void {
+    const classesCategory = document.getElementById("classes");
+    if (!classesCategory) {
+        return;
+    }
+    
+    // 检测是否为时序数据（AirPassengers）
+    const isTimeSeries = dataset instanceof AirPassengersData;
+    
+    // 根据dataset类型显示/隐藏分类菜单
+    if (isTimeSeries) {
+        // 时序数据：隐藏分类菜单
+        classesCategory.style.display = "none";
+    } else {
+        // 分类数据：显示分类菜单
+        classesCategory.style.display = "block";
+    }
 }

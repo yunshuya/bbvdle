@@ -1,4 +1,5 @@
 import { displayError } from "../ui/error";
+import { dataset, AirPassengersData } from "./data";
 import { ActivationLayer } from "../ui/shapes/activationlayer";
 import { Layer } from "../ui/shapes/layer";
 import { juliaSkeleton } from "./julia_skeleton";
@@ -13,9 +14,12 @@ export function generatePython(sorted: Layer[]): string {
         const layerstring = layer.lineOfPython();
         let applystring = ""; // Nothing to apply if no parents (input)
         
-        // 对于RNN层，我们需要检查输入形状并可能添加reshape层来处理MNIST数据
-        // 但如果用户已经手动添加了Reshape层，就不需要自动添加了
-        if (layer.layerType === "Recurrent") {
+        // 检测是否为时序数据
+        const isTimeSeries = dataset instanceof AirPassengersData;
+        
+        // 对于RNN和LSTM层，我们需要检查输入形状并可能添加reshape层
+        // 但对于时序数据（AirPassengers），数据已经是正确的3D格式，不需要reshape
+        if (layer.layerType === "Recurrent" || layer.layerType === "LSTM") {
             // 获取父层
             const parent = layer.parents.values().next().value;
             
@@ -28,11 +32,22 @@ export function generatePython(sorted: Layer[]): string {
                     applystring = `([${[...layer.parents].map((p) => "x" + p.uid).join(", ")}])`;
                 }
                 pythonScript += `x${layer.uid} = ` + layerstring + applystring + "\n";
+            } else if (isTimeSeries && parent && parent.layerType === "Input") {
+                // 对于时序数据，Input层直接连接到LSTM，数据已经是正确的3D格式
+                if (layer.parents.size === 1) {
+                    applystring = `(x${parent.uid})`;
+                } else if (layer.parents.size > 1) {
+                    applystring = `([${[...layer.parents].map((p) => "x" + p.uid).join(", ")}])`;
+                }
+                pythonScript += `x${layer.uid} = ` + layerstring + applystring + "\n";
             } else {
-                // 如果父层不是Reshape层，自动添加reshape层来将4D张量(批次, 28, 28, 1)转换为3D张量(批次, 28, 28)
+                // 对于图像数据，如果父层不是Reshape层，自动添加reshape层
+                // 将4D张量(批次, 28, 28, 1)转换为3D张量(批次, 28, 28)
                 const parentUid = parent.uid;
-                pythonScript += `# Reshape layer for RNN input\n`;
-                pythonScript += `x_reshape_${layer.uid} = Reshape((28, 28))(x${parentUid})\n`;
+                const imgRows = dataset.IMAGE_HEIGHT;
+                const imgCols = dataset.IMAGE_WIDTH * dataset.IMAGE_CHANNELS;
+                pythonScript += `# Reshape layer for ${layer.layerType} input\n`;
+                pythonScript += `x_reshape_${layer.uid} = Reshape((${imgRows}, ${imgCols}))(x${parentUid})\n`;
                 pythonScript += `x${layer.uid} = ` + layerstring + `(x_reshape_${layer.uid})` + "\n";
             }
         } else {
@@ -53,7 +68,22 @@ export function generatePython(sorted: Layer[]): string {
         }
     }
     pythonScript += `model = Model(inputs=x${sorted[0].uid}, outputs=x${sorted[sorted.length - 1].uid})`;
-    return pythonSkeleton(pythonScript);
+    
+    // 查找LSTM或RNN层以获取timestep参数（用于时序数据）
+    let timestep = 12; // 默认值
+    if (dataset instanceof AirPassengersData) {
+        for (const layer of sorted) {
+            if (layer.layerType === "LSTM" || layer.layerType === "Recurrent") {
+                const rnnParams = layer.getParams();
+                if (rnnParams.timestep) {
+                    timestep = parseInt(rnnParams.timestep, 10);
+                    break;
+                }
+            }
+        }
+    }
+    
+    return pythonSkeleton(pythonScript, timestep);
 }
 /**
  * Creates corresponding Julia code.

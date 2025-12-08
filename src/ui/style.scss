@@ -651,6 +651,12 @@ label {
     grid-row: 1 / span 2;
 }
 
+#validation-test-metrics-canvas {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    /* 对于时序数据，让真实值和预测值对比图占据整个右侧区域 */
+}
+
 .prediction-canvas {
     width: 100%;
 }
