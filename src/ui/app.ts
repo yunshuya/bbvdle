@@ -28,7 +28,8 @@ import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
-import { copyTextToClipboard } from "./utils";
+import { Point } from "./shapes/shape";
+import { copyTextToClipboard, getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
@@ -295,7 +296,24 @@ function appendItem(itemType: string): void {
     }
     
     try {
-        const item: Draggable = new itemMap[itemType]();
+        // 获取画布大小并计算中心位置
+        const svgElement = document.getElementById("svg") as unknown as SVGSVGElement;
+        if (!svgElement) {
+            console.error("SVG element not found");
+            return;
+        }
+        
+        const canvasBoundingBox = getSvgOriginalBoundingBox(svgElement);
+        const centerX = canvasBoundingBox.width / 2;
+        const centerY = canvasBoundingBox.height / 2;
+        const centerPoint = new Point(centerX, centerY);
+        
+        // 在画布中心周围生成随机位置（随机范围：宽150px，高100px）
+        const randomLocation = Point.randomPoint(150, 100, centerPoint);
+        
+        // 创建积木块并传入中心位置的随机坐标
+        const item: Draggable = new itemMap[itemType](randomLocation);
+        
         console.log("Created item:", item);
         
         svgData.draggable.push(item);
