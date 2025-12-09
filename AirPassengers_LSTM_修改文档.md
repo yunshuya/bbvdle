@@ -9,9 +9,9 @@
 2. 新增 LSTM 积木块，支持时序数据预测
 3. **优化 RNN 积木块，使其也能成功训练 Air Passengers 数据集**（参照 LSTM 模板的实现思路）
 界面显示如下：
+<img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/67a267f2-1dd5-4c7e-884f-e04dd6b6bb93" />
+<img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/39f532ff-27bd-4e14-bc86-301c86b09c99" />
 <img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/bc537e1c-065a-4b49-8aa3-8d66793ae4dc" />
-
-
 ---
 
 ## 二、为什么要进行这个修改
