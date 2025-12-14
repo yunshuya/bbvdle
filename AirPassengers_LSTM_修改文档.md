@@ -12,7 +12,7 @@
 <img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/67a267f2-1dd5-4c7e-884f-e04dd6b6bb93" />
 <img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/39f532ff-27bd-4e14-bc86-301c86b09c99" />
 <img width="2940" height="1596" alt="image" src="https://github.com/user-attachments/assets/bc537e1c-065a-4b49-8aa3-8d66793ae4dc" />
-Attention：preduction结果的119-131列的数据没有成功在图表上上传！
+Attention：preduction结果的119-131列的数据没有成功在图表上显示，待修改！
 
 ---
 
