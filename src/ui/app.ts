@@ -32,6 +32,9 @@ import { copyTextToClipboard } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
+import { authService } from './auth/authService';
+import { authDialog } from './auth/authDialog';
+import { loginPage } from './auth/loginPage';
 
 
 export interface IDraggableData {
@@ -56,6 +59,17 @@ interface IEducationContextPayload {
     mode?: EducationAction | "custom";
 }
 
+interface IChatMessage {
+    sender: "user" | "assistant";
+    content: string;
+}
+
+interface IConversation {
+    id: number;
+    title: string;
+    messages: IChatMessage[];
+}
+
 export let svgData: IDraggableData = {
     draggable: [],
     input: null,
@@ -68,15 +82,28 @@ let aiDialogContentElement: HTMLElement | null = null;
 let aiContextAttachmentElement: HTMLElement | null = null;
 let aiContextTextElement: HTMLElement | null = null;
 let aiContextActionsElement: HTMLElement | null = null;
+let aiBackdropElement: HTMLElement | null = null;
 let pendingAiAttachment: AiAttachment | null = null;
 let educationSelectionHandle: HTMLDivElement | null = null;
 let educationSelectionText: string | null = null;
+let voiceRecognition: any = null;
+let isRecording: boolean = false;
+let conversations: IConversation[] = [];
+let currentConversationId: number | null = null;
+let aiConversationSelectElement: HTMLSelectElement | null = null;
+let aiNewConversationButtonElement: HTMLButtonElement | null = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    // 首先初始化登录页面（应用入口）
+    loginPage.init();
 
     // This function runs when the DOM is ready, i.e. when the document has been parsed
     setupPlots();
     setupTestResults();
+
+    // 初始化认证系统
+    setupAuthSystem();
 
     setupOptionOnClicks();
     setupIndividualOnClicks();
@@ -89,7 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", resizeMiddleSVG);
     window.addEventListener("resize", setupPlots);
 
-    resizeMiddleSVG();
+    // 只在主应用显示时才调用resizeMiddleSVG
+    // 如果main是hidden的，会在登录成功后自动调用
+    const mainDivCheck = document.getElementById("main");
+    if (mainDivCheck && !mainDivCheck.classList.contains("hidden")) {
+        resizeMiddleSVG();
+    }
 
     window.onkeyup = (event: KeyboardEvent) => {
         switch (event.key) {
@@ -123,10 +155,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    svgData = loadStateIfPossible();
+    // 延迟加载网络状态，直到主应用显示
+    // 如果主应用已经显示，立即加载；否则等待显示事件
+    const mainDiv = document.getElementById("main");
+    if (mainDiv && !mainDiv.classList.contains("hidden")) {
+        svgData = loadStateIfPossible();
+    } else {
+        // 监听主应用显示事件
+        const loadNetworkState = () => {
+            svgData = loadStateIfPossible();
+            // 加载后重新计算布局
+            setTimeout(() => {
+                resizeMiddleSVG();
+            }, 100);
+        };
+        
+        // 监听登录成功事件
+        window.addEventListener('userLoggedIn', loadNetworkState, { once: true });
+        
+        // 也监听主应用显示（通过检查main的class变化）
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const target = mutation.target as HTMLElement;
+                    if (target.id === 'main' && !target.classList.contains('hidden')) {
+                        loadNetworkState();
+                        observer.disconnect();
+                    }
+                }
+            });
+        });
+        
+        if (mainDiv) {
+            observer.observe(mainDiv, { attributes: true });
+        }
+    }
 
-    // Select the input block when we load the page
-    svgData.input.select();
+    // 不再默认选中输入层，让用户手动选择
+    // svgData.input.select();
 
     //task open
     const taskTitle = document.getElementById("taskTitle");
@@ -138,6 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupAiAssistant();
     const taskSteps = document.querySelector('#taskSteps') as HTMLElement;
     aiAssistantDialogElement = document.querySelector('#aiAssistantDialog') as HTMLElement;
+    aiBackdropElement = document.getElementById("aiBackdrop");
     aiContextAttachmentElement = document.getElementById("aiContextAttachment");
     aiContextTextElement = aiContextAttachmentElement?.querySelector(".ai-context-text") as HTMLElement;
     aiContextActionsElement = document.getElementById("aiContextActions");
@@ -161,15 +228,94 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     if (taskSteps) {
-        makeDraggable(taskSteps);
-        makeResizable(taskSteps);
+    makeDraggable(taskSteps);
+    makeResizable(taskSteps);
     }
-    if (aiAssistantDialogElement) {
-        makeDraggable(aiAssistantDialogElement);
-        makeResizable(aiAssistantDialogElement);
-    }
+    // AI 对话框不需要拖拽和调整大小功能，保持居中固定
     setupEducationSelectionWatcher();
 });
+
+function getOrCreateCurrentConversation(): IConversation {
+    if (currentConversationId != null) {
+        const existing = conversations.find((c) => c.id === currentConversationId);
+        if (existing) {
+            return existing;
+        }
+    }
+    const nextId = conversations.length > 0 ? conversations[conversations.length - 1].id + 1 : 1;
+    const conversation: IConversation = {
+        id: nextId,
+        title: `对话 ${nextId}`,
+        messages: [],
+    };
+    conversations.push(conversation);
+    currentConversationId = conversation.id;
+    updateConversationSelectOptions();
+    return conversation;
+}
+
+function createNewConversation(): void {
+    const nextId = conversations.length > 0 ? conversations[conversations.length - 1].id + 1 : 1;
+    const conversation: IConversation = {
+        id: nextId,
+        title: `对话 ${nextId}`,
+        messages: [],
+    };
+    conversations.push(conversation);
+    currentConversationId = conversation.id;
+    updateConversationSelectOptions();
+    renderCurrentConversation();
+}
+
+function updateConversationSelectOptions(): void {
+    if (!aiConversationSelectElement) {
+        return;
+    }
+    aiConversationSelectElement.innerHTML = "";
+    for (const conv of conversations) {
+        const option = document.createElement("option");
+        option.value = String(conv.id);
+        option.textContent = conv.title;
+        aiConversationSelectElement.appendChild(option);
+    }
+    if (currentConversationId != null) {
+        aiConversationSelectElement.value = String(currentConversationId);
+    }
+}
+
+function renderCurrentConversation(): void {
+    if (!aiDialogContentElement) {
+        return;
+    }
+    aiDialogContentElement.innerHTML = "";
+    if (currentConversationId == null) {
+        return;
+    }
+    const conv = conversations.find((c) => c.id === currentConversationId);
+    if (!conv) {
+        return;
+    }
+    for (const msg of conv.messages) {
+        appendMessage(aiDialogContentElement, msg.sender, msg.content);
+    }
+}
+
+function appendMessageToCurrentConversation(sender: "user" | "assistant", content: string): void {
+    if (!aiDialogContentElement) {
+        return;
+    }
+    const conv = getOrCreateCurrentConversation();
+    conv.messages.push({ sender, content });
+    
+    // 如果是第一条用户消息，更新对话标题
+    if (sender === "user" && conv.messages.length === 1) {
+        const titleText = content.length > 20 ? content.substring(0, 20) + "..." : content;
+        conv.title = titleText;
+        updateConversationSelectOptions();
+    }
+    
+    appendMessage(aiDialogContentElement, sender, content);
+}
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
     console.log("addOnClickToOptions called for categoryId:", categoryId);
@@ -206,6 +352,31 @@ function setupOptionOnClicks(): void {
     });
     addOnClickToOptions("educationAct", (articleType) => {
         document.getElementById("education" + articleType).scrollIntoView(true);
+    });
+    addOnClickToOptions("quizCategories", (quizType) => {
+        // 隐藏所有测验内容
+        const quizBasic = document.getElementById("quizBasic");
+        const quizLayers = document.getElementById("quizLayers");
+        const quizTraining = document.getElementById("quizTraining");
+        if (quizBasic) quizBasic.style.display = "none";
+        if (quizLayers) quizLayers.style.display = "none";
+        if (quizTraining) quizTraining.style.display = "none";
+        
+        // 显示选中的测验内容
+        let quizElement: HTMLElement | null = null;
+        if (quizType === "basic") {
+            quizElement = quizBasic;
+        } else if (quizType === "layers") {
+            quizElement = quizLayers;
+        } else if (quizType === "training") {
+            quizElement = quizTraining;
+        }
+        
+        if (quizElement) {
+            quizElement.style.display = "block";
+            // 使用 block: "nearest" 避免页面跳转
+            quizElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
     });
     addOnClickToOptions("classes", (_, element) => {
         selectOption("classes", element);
@@ -255,8 +426,8 @@ function createTemplate(template: string): void {
             }
              break;
             //当前有教学任务时，验证是否生成input和output；
-            
                 
+
         }
         
         case "default": defaultTemplate(svgData); break;
@@ -297,12 +468,12 @@ function appendItem(itemType: string): void {
     try {
         const item: Draggable = new itemMap[itemType]();
         console.log("Created item:", item);
-        
-        svgData.draggable.push(item);
-        //这里是验证教学任务的步骤
-        if(isTaskAlready){
-                verifyStepCompletion(item);    
-        }
+
+    svgData.draggable.push(item);
+    //这里是验证教学任务的步骤
+    if(isTaskAlready){
+            verifyStepCompletion(item);    
+    }
     } catch (error) {
         console.error("Error creating item of type", itemType, error);
     }
@@ -552,13 +723,39 @@ function downloadDataUrl(dataUrl: string, filename: string): void {
 function resizeMiddleSVG(): void {
     const originalSVGWidth = 1000;
 
-    const svgWidth = document.getElementById("middle").clientWidth;
-    const svgHeight = document.getElementById("middle").clientHeight;
+    const middleElement = document.getElementById("middle");
+    if (!middleElement) {
+        console.warn('resizeMiddleSVG: middle元素未找到，可能主应用还未显示');
+        return;
+    }
 
+    // 检查主应用是否显示
+    const mainDiv = document.getElementById("main");
+    if (mainDiv && mainDiv.classList.contains("hidden")) {
+        console.warn('resizeMiddleSVG: 主应用还在隐藏状态，跳过布局计算');
+        return;
+    }
+
+    const svgWidth = middleElement.clientWidth;
+    const svgHeight = middleElement.clientHeight;
+
+    // 如果尺寸为0，说明元素还未完全显示，延迟重试
+    if (svgWidth === 0 || svgHeight === 0) {
+        console.warn('resizeMiddleSVG: 元素尺寸为0，延迟重试');
+        setTimeout(() => resizeMiddleSVG(), 100);
+        return;
+    }
+
+    // 计算缩放比例：**水平方向铺满整个中间面板**
+    // 原始 SVG 尺寸为 1000x1000，这里以宽度为基准计算缩放比
+    const originalSVGHeight = 1000;
     const ratio = svgWidth / originalSVGWidth;
 
-    const xTranslate = (svgWidth - originalSVGWidth) / 2;
-    const yTranslate = Math.max(0, (svgHeight * ratio - svgHeight) / 2);
+    // 计算平移
+    // 水平方向：不再居中，而是左对齐，这样拖拽时可以利用整个面板的左右空间
+    const scaledHeight = originalSVGHeight * ratio;
+    const xTranslate = 0;
+    const yTranslate = (svgHeight - scaledHeight) / 2;
 
     // Modify initialization heights for random locations for layers/activations so they don't appear above the svg
     const yOffsetDelta = yTranslate / ratio - windowProperties.svgYOffset;
@@ -568,7 +765,12 @@ function resizeMiddleSVG(): void {
     windowProperties.svgYOffset = yTranslate / ratio;
     windowProperties.svgTransformRatio = ratio;
 
-    document.getElementById("svg").setAttribute("transform", `translate(${xTranslate}, 0) scale(${ratio}, ${ratio})  `);
+    const svgElement = document.getElementById("svg");
+    if (svgElement) {
+        // 使用translate和scale，确保内容居中并完整显示
+        svgElement.setAttribute("transform", `translate(${xTranslate}, ${yTranslate}) scale(${ratio}, ${ratio})`);
+        console.log(`resizeMiddleSVG: 已设置transform, xTranslate=${xTranslate}, yTranslate=${yTranslate}, ratio=${ratio}`);
+    }
 
     // Call crop position on each draggable to ensure it is within the new canvas boundary
     if (svgData.input != null) {
@@ -584,6 +786,9 @@ function resizeMiddleSVG(): void {
         elem.moveAction();
     });
 }
+
+// 将resizeMiddleSVG暴露到全局作用域，以便其他模块调用
+(window as any).resizeMiddleSVG = resizeMiddleSVG;
 
 function toggleExpanderTriangle(categoryTitle: Element): void {
     categoryTitle.getElementsByClassName("expander")[0].classList.toggle("expanded");
@@ -650,6 +855,8 @@ export function tabSelected(): string {
         return "progressTab";
     } else if (document.getElementById("visualizationTab").style.display !== "none") {
         return "visualizationTab";
+    } else if (document.getElementById("quizTab").style.display !== "none") {
+        return "quizTab";
     } else if (document.getElementById("educationTab").style.display !== "none") {
         return "educationTab";
     } else {
@@ -662,18 +869,21 @@ function switchTab(tabType: string): void {
     document.getElementById("networkTab").style.display = "none";
     document.getElementById("progressTab").style.display = "none";
     document.getElementById("visualizationTab").style.display = "none";
+    document.getElementById("quizTab").style.display = "none";
     document.getElementById("educationTab").style.display = "none";
 
     // Hide all menus
     document.getElementById("networkMenu").style.display = "none";
     document.getElementById("progressMenu").style.display = "none";
     document.getElementById("visualizationMenu").style.display = "none";
+    document.getElementById("quizMenu").style.display = "none";
     document.getElementById("educationMenu").style.display = "none";
 
     // Hide all paramshells
     document.getElementById("networkParamshell").style.display = "none";
     document.getElementById("progressParamshell").style.display = "none";
     document.getElementById("visualizationParamshell").style.display = "none";
+    document.getElementById("quizParamshell").style.display = "none";
     document.getElementById("educationParamshell").style.display = "none";
 
     // Hide taskSteps by default
@@ -686,6 +896,7 @@ function switchTab(tabType: string): void {
     document.getElementById("network").classList.remove("tab-selected");
     document.getElementById("progress").classList.remove("tab-selected");
     document.getElementById("visualization").classList.remove("tab-selected");
+    document.getElementById("quiz").classList.remove("tab-selected");
     document.getElementById("education").classList.remove("tab-selected");
 
     // Display only the selected tab
@@ -706,6 +917,9 @@ function switchTab(tabType: string): void {
         case "network": resizeMiddleSVG(); break;
         case "progress": setupPlots(); break;
         case "visualization": showPredictions(); break;
+        case "quiz":
+            document.getElementById("paramshell").style.display = "none";
+            break;
         case "education":
             document.getElementById("paramshell").style.display = "none";
             break;
@@ -720,13 +934,29 @@ function switchTab(tabType: string): void {
     }
 
     const tabMapping = ["blanktab", "network", "progress", "visualization",
-        "middleblanktab", "education", "bottomblanktab"];
+        "middleblanktab", "quiz", "education", "bottomblanktab"];
     const index = tabMapping.indexOf(tabType);
 
     document.getElementById(tabMapping[index - 1]).classList.add("top_neighbor_tab-selected");
     document.getElementById(tabMapping[index + 1]).classList.add("bottom_neighbor_tab-selected");
 }
 
+
+function openAiDialog(): void {
+    if (!aiAssistantDialogElement) {
+        return;
+    }
+    aiAssistantDialogElement.classList.remove("hidden");
+    aiBackdropElement?.classList.remove("hidden");
+}
+
+function closeAiDialog(): void {
+    if (!aiAssistantDialogElement) {
+        return;
+    }
+    aiAssistantDialogElement.classList.add("hidden");
+    aiBackdropElement?.classList.add("hidden");
+}
 
 // 封装 AI 助手事件监听器
 function setupAiAssistant(): void {
@@ -735,17 +965,39 @@ function setupAiAssistant(): void {
     const dialogContent = document.getElementById("dialogContent");
     const dialogInput = document.getElementById("dialogInput") as HTMLInputElement;
     const sendButton = document.getElementById("sendButton");
+    const closeButton = document.getElementById("closeAiDialog");
+    const voiceInputButton = document.getElementById("voiceInputButton") as HTMLButtonElement;
+    aiConversationSelectElement = document.getElementById("aiConversationSelect") as HTMLSelectElement;
+    aiNewConversationButtonElement = document.getElementById("aiNewConversation") as HTMLButtonElement;
 
     if (!aiButton || !aiDialog || !dialogContent || !dialogInput || !sendButton) return;
+
+    // 初始化语音识别
+    initializeVoiceRecognition(voiceInputButton, dialogInput);
 
     aiAssistantDialogElement = aiDialog;
     aiDialogInputElement = dialogInput;
     aiDialogContentElement = dialogContent;
 
-    // 显示/隐藏对话框
+    // 初始化会话列表（至少一个默认会话）
+    getOrCreateCurrentConversation();
+    updateConversationSelectOptions();
+
+    // 显示/隐藏对话框（悬浮居中 + 蒙版）
     aiButton.addEventListener("click", () => {
-        aiDialog.classList.toggle("hidden");
+        if (aiDialog.classList.contains("hidden")) {
+            openAiDialog();
+        } else {
+            closeAiDialog();
+        }
     });
+
+    // 点击蒙版关闭对话框
+    if (aiBackdropElement) {
+        aiBackdropElement.addEventListener("click", () => {
+            closeAiDialog();
+        });
+    }
 
     // 发送消息
     sendButton.addEventListener("click", async () => {
@@ -753,8 +1005,113 @@ function setupAiAssistant(): void {
         if (!userMessage) {
             return;
         }
-        dialogInput.value = "";
+            dialogInput.value = "";
         await sendAiMessage(userMessage);
+    });
+
+    // 在输入框中按下 Enter 键发送消息
+    dialogInput.addEventListener("keydown", async (event: KeyboardEvent) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const userMessage = dialogInput.value.trim();
+            if (!userMessage) {
+                return;
+            }
+            dialogInput.value = "";
+            await sendAiMessage(userMessage);
+        }
+    });
+
+    // 右上角关闭按钮
+    if (closeButton) {
+        closeButton.addEventListener("click", () => {
+            closeAiDialog();
+        });
+    }
+
+    // 切换历史对话
+    if (aiConversationSelectElement) {
+        aiConversationSelectElement.addEventListener("change", () => {
+            const value = aiConversationSelectElement.value;
+            const id = Number(value);
+            if (!Number.isNaN(id)) {
+                currentConversationId = id;
+                renderCurrentConversation();
+            }
+        });
+    }
+
+    // 新建对话
+    if (aiNewConversationButtonElement) {
+        aiNewConversationButtonElement.addEventListener("click", () => {
+            createNewConversation();
+        });
+    }
+}
+
+function initializeVoiceRecognition(voiceButton: HTMLButtonElement | null, inputElement: HTMLInputElement): void {
+    if (!voiceButton) {
+        return;
+    }
+
+    // 检查浏览器是否支持语音识别
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        // 不支持语音识别时，禁用按钮并提示
+        voiceButton.disabled = true;
+        voiceButton.title = "您的浏览器不支持语音输入";
+        voiceButton.style.opacity = "0.5";
+        return;
+    }
+
+    voiceRecognition = new SpeechRecognition();
+    voiceRecognition.lang = "zh-CN"; // 设置为中文
+    voiceRecognition.continuous = false; // 不连续识别
+    voiceRecognition.interimResults = false; // 不返回临时结果
+
+    voiceRecognition.onstart = () => {
+        isRecording = true;
+        voiceButton.classList.add("recording");
+        voiceButton.title = "正在录音，点击停止";
+    };
+
+    voiceRecognition.onend = () => {
+        isRecording = false;
+        voiceButton.classList.remove("recording");
+        voiceButton.title = "语音输入";
+    };
+
+    voiceRecognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (inputElement) {
+            inputElement.value = transcript;
+            inputElement.focus();
+        }
+    };
+
+    voiceRecognition.onerror = (event: any) => {
+        console.error("语音识别错误:", event.error);
+        isRecording = false;
+        voiceButton.classList.remove("recording");
+        voiceButton.title = "语音输入";
+        
+        if (event.error === "not-allowed") {
+            alert("请允许浏览器使用麦克风权限");
+        } else if (event.error === "no-speech") {
+            alert("未检测到语音，请重试");
+        }
+    };
+
+    voiceButton.addEventListener("click", () => {
+        if (isRecording) {
+            voiceRecognition.stop();
+        } else {
+            try {
+                voiceRecognition.start();
+            } catch (error) {
+                console.error("启动语音识别失败:", error);
+            }
+        }
     });
 }
 
@@ -762,7 +1119,7 @@ export function sendLayerContextToAi(layer: Layer): void {
     if (!aiAssistantDialogElement || !aiDialogInputElement) {
         return;
     }
-    aiAssistantDialogElement.classList.remove("hidden");
+    openAiDialog();
     pendingAiAttachment = {
         kind: "layer",
         layerType: layer.layerType,
@@ -806,7 +1163,7 @@ async function sendAiMessage(
     if (!aiDialogContentElement) {
         return;
     }
-    appendMessage(aiDialogContentElement, "user", userMessage);
+    appendMessageToCurrentConversation("user", userMessage);
 
     let layerContext: IAiLayerContext | undefined = overrides?.layerContext;
     if (!layerContext && pendingAiAttachment?.kind === "layer") {
@@ -832,7 +1189,7 @@ async function sendAiMessage(
 
     const taskName = getCurrentTask();
     const aiResponse = await fetchAiResponse(userMessage, layerContext, taskName, educationContext);
-    appendMessage(aiDialogContentElement, "assistant", aiResponse);
+    appendMessageToCurrentConversation("assistant", aiResponse);
     pendingAiAttachment = null;
     updateAiContextAttachment();
 }
@@ -854,7 +1211,7 @@ async function handleAiContextAction(action: EducationAction): Promise<void> {
             prompt = `请根据以下内容设计三道测验题，并给出参考答案：\n${text}`;
             break;
     }
-    aiAssistantDialogElement?.classList.remove("hidden");
+    openAiDialog();
     if (aiDialogInputElement) {
         aiDialogInputElement.value = "";
     }
@@ -928,7 +1285,7 @@ function attachEducationSelection(text: string): void {
         displayText
     };
     updateAiContextAttachment();
-    aiAssistantDialogElement?.classList.remove("hidden");
+    openAiDialog();
     aiDialogInputElement?.focus();
     hideEducationSelectionHandle();
     const selection = window.getSelection();
@@ -1021,6 +1378,67 @@ async function stopTraining(): Promise<void> {
 
     stopTrainingHandler() 
 }
+
+/**
+ * 初始化认证系统
+ */
+function setupAuthSystem(): void {
+    // 初始化认证对话框
+    authDialog.init();
+
+    // 获取UI元素
+    const userInfoElement = document.getElementById('userInfo');
+    const loginButtonsElement = document.getElementById('loginButtons');
+    const userNameElement = document.getElementById('userName');
+    const logoutButton = document.getElementById('logoutButton');
+
+    // 更新用户状态显示
+    function updateUserStatus(): void {
+        const user = authService.getCurrentUser();
+        const isAuthenticated = authService.isAuthenticated();
+
+        if (isAuthenticated && user) {
+            // 显示用户信息
+            if (userInfoElement) userInfoElement.classList.remove('hidden');
+            if (loginButtonsElement) loginButtonsElement.classList.add('hidden');
+            if (userNameElement) userNameElement.textContent = user.username;
+        } else {
+            // 隐藏用户信息（登出后返回登录页面，不需要显示登录按钮）
+            if (userInfoElement) userInfoElement.classList.add('hidden');
+            if (loginButtonsElement) loginButtonsElement.classList.add('hidden');
+        }
+    }
+
+    // 登出按钮点击事件
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            await authService.logout();
+            updateUserStatus();
+            // 登出后返回登录页面
+            loginPage.showLoginPage();
+            console.log('已登出');
+        });
+    }
+
+    // 监听登录成功事件
+    window.addEventListener('userLoggedIn', async () => {
+        updateUserStatus();
+        
+        // 登录成功后重新计算布局
+        // 使用requestAnimationFrame确保DOM完全渲染
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                resizeMiddleSVG();
+                console.log('登录成功后重新计算SVG布局');
+            }, 300);
+        });
+    });
+
+    // 页面加载时验证token（由loginPage处理）
+    // 这里只更新状态栏显示
+    updateUserStatus();
+}
+
     //    // 获取ai谈话窗口弹窗元素
     //    const dialog = document.getElementById('aiAssistantDialog') as HTMLElement;
     //    const dialogHeader = dialog.querySelector('.dialog-header') as HTMLElement;

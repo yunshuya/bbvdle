@@ -1,5 +1,59 @@
 import axios from 'axios';
 
+function renderMarkdown(src: string): string {
+    // 简单转义，避免 HTML 注入
+    let text = src
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    // 代码块 ```...```
+    text = text.replace(/```([\s\S]*?)```/g, (_m, code) => {
+        return `<pre><code>${code}</code></pre>`;
+    });
+
+    // 行内代码 `code`
+    text = text.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+
+    // 粗体 **bold**
+    text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+    // 斜体 *italic*
+    text = text.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+
+    // 标题 #, ##, ###
+    text = text.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+    text = text.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+    text = text.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+
+    // 无序列表 - item
+    const lines = text.split(/\r?\n/);
+    const out: string[] = [];
+    let inList = false;
+    for (const line of lines) {
+        const m = /^-\s+(.+)$/.exec(line);
+        if (m) {
+            if (!inList) {
+                inList = true;
+                out.push("<ul>");
+            }
+            out.push(`<li>${m[1]}</li>`);
+        } else {
+            if (inList) {
+                inList = false;
+                out.push("</ul>");
+            }
+            out.push(line);
+        }
+    }
+    if (inList) {
+        out.push("</ul>");
+    }
+
+    // 普通换行转成 <br>
+    return out.join("\n").replace(/\n/g, "<br>");
+}
+
 // 添加消息到对话框，并注明发送者
 export function appendMessage(container: HTMLElement, sender: string, message: string): void {
     const messageWrapper = document.createElement("div");
@@ -10,10 +64,10 @@ export function appendMessage(container: HTMLElement, sender: string, message: s
     senderLabel.className = "sender-label";
     senderLabel.textContent = sender === "user" ? "用户" : "助手";
 
-    // 消息内容
+    // 消息内容（支持简单 Markdown 渲染）
     const messageContent = document.createElement("div");
     messageContent.className = "message-content";
-    messageContent.textContent = message;
+    messageContent.innerHTML = renderMarkdown(message);
 
     // 组合消息元素
     messageWrapper.appendChild(senderLabel);
