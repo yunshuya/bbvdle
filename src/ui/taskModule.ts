@@ -4,6 +4,8 @@ import { Layer } from "./shapes/layer";
 
 import { Draggable } from "./shapes/draggable";
 import { Activation,} from "./shapes/activation";
+// 不再使用进度服务保存历史进度，只显示当前会话的进度
+
 // taskModule.ts
 let CurrentTask: string = "None";  // 当前学习的任务，全局变量，初始为 "None"
 
@@ -20,9 +22,21 @@ export const taskMapping = {
 
 export async function switchTask(taskType: string): Promise<void> {
     console.log("Switching to task: " + taskType);
+    
+    // 首先检查主应用是否显示，如果不显示，直接返回（防止触发任何认证检查）
+    const mainDiv = document.getElementById('main');
+    if (!mainDiv || mainDiv.classList.contains('hidden')) {
+        console.warn('主应用未显示，无法切换任务');
+        return;
+    }
+    
     const taskDisplay = document.getElementById("taskTitleText");
     const stepsList = document.getElementById("stepsList");
-    if (!taskDisplay || !stepsList) return;
+    if (!taskDisplay || !stepsList) {
+        console.warn('任务显示元素未找到');
+        return;
+    }
+    
     //更新当前的任务类型
     CurrentTask = taskType; 
     taskDisplay.textContent = "当前任务: " + (taskMapping[taskType as keyof typeof taskMapping] || "未知任务");
@@ -35,6 +49,13 @@ export async function switchTask(taskType: string): Promise<void> {
         localStorage.setItem("taskSteps", JSON.stringify(taskSteps));  // 保存到 localStorage
         const steps = taskData[taskType] || ['未找到对应任务的步骤'];
         console.log(steps);
+        
+        // 重置所有步骤为未完成状态（不保存历史进度，每次都是新开始）
+        steps.forEach((step: { step: string, requiredBlock: string, completed: boolean }) => {
+            step.completed = false;
+        });
+        
+        // 显示步骤列表
         stepsList.innerHTML = '';
         steps.forEach((step: { step: string, requiredBlock: string, completed: boolean }, index: number) => {
             const li = document.createElement('li');
@@ -43,6 +64,9 @@ export async function switchTask(taskType: string): Promise<void> {
             stepsList.appendChild(li);
         });
         toggleTaskSteps(true);
+        
+        // 更新任务完成率（仅显示，不保存）
+        updateTaskCompletionRate();
     } catch (error) {
         console.error('加载任务步骤失败:', error);
         stepsList.innerHTML = '<li>任务步骤加载失败，请检查网络或联系管理员。</li>';
@@ -160,10 +184,15 @@ export function markStepAsCompleted(stepIndex: number): void {
 
         // 更新任务步骤的 completed 状态
         const task = taskSteps[CurrentTask];
-        if (task) {
+        if (task && task[stepIndex]) {
             task[stepIndex].completed = true;
             console.log(task[stepIndex]);
+            
+            // 不保存进度到服务器，只更新当前会话的进度显示
         }
+        
+        // 更新任务完成率
+        updateTaskCompletionRate();
     }
 }
 
@@ -202,6 +231,81 @@ export function markStepAsFault(stepIndex: number): void {
 export function isTaskAlready(): boolean {
     if(CurrentTask =="None") return false;
         else return true;
+}
 
+/**
+ * 更新任务完成率（仅显示，不保存）
+ */
+function updateTaskCompletionRate(): void {
+    if (CurrentTask === "None") return;
+    
+    const task = taskSteps[CurrentTask];
+    if (!task || task.length === 0) return;
+    
+    const completedCount = task.filter(step => step.completed).length;
+    const totalCount = task.length;
+    const completionRate = totalCount > 0 ? completedCount / totalCount : 0;
+    
+    // 只更新UI显示，不保存到服务器
+    updateProgressUI(completionRate);
+}
 
+/**
+ * 更新进度UI显示（阶段二）
+ */
+function updateProgressUI(completionRate: number): void {
+    // 查找或创建进度显示元素
+    let progressBar = document.getElementById('taskProgressBar');
+    let progressText = document.getElementById('taskProgressText');
+    
+    const taskTitle = document.getElementById('taskTitle');
+    if (taskTitle && !progressBar) {
+        // 创建进度条容器
+        const progressContainer = document.createElement('div');
+        progressContainer.id = 'taskProgressContainer';
+        progressContainer.style.cssText = 'margin-top: 10px; padding: 0 10px;';
+        
+        // 创建进度文本
+        progressText = document.createElement('div');
+        progressText.id = 'taskProgressText';
+        progressText.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 5px;';
+        
+        // 创建进度条
+        progressBar = document.createElement('div');
+        progressBar.id = 'taskProgressBar';
+        progressBar.style.cssText = `
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        `;
+        
+        const progressFill = document.createElement('div');
+        progressFill.id = 'taskProgressFill';
+        progressFill.style.cssText = `
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #2e7d32 100%);
+            transition: width 0.3s ease;
+            width: ${(completionRate * 100).toFixed(1)}%;
+        `;
+        
+        progressBar.appendChild(progressFill);
+        progressContainer.appendChild(progressText);
+        progressContainer.appendChild(progressBar);
+        taskTitle.appendChild(progressContainer);
+    }
+    
+    // 更新进度显示
+    if (progressText) {
+        const percentage = (completionRate * 100).toFixed(1);
+        progressText.textContent = `完成进度: ${percentage}%`;
+    }
+    
+    if (progressBar) {
+        const progressFill = progressBar.querySelector('#taskProgressFill') as HTMLElement;
+        if (progressFill) {
+            progressFill.style.width = `${(completionRate * 100).toFixed(1)}%`;
+        }
+    }
 }

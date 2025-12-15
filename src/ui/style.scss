@@ -2,7 +2,11 @@ $color-menu-bg: #E5E5FC;
 
 body {
    margin: 0px;
+   padding: 0px;
    overflow: hidden;
+   width: 100%;
+   height: 100%;
+   position: relative;
 }
 
 #main {
@@ -22,6 +26,10 @@ body {
     font-size:22px;
     font-family: Helvetica;
     user-select:none;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #menu {
@@ -90,25 +98,24 @@ body {
 }
 
 #blanktab {
-    min-height: calc(25% - 100px);
+    flex: 0 0 auto;
+    min-height: 20px;
     width: 100%;
     background-color: #A8A8BD;
 }
 
 #middleblanktab {
-    min-height: calc(75% - 200px);
+    flex: 1 1 auto;
+    min-height: 20px;
     width: 100%;
-    vertical-align: middle;
     background-color: #A8A8BD;
-    float:left;
 }
 
 #bottomblanktab {
+    flex: 0 0 auto;
+    min-height: 20px;
     width: 100%;
-    height: 100%;
-    vertical-align: middle;
     background-color: #A8A8BD;
-    float:left;
 }
 
 .icon{
@@ -269,8 +276,9 @@ body {
     line-height: 70px;
     width: 50px;
     height: 70px;
+    min-height: 70px;
+    flex: 0 0 70px;
     text-align: center;
-    float:left;
     font-size:22px;
     font-family: Helvetica;
     cursor:pointer;
@@ -320,7 +328,7 @@ div.option.selected {
     font-size: 9px;
     font-weight: bold;
     pointer-events: none;
-}
+ }
 
 div.top_neighbor_tab-selected {
     border-bottom-right-radius: 5px;
@@ -406,14 +414,21 @@ div.top_neighbor_tab-selected {
 
 #svg {
     width: 1000px;
-    height: 100%;
+    height: 1000px;
     background: #e3e3eE;
+    cursor: grab;
+}
+
+#svg:active {
+    cursor: grabbing;
 }
 
 #networkTab {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    position: relative;
+    background: #e3e3eE;
 }
 
 #progressTab {
@@ -525,6 +540,16 @@ a.overlayLinks {
     font-size: 24;
     font-family: Helvetica;
     padding-bottom: 3%;
+}
+
+#quizTab {
+    width: 90%;
+    height: 100%;
+    background: #F1FAFF;
+    padding-left: 5%;
+    padding-right: calc(5% + 200px);
+    padding-top: 3%;
+    overflow-y : auto;
 }
 
 #educationTab {
@@ -802,17 +827,20 @@ label {
 
 .ai-dialog {
     position: fixed;
-    bottom: 100px;
-    right: 20px;
-    width: 300px;
-    max-height: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    max-width: 1200px;
+    height: 70vh;
+    max-height: 800px;
     background-color: #fff;
     border: 1px solid #ccc;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 1100;
 }
 
 .hidden {
@@ -820,24 +848,129 @@ label {
 }
 
 .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background-color:rgb(128,108,183);
     color: white;
-    padding: 10px;
+    padding: 14px 18px;
     font-weight: bold;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    position: relative;
+}
+
+.dialog-title {
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.dialog-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-conversation-select {
+    padding: 6px 10px;
+    font-size: 21px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    min-width: 120px;
+}
+
+.ai-conversation-select:hover {
+    background: rgb(80, 65, 120);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.ai-conversation-select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.ai-conversation-select option {
+    background: rgb(128,108,183);
+    color: #fff;
+    padding: 8px;
+}
+
+.ai-conversation-select option:hover {
+    background: rgb(80, 65, 120) !important;
+    color: #fff;
+}
+
+.ai-conversation-select option:checked {
+    background: rgb(80, 65, 120);
+    color: #fff;
+}
+
+.ai-new-conversation {
+    padding: 6px 14px;
+    font-size: 21px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.ai-new-conversation:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.ai-new-conversation:active {
+    transform: translateY(0);
+}
+
+.ai-dialog-close {
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.ai-dialog-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
 }
 
 .dialog-content {
-    padding: 10px;
+    padding: 20px;
     overflow-y: auto;
     flex: 1;
     border-top: 1px solid #ccc;
+    font-size: 24px;
+    line-height: 1.6;
 }
 
 .dialog-footer {
     display: flex;
+    align-items: center;
     border-top: 1px solid #ccc;
+    gap: 8px;
+    padding: 0 8px;
 }
 
 .ai-context {
@@ -863,9 +996,9 @@ label {
 }
 
 .ai-context-text {
-    font-size: 12px;
+    font-size: 21px;
     color: #4a4a4a;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .ai-context-remove {
@@ -902,9 +1035,9 @@ label {
     border: 1px solid #6C63FF;
     background: #fff;
     color: #6C63FF;
-    font-size: 12px;
+    font-size: 20px;
     border-radius: 999px;
-    padding: 4px 10px;
+    padding: 6px 18px;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
 }
@@ -935,18 +1068,89 @@ label {
     display: none;
 }
 
+.voice-input-button {
+    border: 2px solid rgb(128,108,183);
+    background: rgba(128,108,183, 0.1);
+    color: rgb(128,108,183);
+    cursor: pointer;
+    padding: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s ease, transform 0.1s ease;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.voice-input-button svg {
+    width: 66px;
+    height: 66px;
+}
+
+.voice-input-button:hover {
+    background: rgba(128,108,183, 0.2);
+    transform: scale(1.1);
+}
+
+.voice-input-button:active {
+    transform: scale(0.95);
+}
+
+.voice-input-button.recording {
+    background: rgba(255, 0, 0, 0.2);
+    border-color: #ff4444;
+    color: #ff4444;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.voice-input-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
 .dialog-footer input {
     flex: 1;
     border: none;
-    padding: 10px;
+    padding: 12px 16px;
+    font-size: 24px;
+    outline: none;
 }
 
 .dialog-footer button {
     border: none;
     background-color:rgb(128,108,183);
     color: white;
-    padding: 10px;
+    padding: 12px 20px;
+    font-size: 24px;
+    font-weight: 500;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dialog-footer button:hover {
+    background-color: rgb(100, 85, 150);
+}
+
+/* AI 助手全屏蒙版 */
+.ai-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
 }
 /* 消息容器样式 */
 .message {
@@ -968,19 +1172,22 @@ label {
 
 /* 消息内容通用样式 */
 .message-content {
-    padding: 10px;
+    padding: 12px 16px;
     border-radius: 8px;
-    max-width: 70%;
+    max-width: 75%;
     word-wrap: break-word;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 24px;
+    line-height: 1.6;
 }
 
 /* 发送者标签 */
 .sender-label {
-    font-size: 12px;
+    font-size: 21px;
     color: #6c757d;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     text-align: left;
+    font-weight: 500;
 }
 
 .message.user .sender-label {
@@ -1012,4 +1219,416 @@ label {
 .failed-step {
     background-color: #ffebee; /* 失败步骤的背景色，淡红色 */
     border-left: 5px solid red; /* 失败步骤时，左侧添加红色边框 */
+}
+
+/* ==================== 登录页面样式 ==================== */
+
+/* 主应用容器 */
+#main.hidden {
+    display: none !important;
+}
+
+/* 确保主应用显示时布局正常 */
+#main:not(.hidden) {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* 登录页面 */
+.login-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.login-page.hidden {
+    display: none !important; // 使用!important确保隐藏优先级最高
+    visibility: hidden !important; // 双重保险
+    opacity: 0 !important; // 添加透明度过渡
+    pointer-events: none !important; // 禁用所有交互
+    z-index: -1 !important; // 确保在底层
+}
+
+.login-page-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    // 背景图片（16:9比例，覆盖整个区域）
+    // 如果图片未加载，使用渐变作为后备
+    // 路径：相对于CSS文件位置（src/ui/style.css -> 向上两级到项目根目录 -> resources/login-background.jpg）
+    background-image: url('../../resources/login-background.jpg'), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: cover, 100% 100%;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    // 添加深色遮罩层，确保文字可读性
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 0;
+    }
+}
+
+.login-page-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    // 移除浮动动画，改为轻微的渐变遮罩
+    background: radial-gradient(circle at center, rgba(128, 108, 183, 0.2), transparent 70%);
+    z-index: 1;
+}
+
+.login-page-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 700px; // 从500px增加到700px
+    padding: 40px; // 从20px增加到40px
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.login-page-title {
+    font-size: 56px; // 从42px增加到56px
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5); // 增强阴影以提高可读性
+    letter-spacing: -0.5px;
+}
+
+.login-page-subtitle {
+    font-size: 24px; // 从18px增加到24px
+    margin: 0;
+    opacity: 0.95;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* 登录认证框 */
+.login-auth-box {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 24px; // 从20px增加到24px
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4); // 增强阴影
+    padding: 50px; // 从40px增加到50px
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.login-page-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-page-form.hidden {
+    display: none;
+}
+
+.login-form-title {
+    font-size: 36px; // 从28px增加到36px
+    font-weight: 600;
+    margin: 0 0 35px 0; // 从30px增加到35px
+    color: #333;
+    text-align: center;
+}
+
+.login-page-error {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    padding: 16px 20px; // 从14px 18px增加到16px 20px
+    border-radius: 10px;
+    margin-bottom: 24px; // 从20px增加到24px
+    font-size: 16px; // 从14px增加到16px
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(238, 90, 111, 0.3);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+.login-page-error.hidden {
+    display: none;
+}
+
+.login-page-form-element {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-form-group label {
+    font-size: 18px; // 从14px增加到18px
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 8px; // 从4px增加到8px
+}
+
+.login-form-group input {
+    padding: 18px 20px; // 从14px 16px增加到18px 20px
+    font-size: 18px; // 从16px增加到18px
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    color: #333;
+}
+
+.login-form-group input:focus {
+    border-color: #806cb7;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(128, 108, 183, 0.1);
+    transform: translateY(-2px);
+}
+
+.login-form-group input::placeholder {
+    color: #999;
+    font-weight: 300;
+    font-size: 16px; // 增加placeholder字体大小
+}
+
+.login-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px; // 从10px增加到12px
+    cursor: pointer;
+    font-size: 16px; // 从14px增加到16px
+    user-select: none;
+    color: #666;
+}
+
+.login-checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #806cb7;
+}
+
+/* 登录按钮 */
+.login-button {
+    padding: 20px 32px; // 从16px 24px增加到20px 32px
+    font-size: 20px; // 从18px增加到20px
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin-top: 15px; // 从10px增加到15px
+}
+
+.login-button-primary {
+    background: linear-gradient(135deg, #806cb7 0%, #645596 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(128, 108, 183, 0.4);
+}
+
+.login-button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(128, 108, 183, 0.5);
+}
+
+.login-button-primary:active {
+    transform: translateY(0);
+}
+
+.login-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.login-button-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* 切换链接 */
+.login-page-switch {
+    margin-top: 28px; // 从24px增加到28px
+    text-align: center;
+    font-size: 16px; // 从14px增加到16px
+    color: #666;
+}
+
+.login-page-switch a {
+    color: #806cb7;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 8px; // 从6px增加到8px
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+    font-size: 16px; // 确保链接字体大小
+}
+
+.login-page-switch a:hover {
+    color: #645596;
+    border-bottom-color: #645596;
+}
+
+/* 用户认证状态栏（主应用内） */
+.user-auth-bar {
+    position: fixed;
+    top: 0;
+    right: 220px; // 从 180px 增加到 220px，再往左移一点，确保不挡住训练按钮
+    padding: 10px 20px;
+    background-color: rgba(128, 108, 183, 0.9);
+    color: white;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 18px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px; // 添加右侧圆角
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.user-auth-bar.hidden {
+    display: none;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-name {
+    font-weight: 500;
+    color: white;
+}
+
+.login-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-button-small {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 6px 16px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.auth-button-small:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+}
+
+.auth-button-small:active {
+    transform: translateY(0);
+}
+
+/* 阶段二：学习进度相关样式 */
+#taskProgressContainer {
+    margin-top: 10px;
+    padding: 0 10px;
+}
+
+#taskProgressText {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+#taskProgressBar {
+    width: 100%;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#taskProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 0%, #2e7d32 100%);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.completed-step {
+    color: #4caf50;
+    font-weight: 500;
+}
+
+.failed-step {
+    color: #f44336;
+}
+
+.checkmark {
+    margin-left: 8px;
+    font-weight: bold;
 }

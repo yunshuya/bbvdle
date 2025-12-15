@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试背景图片路径</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-box {
+            width: 800px;
+            height: 450px;
+            border: 2px solid #333;
+            margin: 20px 0;
+            position: relative;
+        }
+        .test-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        /* 测试路径1：相对于CSS文件（src/ui/style.css） */
+        .test1 {
+            background-image: url('../../resources/login-background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        /* 测试路径2：绝对路径 */
+        .test2 {
+            background-image: url('/resources/login-background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        /* 测试路径3：相对于HTML文件 */
+        .test3 {
+            background-image: url('resources/login-background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>背景图片路径测试</h1>
+    <p>请查看哪个框显示了背景图片：</p>
+    
+    <div class="test-box test1">
+        <div class="test-label">路径1: ../../resources/login-background.jpg (相对于CSS文件)</div>
+    </div>
+    
+    <div class="test-box test2">
+        <div class="test-label">路径2: /resources/login-background.jpg (绝对路径)</div>
+    </div>
+    
+    <div class="test-box test3">
+        <div class="test-label">路径3: resources/login-background.jpg (相对于HTML文件)</div>
+    </div>
+    
+    <p><strong>说明：</strong>如果某个框显示了背景图片，说明该路径是正确的。请告诉我哪个路径有效。</p>
+</body>
+</html>
+
