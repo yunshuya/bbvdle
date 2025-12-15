@@ -188,14 +188,19 @@ export abstract class Draggable {
         const canvasBoundingBox = getSvgOriginalBoundingBox( document.getElementById("svg") as any as SVGSVGElement);
         const componentBBox  = this.outerBoundingBox();
 
+        // 最初版裁剪邊界：限制在整個 SVG 畫布內，並考慮縱向偏移
         const bottomBoundary = (canvasBoundingBox.height - componentBBox.bottom) - windowProperties.svgYOffset;
 
-        this.setPosition(new Point( Math.min(
-                                        Math.max(-componentBBox.left, this.draggedX),
-                                        canvasBoundingBox.width - componentBBox.right),
-                                    Math.min(
-                                        Math.max(-componentBBox.top + windowProperties.svgYOffset, this.draggedY),
-                                        bottomBoundary)));
+        this.setPosition(new Point(
+            Math.min(
+                Math.max(-componentBBox.left, this.draggedX),
+                canvasBoundingBox.width - componentBBox.right
+            ),
+            Math.min(
+                Math.max(-componentBBox.top + windowProperties.svgYOffset, this.draggedY),
+                bottomBoundary
+            )
+        ));
     }
 
     public setPosition(position: Point): void {

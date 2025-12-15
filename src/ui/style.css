@@ -351,19 +351,13 @@ div.bottom_neighbor_tab-selected {
 
 #svg {
   width: 1000px;
-  height: 1000px;
-  background: #e3e3eE;
-  cursor: grab; }
-
-#svg:active {
-  cursor: grabbing; }
+  height: 100%;
+  background: #e3e3eE; }
 
 #networkTab {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  position: relative;
-  background: #e3e3eE; }
+  overflow: hidden; }
 
 #progressTab {
   width: calc(100% - 20px);

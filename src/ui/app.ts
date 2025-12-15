@@ -743,14 +743,14 @@ function resizeMiddleSVG(): void {
 
     const middleElement = document.getElementById("middle");
     if (!middleElement) {
-        console.warn('resizeMiddleSVG: middle元素未找到，可能主应用还未显示');
+        console.warn("resizeMiddleSVG: middle元素未找到，可能主应用还未显示");
         return;
     }
 
     // 检查主应用是否显示
     const mainDiv = document.getElementById("main");
     if (mainDiv && mainDiv.classList.contains("hidden")) {
-        console.warn('resizeMiddleSVG: 主应用还在隐藏状态，跳过布局计算');
+        console.warn("resizeMiddleSVG: 主应用还在隐藏状态，跳过布局计算");
         return;
     }
 
@@ -759,23 +759,17 @@ function resizeMiddleSVG(): void {
 
     // 如果尺寸为0，说明元素还未完全显示，延迟重试
     if (svgWidth === 0 || svgHeight === 0) {
-        console.warn('resizeMiddleSVG: 元素尺寸为0，延迟重试');
+        console.warn("resizeMiddleSVG: 元素尺寸为0，延迟重试");
         setTimeout(() => resizeMiddleSVG(), 100);
         return;
     }
 
-    // 计算缩放比例：**水平方向铺满整个中间面板**
-    // 原始 SVG 尺寸为 1000x1000，这里以宽度为基准计算缩放比
-    const originalSVGHeight = 1000;
+    // 最初版本：只按宽度计算缩放比，水平居中
     const ratio = svgWidth / originalSVGWidth;
 
-    // 计算平移
-    // 水平方向：不再居中，而是左对齐，这样拖拽时可以利用整个面板的左右空间
-    const scaledHeight = originalSVGHeight * ratio;
-    const xTranslate = 0;
-    const yTranslate = (svgHeight - scaledHeight) / 2;
+    const xTranslate = (svgWidth - originalSVGWidth) / 2;
+    const yTranslate = Math.max(0, (svgHeight * ratio - svgHeight) / 2);
 
-    // Modify initialization heights for random locations for layers/activations so they don't appear above the svg
     const yOffsetDelta = yTranslate / ratio - windowProperties.svgYOffset;
     ActivationLayer.defaultInitialLocation.y += yOffsetDelta;
     Activation.defaultLocation.y += yOffsetDelta;
@@ -785,12 +779,16 @@ function resizeMiddleSVG(): void {
 
     const svgElement = document.getElementById("svg");
     if (svgElement) {
-        // 使用translate和scale，确保内容居中并完整显示
-        svgElement.setAttribute("transform", `translate(${xTranslate}, ${yTranslate}) scale(${ratio}, ${ratio})`);
-        console.log(`resizeMiddleSVG: 已设置transform, xTranslate=${xTranslate}, yTranslate=${yTranslate}, ratio=${ratio}`);
+        svgElement.setAttribute(
+            "transform",
+            `translate(${xTranslate}, 0) scale(${ratio}, ${ratio})  `
+        );
+        console.log(
+            `resizeMiddleSVG: 已设置transform, xTranslate=${xTranslate}, ratio=${ratio}`
+        );
     }
 
-    // Call crop position on each draggable to ensure it is within the new canvas boundary
+    // 调整所有可拖拽元素的位置，确保仍在画布内
     if (svgData.input != null) {
         svgData.input.cropPosition();
         svgData.input.moveAction();
