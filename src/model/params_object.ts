@@ -14,7 +14,7 @@ class NetworkParameters {
     public learningRate: number = 0.001;  // 降低学习率以提高训练稳定性
     public batchSize: number = 64;
     public optimizer: string = "adam";  // 使用Adam优化器，通常比SGD表现更好
-    public epochs: number = 10;  // 增加训练轮次以提高准确率
+    public epochs: number = 1200;  // 参考PyTorch代码，使用1200个epochs进行训练
     public loss: string = "categoricalCrossentropy";
     private paramNames: Set<string> = new Set(["optimizer", "loss"]);
 

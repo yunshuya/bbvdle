@@ -1,6 +1,9 @@
 import * as tf from "@tensorflow/tfjs";
 import { ActivationLayer } from "../activationlayer";
 import { PathShape, Point } from "../shape";
+import { dataset, AirPassengersData } from "../../../model/data";
+import { Layer } from "../layer";
+import { displayError } from "../../error";
 
 export class Dense extends ActivationLayer {
     public layerType: string = "Dense";
@@ -58,5 +61,43 @@ export class Dense extends ActivationLayer {
         newLayer.paramBox = this.paramBox;
         newLayer.activation = this.activation;
         return newLayer;
+    }
+
+    public generateTfjsLayer(): void {
+        // 检测是否为时序数据（回归任务）
+        const isTimeSeries = dataset instanceof AirPassengersData;
+        
+        // 使用parameterDefaults作为基础，然后用getParams()中的用户配置覆盖
+        const parameters = { ...this.parameterDefaults };
+        const userParams = this.getParams();
+        
+        // 将用户配置的参数合并到默认参数中
+        for (const param of Object.keys(userParams)) {
+            parameters[param] = userParams[param];
+        }
+        
+        // 对于时序数据，强制设置units=1（回归任务）
+        if (isTimeSeries) {
+            parameters.units = 1;
+        }
+        
+        // 确保units是整数
+        parameters.units = parseInt(parameters.units, 10);
+        
+        // 获取激活函数
+        if (this.activation != null) {
+            parameters.activation = this.activation.activationType;
+        } else if (isTimeSeries) {
+            // 时序数据（回归任务）不需要激活函数
+            // 不设置activation，使用默认的线性激活
+        }
+
+        let parent: Layer = null;
+        if (this.parents.size > 1) {
+            displayError(new Error("Must use a concatenate when a layer has multiple parents"));
+        }
+        for (const p of this.parents) { parent = p; break; }
+
+        this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parent.getTfjsLayer());
     }
 }

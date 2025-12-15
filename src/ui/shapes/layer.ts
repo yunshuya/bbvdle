@@ -295,10 +295,21 @@ export abstract class Layer extends Draggable {
                 } else {
                     const value = inputElement.value;
                     // Need to not parse as integer for float parameters
-                    if ((defaultParams[name].toString()).indexOf(".") >= 0) {
-                        params[name] = parseFloat(value);
+                    // 安全检查：确保defaultParams中存在该参数，避免undefined.toString()错误
+                    if (defaultParams[name] !== undefined && defaultParams[name] !== null) {
+                        if ((defaultParams[name].toString()).indexOf(".") >= 0) {
+                            params[name] = parseFloat(value);
+                        } else {
+                            params[name] = parseString(value);
+                        }
                     } else {
-                        params[name] = parseString(value);
+                        // 如果参数不在defaultParams中，尝试根据值判断类型
+                        // 如果值包含小数点，解析为浮点数；否则解析为字符串
+                        if (value.indexOf(".") >= 0 && !isNaN(parseFloat(value))) {
+                            params[name] = parseFloat(value);
+                        } else {
+                            params[name] = parseString(value);
+                        }
                     }
                 }
             }
@@ -322,10 +333,21 @@ export abstract class Layer extends Draggable {
                 } else {
                     const value = inputElement.value;
                     // Need to not parse as integer for float parameters
-                    if ((defaultParams[name].toString()).indexOf(".") >= 0) {
-                        params[name] = parseFloat(value);
+                    // 安全检查：确保defaultParams中存在该参数，避免undefined.toString()错误
+                    if (defaultParams[name] !== undefined && defaultParams[name] !== null) {
+                        if ((defaultParams[name].toString()).indexOf(".") >= 0) {
+                            params[name] = parseFloat(value);
+                        } else {
+                            params[name] = parseString(value);
+                        }
                     } else {
-                        params[name] = parseString(value);
+                        // 如果参数不在defaultParams中，尝试根据值判断类型
+                        // 如果值包含小数点，解析为浮点数；否则解析为字符串
+                        if (value.indexOf(".") >= 0 && !isNaN(parseFloat(value))) {
+                            params[name] = parseFloat(value);
+                        } else {
+                            params[name] = parseString(value);
+                        }
                     }
                 }
             }

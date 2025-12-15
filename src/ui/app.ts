@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { buildNetworkDAG, topologicalSort } from "../model/build_network";
 import { generateJulia, generatePython } from "../model/code_generation";
-import { changeDataset } from "../model/data";
+import { changeDataset, dataset, AirPassengersData } from "../model/data";
 import { download, graphToJson } from "../model/export_model";
 import { setupPlots, setupTestResults, showPredictions } from "../model/graphs";
 import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
@@ -28,7 +28,8 @@ import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
-import { copyTextToClipboard } from "./utils";
+import { Point } from "./shapes/shape";
+import { copyTextToClipboard, getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
@@ -466,7 +467,24 @@ function appendItem(itemType: string): void {
     }
     
     try {
-        const item: Draggable = new itemMap[itemType]();
+        // 获取画布大小并计算中心位置
+        const svgElement = document.getElementById("svg") as unknown as SVGSVGElement;
+        if (!svgElement) {
+            console.error("SVG element not found");
+            return;
+        }
+        
+        const canvasBoundingBox = getSvgOriginalBoundingBox(svgElement);
+        const centerX = canvasBoundingBox.width / 2;
+        const centerY = canvasBoundingBox.height / 2;
+        const centerPoint = new Point(centerX, centerY);
+        
+        // 在画布中心周围生成随机位置（随机范围：宽150px，高100px）
+        const randomLocation = Point.randomPoint(150, 100, centerPoint);
+        
+        // 创建积木块并传入中心位置的随机坐标
+        const item: Draggable = new itemMap[itemType](randomLocation);
+        
         console.log("Created item:", item);
 
     svgData.draggable.push(item);
@@ -864,6 +882,29 @@ export function tabSelected(): string {
     }
 }
 
+/**
+ * 根据dataset类型更新visualizationMenu的显示
+ * 当dataset为airpassengers时，隐藏分类菜单；当为其他dataset时，显示分类菜单
+ */
+function updateVisualizationMenu(): void {
+    const classesCategory = document.getElementById("classes");
+    if (!classesCategory) {
+        return;
+    }
+    
+    // 检测是否为时序数据（AirPassengers）
+    const isTimeSeries = dataset instanceof AirPassengersData;
+    
+    // 根据dataset类型显示/隐藏分类菜单
+    if (isTimeSeries) {
+        // 时序数据：隐藏分类菜单
+        classesCategory.style.display = "none";
+    } else {
+        // 分类数据：显示分类菜单
+        classesCategory.style.display = "block";
+    }
+}
+
 function switchTab(tabType: string): void {
     // Hide all tabs
     document.getElementById("networkTab").style.display = "none";
@@ -911,6 +952,11 @@ function switchTab(tabType: string): void {
     // Show taskSteps only for "network" tab
     if (tabType === "network" && taskSteps) {
         taskSteps.style.display = "block";
+    }
+
+    // 当切换到visualization标签时，根据dataset类型更新菜单显示
+    if (tabType === "visualization") {
+        updateVisualizationMenu();
     }
 
     switch (tabType) {

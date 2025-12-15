@@ -237,57 +237,92 @@ export function rnnTemplate(svgData: IDraggableData): void {
     const width = canvasBoundingBox.width;
     const height = canvasBoundingBox.height;
 
+    // 获取当前数据集类型
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+
     const inputPos = new Point(width / 5, height / 3);
-    const reshapePos = new Point(width / 4, height / 2);
-    const rnn1Pos = new Point(width / 2.5, height / 2);
-    const dropoutPos = new Point(width / 1.5, height / 2);
-    const densePos = new Point(width / 1.2, height / 2);
+    const rnn1Pos = isTimeSeries ? new Point(width / 2.5, height / 2) : new Point(width / 2.5, height / 2);
+    const densePos = new Point(width / 1.5, height / 2);
     const outputPos = new Point(width - 100, height / 2);
 
-    // Create layers
-    // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
-    // 默认使用 MNIST 格式 (28, 28)，用户可以根据数据集调整
-    const reshape: Layer = new Reshape(reshapePos);
-    reshape.parameterDefaults.targetShape1 = 28;
-    reshape.parameterDefaults.targetShape2 = 28;
+    // 对于时序数据（AirPassengers），数据已经是3D格式[12, 1]，不需要Reshape层
+    // 对于图像数据（MNIST/CIFAR），需要Reshape层
+    let reshape: Layer | null = null;
+    let dropout: Layer | null = null;
+    
+    if (!isTimeSeries) {
+        const reshapePos = new Point(width / 4, height / 2);
+        const dropoutPos = new Point(width / 1.2, height / 2);
+        
+        // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
+        reshape = new Reshape(reshapePos);
+        if (currentDataset === "cifar") {
+            // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
+            reshape.parameterDefaults.targetShape1 = 32;
+            reshape.parameterDefaults.targetShape2 = 96;
+        } else {
+            // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
+            reshape.parameterDefaults.targetShape1 = 28;
+            reshape.parameterDefaults.targetShape2 = 28;
+        }
+        
+        dropout = new Dropout(dropoutPos);
+        // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
+        dropout.parameterDefaults.rate = 0.2;
+    }
     
     const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
     // 设置RNN层units为64以提高表达能力
     rnn1.parameterDefaults.units = 64;
     // 为RNN层添加tanh激活函数（RNN的默认激活函数，比ReLU更适合序列数据）
     const rnnTanh: Activation = new Tanh(rnn1Pos);
-    const dropout: Layer = new Dropout(dropoutPos);
-    // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
-    // 过高的dropout（如0.3-0.5）可能导致模型在训练后期性能突然下降
-    dropout.parameterDefaults.rate = 0.2;
+    
     const dense: ActivationLayer = new Dense(densePos);
-    // 设置Dense层的units为10（MNIST有10个类别）
-    dense.parameterDefaults.units = 10;
-    // 注意：Dense层不使用激活函数，因为Output层会自动应用softmax
-    // 如果Dense层也使用softmax，会导致双重softmax，使模型输出固定
+    if (isTimeSeries) {
+        // 时序数据：回归任务，输出1个值
+        dense.parameterDefaults.units = 1;
+    } else {
+        // 图像数据：分类任务，输出10个类别
+        dense.parameterDefaults.units = 10;
+    }
+    // 注意：Dense层不使用激活函数，因为Output层会自动应用softmax（分类任务）
+    // 对于回归任务（时序数据），Output层不会应用softmax
 
     // Add activations
     rnn1.addActivation(rnnTanh);
-    // Dense层不添加激活函数，让Output层处理softmax
+    // Dense层不添加激活函数，让Output层处理softmax（分类任务）
 
     // Add relationships among layers
     svgData.input.setPosition(inputPos);
     svgData.output.setPosition(outputPos);
     
-    // Input -> Reshape -> RNN -> Dropout -> Dense -> Output
-    svgData.input.addChild(reshape);
-    reshape.addChild(rnn1);
-    rnn1.addChild(dropout);
-    dropout.addChild(dense);
-    dense.addChild(svgData.output);
-
-    // Store the new network
-    svgData.draggable.push(reshape);
-    svgData.draggable.push(rnn1);
-    svgData.draggable.push(rnnTanh);
-    svgData.draggable.push(dropout);
-    svgData.draggable.push(dense);
-    // 注意：Output层会自动应用softmax，所以Dense层不需要激活函数
+    if (isTimeSeries) {
+        // 时序数据：Input -> RNN -> Dense(1) -> Output
+        svgData.input.addChild(rnn1);
+        rnn1.addChild(dense);
+        dense.addChild(svgData.output);
+        
+        // Store the new network
+        svgData.draggable.push(rnn1);
+        svgData.draggable.push(rnnTanh);
+        svgData.draggable.push(dense);
+    } else {
+        // 图像数据：Input -> Reshape -> RNN -> Dropout -> Dense(10) -> Output
+        svgData.input.addChild(reshape);
+        reshape.addChild(rnn1);
+        rnn1.addChild(dropout);
+        dropout.addChild(dense);
+        dense.addChild(svgData.output);
+        
+        // Store the new network
+        svgData.draggable.push(reshape);
+        svgData.draggable.push(rnn1);
+        svgData.draggable.push(rnnTanh);
+        svgData.draggable.push(dropout);
+        svgData.draggable.push(dense);
+    }
+    // 注意：Output层会自动应用softmax（分类任务），所以Dense层不需要激活函数
 }
 
 // LSTM模板
@@ -299,60 +334,81 @@ export function lstmTemplate(svgData: IDraggableData): void {
     const width = canvasBoundingBox.width;
     const height = canvasBoundingBox.height;
 
+    // 获取当前数据集类型
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+
     const inputPos = new Point(width / 5, height / 3);
-    const reshapePos = new Point(width / 4, height / 2);
-    const lstm1Pos = new Point(width / 2.5, height / 2);
-    const dropoutPos = new Point(width / 1.5, height / 2);
-    const densePos = new Point(width / 1.2, height / 2);
+    const lstm1Pos = isTimeSeries ? new Point(width / 2.5, height / 2) : new Point(width / 2.5, height / 2);
+    const densePos = new Point(width / 1.5, height / 2);
     const outputPos = new Point(width - 100, height / 2);
 
-    // Create layers
-    // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
-    // Reshape层会根据当前数据集自动设置默认值（在populateParamBox中）
-    // 这里设置parameterDefaults以确保一致性
-    const reshape: Layer = new Reshape(reshapePos);
-    // 获取当前数据集类型，根据数据集设置默认值
-    const currentDataset = svgData.input.getParams().dataset;
-    if (currentDataset === "cifar") {
-        // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
-        reshape.parameterDefaults.targetShape1 = 32;
-        reshape.parameterDefaults.targetShape2 = 96;
-    } else {
-        // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
-        reshape.parameterDefaults.targetShape1 = 28;
-        reshape.parameterDefaults.targetShape2 = 28;
+    // 对于时序数据（AirPassengers），数据已经是3D格式[12, 1]，不需要Reshape层
+    // 对于图像数据（MNIST/CIFAR），需要Reshape层
+    let reshape: Layer | null = null;
+    if (!isTimeSeries) {
+        const reshapePos = new Point(width / 4, height / 2);
+        reshape = new Reshape(reshapePos);
+        if (currentDataset === "cifar") {
+            // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
+            reshape.parameterDefaults.targetShape1 = 32;
+            reshape.parameterDefaults.targetShape2 = 96;
+        } else {
+            // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
+            reshape.parameterDefaults.targetShape1 = 28;
+            reshape.parameterDefaults.targetShape2 = 28;
+        }
     }
     
     const lstm1: ActivationLayer = new LSTM(lstm1Pos);
-    // 为LSTM层添加ReLU激活函数
-    const lstmRelu: Activation = new Relu(lstm1Pos);
-    const dropout: Layer = new Dropout(dropoutPos);
+    // LSTM层：units=64, dropout=0（参考PyTorch代码）
+    
+    // 对于时序预测任务，LSTM通常不需要激活函数
+    // 对于分类任务，可以添加ReLU激活函数
+    let lstmRelu: Activation | null = null;
+    if (!isTimeSeries) {
+        lstmRelu = new Relu(lstm1Pos);
+        lstm1.addActivation(lstmRelu);
+    }
+    
     const dense: ActivationLayer = new Dense(densePos);
-    // 设置Dense层的units为10（数据集有10个类别）
-    dense.parameterDefaults.units = 10;
-    // 为Dense层添加ReLU激活函数
-    const denseRelu: Activation = new Relu(densePos);
-
-    // Add activations
-    lstm1.addActivation(lstmRelu);
-    dense.addActivation(denseRelu);
+    if (isTimeSeries) {
+        // 时序预测任务：输出1个值（回归任务）
+        dense.parameterDefaults.units = 1;
+        // 回归任务不需要激活函数
+    } else {
+        // 分类任务：输出10个类别
+        dense.parameterDefaults.units = 10;
+        // 为Dense层添加ReLU激活函数
+        const denseRelu: Activation = new Relu(densePos);
+        dense.addActivation(denseRelu);
+        svgData.draggable.push(denseRelu);
+    }
 
     // Add relationships among layers
     svgData.input.setPosition(inputPos);
     svgData.output.setPosition(outputPos);
     
-    // Input -> Reshape -> LSTM -> Dropout -> Dense -> Output
-    svgData.input.addChild(reshape);
-    reshape.addChild(lstm1);
-    lstm1.addChild(dropout);
-    dropout.addChild(dense);
-    dense.addChild(svgData.output);
+    if (isTimeSeries) {
+        // 时序数据：Input -> LSTM -> Dense -> Output（不需要Reshape和激活函数）
+        svgData.input.addChild(lstm1);
+        lstm1.addChild(dense);
+        dense.addChild(svgData.output);
+    } else {
+        // 图像数据：Input -> Reshape -> LSTM -> Dense -> Output
+        svgData.input.addChild(reshape!);
+        reshape!.addChild(lstm1);
+        lstm1.addChild(dense);
+        dense.addChild(svgData.output);
+    }
 
     // Store the new network
-    svgData.draggable.push(reshape);
+    if (reshape) {
+        svgData.draggable.push(reshape);
+    }
     svgData.draggable.push(lstm1);
-    svgData.draggable.push(lstmRelu);
-    svgData.draggable.push(dropout);
+    if (lstmRelu) {
+        svgData.draggable.push(lstmRelu);
+    }
     svgData.draggable.push(dense);
-    svgData.draggable.push(denseRelu);
 }
