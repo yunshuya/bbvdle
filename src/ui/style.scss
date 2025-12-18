@@ -96,7 +96,7 @@ body {
 }
 
 #middleblanktab {
-    min-height: calc(75% - 200px);
+    min-height: calc(50% - 200px);
     width: 100%;
     vertical-align: middle;
     background-color: #A8A8BD;
@@ -112,8 +112,8 @@ body {
 }
 
 .icon{
-    padding-top: 23;
-    padding-left: 1;
+    padding-top: 23px;
+    padding-left: 1px;
 }
 
 .tab:hover {
@@ -279,7 +279,7 @@ body {
 }
 
 .tab-selected {
-    background-color: $color-menu-bg;
+    background-color: #C4B7D1;
 }
 
 .last-dropdown {
