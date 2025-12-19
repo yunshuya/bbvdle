@@ -36,6 +36,7 @@ import { appendMessage, fetchAiResponse } from './ai_assistant';
 import { authService } from './auth/authService';
 import { authDialog } from './auth/authDialog';
 import { loginPage } from './auth/loginPage';
+import { noteManager } from './noteManager';
 
 
 export interface IDraggableData {
@@ -234,6 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     // AI 对话框不需要拖拽和调整大小功能，保持居中固定
     setupEducationSelectionWatcher();
+    setupNoteFeature();
 });
 
 function getOrCreateCurrentConversation(): IConversation {
@@ -910,6 +912,18 @@ function switchTab(tabType: string): void {
     document.getElementById("visualizationTab").style.display = "none";
     document.getElementById("quizTab").style.display = "none";
     document.getElementById("educationTab").style.display = "none";
+    
+    // 隐藏笔记栏（除非切换到education标签）
+    const noteSidebar = document.getElementById("educationNoteSidebar");
+    const noteShowBtn = document.getElementById("noteSidebarShowBtn");
+    if (tabType !== "education") {
+        if (noteSidebar) {
+            noteSidebar.style.display = "none";
+        }
+        if (noteShowBtn) {
+            noteShowBtn.style.display = "none";
+        }
+    }
 
     // Hide all menus
     document.getElementById("networkMenu").style.display = "none";
@@ -966,6 +980,19 @@ function switchTab(tabType: string): void {
             break;
         case "education":
             document.getElementById("paramshell").style.display = "none";
+            // 显示笔记栏
+            const noteSidebar = document.getElementById("educationNoteSidebar");
+            const noteShowBtn = document.getElementById("noteSidebarShowBtn");
+            if (noteSidebar) {
+                noteSidebar.style.display = "flex";
+                if (noteShowBtn && !noteSidebar.classList.contains("hidden")) {
+                    noteShowBtn.style.display = "none";
+                }
+            }
+            // 重新设置笔记标记的点击事件
+            setTimeout(() => {
+                setupNoteMarkClickHandlers();
+            }, 100);
             break;
     }
 
@@ -1267,25 +1294,48 @@ function setupEducationSelectionWatcher(): void {
         const selection = window.getSelection();
         if (!selection || selection.isCollapsed) {
             hideEducationSelectionHandle();
+            hideNoteSelectionToolbar();
             return;
         }
         const text = selection.toString().trim();
         if (!text) {
             hideEducationSelectionHandle();
+            hideNoteSelectionToolbar();
             return;
         }
         const range = selection.getRangeAt(0);
         if (!isNodeWithinEducation(range.commonAncestorContainer)) {
             hideEducationSelectionHandle();
+            hideNoteSelectionToolbar();
             return;
         }
         const rect = getRangeRect(range);
         if (!rect) {
             hideEducationSelectionHandle();
+            hideNoteSelectionToolbar();
             return;
         }
         educationSelectionText = text;
+        // 保存选中信息供笔记功能使用
+        noteManager.saveCurrentSelection();
+        // 显示原有的AI按钮
         showEducationSelectionHandle(rect);
+        // 显示笔记工具栏
+        showNoteSelectionToolbar(rect);
+    });
+    
+    // 点击其他地方时隐藏工具栏
+    document.addEventListener("mousedown", (event) => {
+        const toolbar = document.getElementById("educationSelectionToolbar");
+        const dialog = document.getElementById("noteEditDialog");
+        if (toolbar && !toolbar.contains(event.target as Node) && 
+            (!dialog || !dialog.contains(event.target as Node))) {
+            // 如果点击的不是工具栏或对话框，检查是否是文本选择
+            const selection = window.getSelection();
+            if (!selection || selection.isCollapsed) {
+                hideNoteSelectionToolbar();
+            }
+        }
     });
 }
 
@@ -1365,6 +1415,527 @@ function getRangeRect(range: Range): DOMRect | null {
         return clientRects[0];
     }
     return null;
+}
+
+// 笔记功能相关函数
+function setupNoteFeature(): void {
+    // 初始化笔记栏显示状态
+    const sidebar = document.getElementById("educationNoteSidebar");
+    const toggleBtn = document.getElementById("noteSidebarToggle");
+    const showBtn = document.getElementById("noteSidebarShowBtn");
+    
+    if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+            if (sidebar) {
+                sidebar.classList.add("hidden");
+                if (showBtn) {
+                    showBtn.style.display = "block";
+                }
+            }
+        });
+    }
+    
+    if (showBtn) {
+        showBtn.addEventListener("click", () => {
+            if (sidebar) {
+                sidebar.classList.remove("hidden");
+                showBtn.style.display = "none";
+            }
+        });
+    }
+    
+    // 高亮按钮
+    const highlightBtn = document.getElementById("highlightBtn");
+    if (highlightBtn) {
+        highlightBtn.addEventListener("click", () => {
+            const success = noteManager.highlightSelection();
+            if (success) {
+                hideNoteSelectionToolbar();
+                updateNoteList();
+            }
+        });
+    }
+    
+    // 做笔记按钮
+    const noteBtn = document.getElementById("noteBtn");
+    if (noteBtn) {
+        noteBtn.addEventListener("click", () => {
+            showNoteEditDialog();
+        });
+    }
+    
+    // 笔记编辑对话框
+    const noteEditDialog = document.getElementById("noteEditDialog");
+    const noteEditClose = document.getElementById("noteEditClose");
+    const noteEditCancel = document.getElementById("noteEditCancel");
+    const noteEditSave = document.getElementById("noteEditSave");
+    const noteEditTextarea = document.getElementById("noteEditTextarea") as HTMLTextAreaElement;
+    
+    const closeNoteDialog = () => {
+        if (noteEditDialog) {
+            noteEditDialog.style.display = "none";
+            noteEditDialog.removeAttribute('data-editing-note-id');
+        }
+        if (noteEditTextarea) {
+            noteEditTextarea.value = "";
+        }
+        hideNoteSelectionToolbar();
+    };
+    
+    if (noteEditClose) {
+        noteEditClose.addEventListener("click", closeNoteDialog);
+    }
+    
+    if (noteEditCancel) {
+        noteEditCancel.addEventListener("click", closeNoteDialog);
+    }
+    
+    if (noteEditSave) {
+        noteEditSave.addEventListener("click", () => {
+            if (noteEditTextarea && noteEditDialog) {
+                const noteContent = noteEditTextarea.value.trim();
+                if (noteContent) {
+                    const editingNoteId = noteEditDialog.getAttribute('data-editing-note-id');
+                    
+                    if (editingNoteId) {
+                        // 编辑模式：更新现有笔记
+                        const updated = noteManager.updateNote(editingNoteId, noteContent);
+                        if (updated) {
+                            closeNoteDialog();
+                            updateNoteList();
+                            // 滚动到更新后的笔记项并高亮
+                            setTimeout(() => {
+                                scrollToNoteInSidebar(editingNoteId);
+                            }, 100);
+                        }
+                    } else {
+                        // 新建模式：创建新笔记
+                        const note = noteManager.createNote(noteContent);
+                        if (note) {
+                            closeNoteDialog();
+                            updateNoteList();
+                            // 等待DOM更新后再添加点击事件和滚动
+                            setTimeout(() => {
+                                const markElement = document.getElementById(note.id);
+                                if (markElement) {
+                                    addNoteMarkClickHandler(markElement);
+                                }
+                                scrollToNoteInSidebar(note.id);
+                            }, 100);
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 监听笔记创建事件
+    document.addEventListener('noteCreated', ((event: CustomEvent) => {
+        const noteId = event.detail.noteId;
+        setTimeout(() => {
+            const markElement = document.getElementById(noteId);
+            if (markElement) {
+                addNoteMarkClickHandler(markElement);
+            }
+        }, 100);
+    }) as EventListener);
+    
+    // 点击对话框背景关闭
+    if (noteEditDialog) {
+        noteEditDialog.addEventListener("click", (event) => {
+            if (event.target === noteEditDialog) {
+                closeNoteDialog();
+            }
+        });
+    }
+    
+    // 初始化笔记列表
+    updateNoteList();
+    
+    // 延迟设置，确保DOM已完全加载
+    setTimeout(() => {
+        setupNoteMarkClickHandlers();
+    }, 100);
+    
+    // 监听DOM变化，为新创建的笔记标记添加点击事件
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node instanceof HTMLElement) {
+                    // 检查是否是笔记标记
+                    if (node.classList.contains('education-note-mark')) {
+                        addNoteMarkClickHandler(node);
+                    }
+                    // 检查子元素中是否有笔记标记
+                    const noteMarks = node.querySelectorAll?.('.education-note-mark');
+                    if (noteMarks) {
+                        noteMarks.forEach((mark: Element) => {
+                            addNoteMarkClickHandler(mark as HTMLElement);
+                        });
+                    }
+                }
+            });
+        });
+    });
+    
+    const educationTab = document.getElementById("educationTab");
+    if (educationTab) {
+        observer.observe(educationTab, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // 当切换到education标签时，重新设置笔记标记的点击事件
+    const originalSwitchTab = (window as any).switchTab;
+    if (originalSwitchTab) {
+        (window as any).switchTab = function(tabType: string) {
+            originalSwitchTab(tabType);
+            if (tabType === "education") {
+                setTimeout(() => {
+                    setupNoteMarkClickHandlers();
+                }, 100);
+            }
+        };
+    }
+}
+
+function setupNoteMarkClickHandlers(): void {
+    const noteMarks = document.querySelectorAll('.education-note-mark');
+    noteMarks.forEach((mark) => {
+        addNoteMarkClickHandler(mark as HTMLElement);
+    });
+}
+
+function addNoteMarkClickHandler(markElement: HTMLElement): void {
+    // 避免重复添加事件监听
+    if (markElement.hasAttribute('data-note-click-handler')) {
+        return;
+    }
+    markElement.setAttribute('data-note-click-handler', 'true');
+    
+    markElement.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const noteId = markElement.id || markElement.getAttribute('data-note-id');
+        if (noteId) {
+            // 确保笔记栏可见
+            const sidebar = document.getElementById("educationNoteSidebar");
+            const showBtn = document.getElementById("noteSidebarShowBtn");
+            if (sidebar) {
+                if (sidebar.classList.contains("hidden")) {
+                    sidebar.classList.remove("hidden");
+                    sidebar.style.display = "flex";
+                    if (showBtn) {
+                        showBtn.style.display = "none";
+                    }
+                }
+            }
+            // 滚动到对应的笔记并高亮（稍微延迟确保笔记栏已显示）
+            setTimeout(() => {
+                scrollToNoteInSidebar(noteId);
+            }, 100);
+        }
+    });
+}
+
+function showNoteSelectionToolbar(rect: DOMRect): void {
+    const toolbar = document.getElementById("educationSelectionToolbar");
+    if (!toolbar) {
+        return;
+    }
+    
+    // 计算工具栏位置（在选中文本上方）
+    const toolbarTop = window.scrollY + rect.top - 40;
+    const toolbarLeft = window.scrollX + rect.left + (rect.width / 2) - 80; // 居中显示
+    
+    toolbar.style.top = `${toolbarTop}px`;
+    toolbar.style.left = `${toolbarLeft}px`;
+    toolbar.style.display = "flex";
+}
+
+function hideNoteSelectionToolbar(): void {
+    const toolbar = document.getElementById("educationSelectionToolbar");
+    if (toolbar) {
+        toolbar.style.display = "none";
+    }
+}
+
+function showNoteEditDialog(noteId?: string): void {
+    const dialog = document.getElementById("noteEditDialog");
+    const textarea = document.getElementById("noteEditTextarea") as HTMLTextAreaElement;
+    const dialogTitle = dialog?.querySelector('.note-edit-header > span') as HTMLElement;
+    
+    if (dialog && textarea) {
+        dialog.style.display = "flex";
+        
+        if (noteId) {
+            // 编辑模式：加载现有笔记内容
+            const note = noteManager.getNote(noteId);
+            if (note) {
+                textarea.value = note.noteContent;
+                if (dialogTitle) {
+                    dialogTitle.textContent = "编辑笔记";
+                }
+                // 保存当前编辑的笔记ID到dialog的data属性
+                dialog.setAttribute('data-editing-note-id', noteId);
+            }
+        } else {
+            // 新建模式
+            textarea.value = "";
+            if (dialogTitle) {
+                dialogTitle.textContent = "添加笔记";
+            }
+            dialog.removeAttribute('data-editing-note-id');
+        }
+        
+        textarea.focus();
+        // 将光标移到文本末尾
+        if (textarea.value) {
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    }
+    hideNoteSelectionToolbar();
+}
+
+function updateNoteList(): void {
+    const noteList = document.getElementById("educationNoteList");
+    if (!noteList) {
+        return;
+    }
+    
+    const notes = noteManager.getAllNotes();
+    noteList.innerHTML = "";
+    
+    if (notes.length === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.className = "note-empty-message";
+        emptyMsg.textContent = "暂无笔记";
+        emptyMsg.style.textAlign = "center";
+        emptyMsg.style.color = "#999";
+        emptyMsg.style.padding = "20px";
+        noteList.appendChild(emptyMsg);
+        return;
+    }
+    
+    // 按照在页面中的位置排序笔记（从上到下）
+    const educationTab = document.getElementById("educationTab");
+    const notesWithPosition = notes.map(note => {
+        const position = noteManager.getNotePosition(note.id);
+        return { note, position: position ? position.top : 0 };
+    });
+    notesWithPosition.sort((a, b) => a.position - b.position);
+    
+    notesWithPosition.forEach(({ note }) => {
+        const noteItem = document.createElement("div");
+        noteItem.className = "note-item";
+        // 先设置属性，避免innerHTML覆盖
+        noteItem.setAttribute("data-note-id", note.id);
+        noteItem.id = `note-item-${note.id}`;
+        
+        // 显示原文（截断）
+        const textPreview = note.text.length > 50 
+            ? note.text.substring(0, 50) + "..." 
+            : note.text;
+        
+        // 处理笔记内容中的换行
+        const noteContentHtml = escapeHtml(note.noteContent).replace(/\n/g, '<br>');
+        
+        // 创建内容（确保属性不会被覆盖）
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "note-item-header";
+        
+        const textDiv = document.createElement("div");
+        textDiv.className = "note-item-text";
+        textDiv.textContent = `"${textPreview}"`;
+        
+        // 创建按钮容器
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.className = "note-item-buttons";
+        buttonsContainer.style.display = "flex";
+        buttonsContainer.style.gap = "5px";
+        
+        // 编辑按钮
+        const editBtn = document.createElement("button");
+        editBtn.className = "note-item-edit";
+        editBtn.setAttribute("data-note-id", note.id);
+        editBtn.title = "编辑";
+        editBtn.textContent = "✎";
+        
+        // 删除按钮
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "note-item-delete";
+        deleteBtn.setAttribute("data-note-id", note.id);
+        deleteBtn.title = "删除";
+        deleteBtn.textContent = "×";
+        
+        buttonsContainer.appendChild(editBtn);
+        buttonsContainer.appendChild(deleteBtn);
+        
+        headerDiv.appendChild(textDiv);
+        headerDiv.appendChild(buttonsContainer);
+        
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "note-item-content";
+        contentDiv.innerHTML = noteContentHtml;
+        
+        noteItem.appendChild(headerDiv);
+        noteItem.appendChild(contentDiv);
+        
+        // 编辑按钮事件
+        editBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            showNoteEditDialog(note.id);
+        });
+        
+        // 删除按钮事件
+        deleteBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (confirm("确定要删除这条笔记吗？")) {
+                const deleted = noteManager.deleteNote(note.id);
+                if (deleted) {
+                    updateNoteList();
+                }
+            }
+        });
+        
+        // 点击笔记项可以滚动到对应的文本位置
+        noteItem.style.cursor = "pointer";
+        noteItem.addEventListener("click", (event) => {
+            // 如果点击的是删除按钮或编辑按钮，不触发定位
+            const target = event.target as HTMLElement;
+            if (target.classList.contains('note-item-delete') || 
+                target.classList.contains('note-item-edit') ||
+                target.closest('.note-item-buttons')) {
+                return;
+            }
+            
+            const element = document.getElementById(note.id);
+            if (element && educationTab) {
+                // 确保笔记栏可见
+                const sidebar = document.getElementById("educationNoteSidebar");
+                if (sidebar && sidebar.classList.contains("hidden")) {
+                    sidebar.classList.remove("hidden");
+                    const showBtn = document.getElementById("noteSidebarShowBtn");
+                    if (showBtn) {
+                        showBtn.style.display = "none";
+                    }
+                }
+                
+                // 滚动到正文中的笔记位置
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
+                // 高亮一下
+                element.style.transition = "background-color 0.3s";
+                element.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+                setTimeout(() => {
+                    element.style.backgroundColor = "";
+                }, 1000);
+            }
+        });
+        
+        noteList.appendChild(noteItem);
+    });
+}
+
+function scrollToNoteInSidebar(noteId: string): void {
+    // 确保笔记栏可见
+    const sidebar = document.getElementById("educationNoteSidebar");
+    if (sidebar) {
+        if (sidebar.classList.contains("hidden")) {
+            sidebar.classList.remove("hidden");
+            sidebar.style.display = "flex";
+            const showBtn = document.getElementById("noteSidebarShowBtn");
+            if (showBtn) {
+                showBtn.style.display = "none";
+            }
+        }
+    }
+    
+    // 等待一小段时间确保DOM更新完成
+    setTimeout(() => {
+        // 使用多种选择器尝试找到笔记项
+        let noteItem: HTMLElement | null = null;
+        
+        // 方法1: 通过类名和data-note-id查找（最精确）
+        noteItem = document.querySelector(`.note-item[data-note-id="${noteId}"]`) as HTMLElement;
+        
+        // 方法2: 通过ID查找
+        if (!noteItem) {
+            noteItem = document.getElementById(`note-item-${noteId}`) as HTMLElement;
+        }
+        
+        // 方法3: 通过笔记列表遍历查找
+        if (!noteItem) {
+            const noteList = document.getElementById("educationNoteList");
+            if (noteList) {
+                const items = noteList.querySelectorAll('.note-item');
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i] as HTMLElement;
+                    const itemNoteId = item.getAttribute('data-note-id');
+                    if (itemNoteId === noteId) {
+                        noteItem = item;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (noteItem) {
+            // 滚动到笔记项（在笔记栏内部滚动）
+            const noteList = document.getElementById("educationNoteList");
+            if (noteList) {
+                // 计算笔记项相对于笔记列表的位置进行精确滚动
+                const itemRect = noteItem.getBoundingClientRect();
+                const listRect = noteList.getBoundingClientRect();
+                const scrollTop = noteList.scrollTop;
+                const itemTop = itemRect.top - listRect.top + scrollTop;
+                
+                // 平滑滚动到笔记项位置
+                noteList.scrollTo({
+                    top: itemTop - 20, // 留一些顶部空间
+                    behavior: 'smooth'
+                });
+            } else {
+                noteItem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            
+            // 高亮笔记项（使用更强的视觉效果）
+            const originalBg = noteItem.style.backgroundColor || window.getComputedStyle(noteItem).backgroundColor;
+            const originalShadow = noteItem.style.boxShadow || window.getComputedStyle(noteItem).boxShadow;
+            const originalBorder = noteItem.style.borderColor || window.getComputedStyle(noteItem).borderColor;
+            
+            noteItem.style.transition = "background-color 0.3s, box-shadow 0.3s, border-color 0.3s";
+            noteItem.style.backgroundColor = "rgba(255, 215, 0, 0.5)";
+            noteItem.style.boxShadow = "0 4px 16px rgba(255, 215, 0, 0.7)";
+            noteItem.style.borderColor = "#FFD700";
+            noteItem.style.borderWidth = "2px";
+            
+            setTimeout(() => {
+                noteItem.style.backgroundColor = originalBg;
+                noteItem.style.boxShadow = originalShadow;
+                noteItem.style.borderColor = originalBorder;
+                noteItem.style.borderWidth = "";
+            }, 2000);
+        } else {
+            // 调试信息：输出所有笔记项的ID以便排查问题
+            const allItems = document.querySelectorAll('.note-item');
+            const allNoteIds = Array.from(allItems).map(item => ({
+                id: (item as HTMLElement).id,
+                dataNoteId: (item as HTMLElement).getAttribute('data-note-id')
+            }));
+            console.warn(`找不到笔记项: ${noteId}`, {
+                searchNoteId: noteId,
+                allNoteItems: allNoteIds
+            });
+        }
+    }, 50);
+}
+
+function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 async function trainOnClick(): Promise<void> {

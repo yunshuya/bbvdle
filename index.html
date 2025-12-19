@@ -1374,8 +1374,44 @@
 
 			<div style="height:100px;"> </div>
 
-
 		</div>
+
+		<!-- 笔记栏 -->
+		<div id="educationNoteSidebar" class="education-note-sidebar">
+			<div class="note-sidebar-header">
+				<span class="note-sidebar-title">笔记</span>
+				<button id="noteSidebarToggle" class="note-sidebar-toggle" title="隐藏笔记栏">−</button>
+			</div>
+			<div id="educationNoteList" class="note-sidebar-content">
+				<!-- 笔记列表将在这里动态生成 -->
+			</div>
+		</div>
+
+		<!-- 选中文本操作按钮 -->
+		<div id="educationSelectionToolbar" class="education-selection-toolbar" style="display: none;">
+			<button id="highlightBtn" class="selection-btn highlight-btn" title="高亮">高亮</button>
+			<button id="noteBtn" class="selection-btn note-btn" title="做笔记">做笔记</button>
+		</div>
+
+		<!-- 笔记编辑对话框 -->
+		<div id="noteEditDialog" class="note-edit-dialog" style="display: none;">
+			<div class="note-edit-content">
+				<div class="note-edit-header">
+					<span>添加笔记</span>
+					<button id="noteEditClose" class="note-edit-close">×</button>
+				</div>
+				<div class="note-edit-body">
+					<textarea id="noteEditTextarea" class="note-edit-textarea" placeholder="输入你的笔记..."></textarea>
+				</div>
+				<div class="note-edit-footer">
+					<button id="noteEditCancel" class="note-edit-btn cancel-btn">取消</button>
+					<button id="noteEditSave" class="note-edit-btn save-btn">保存</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 隐藏笔记栏的按钮（当笔记栏隐藏时显示） -->
+		<button id="noteSidebarShowBtn" class="note-sidebar-show-btn" style="display: none;" title="显示笔记栏">笔记</button>
 
 		<div id = 'loadingDataTab' style="display: none">
 			<div id='loadingMNIST'>
