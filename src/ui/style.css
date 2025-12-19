@@ -1426,3 +1426,303 @@ label {
 .checkmark {
   margin-left: 8px;
   font-weight: bold; }
+
+/* 笔记功能样式 */
+.education-note-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: #FFFFFF;
+  border-left: 2px solid #D3D3DE;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  transition: transform 0.3s ease; }
+  .education-note-sidebar:not(.hidden) {
+    display: flex; }
+  .education-note-sidebar.hidden {
+    transform: translateX(100%); }
+
+.note-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #E5E5FC;
+  border-bottom: 1px solid #D3D3DE; }
+
+.note-sidebar-title {
+  font-size: 20px;
+  font-weight: bold;
+  font-family: Helvetica;
+  color: #333; }
+
+.note-sidebar-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #555;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s; }
+  .note-sidebar-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1); }
+
+.note-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px; }
+
+.note-item {
+  background-color: #F8F9FA;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  transition: box-shadow 0.2s; }
+  .note-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+
+.note-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px; }
+
+.note-item-text {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  font-style: italic;
+  word-break: break-word; }
+
+.note-item-content {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  word-break: break-word; }
+
+.note-item-buttons {
+  display: flex;
+  gap: 5px;
+  align-items: center; }
+
+.note-item-edit {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0; }
+  .note-item-edit:hover {
+    background-color: #E0E8FF;
+    color: #4A90E2; }
+
+.note-item-delete {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0; }
+  .note-item-delete:hover {
+    background-color: #FFE0E0;
+    color: #FF4444; }
+
+/* 高亮样式 - 荧火黄 */
+.education-highlight {
+  background-color: #FFFF00;
+  padding: 0 2px; }
+
+/* 笔记标记样式 - 黄色下划线 */
+.education-note-mark {
+  border-bottom: 3px solid #FFD700;
+  padding-bottom: 2px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s; }
+  .education-note-mark:hover {
+    background-color: rgba(255, 215, 0, 0.2); }
+  .education-note-mark:active {
+    background-color: rgba(255, 215, 0, 0.3); }
+
+/* 选中文本工具栏 */
+.education-selection-toolbar {
+  position: fixed;
+  z-index: 1001;
+  display: flex;
+  gap: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid #D3D3DE;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+
+.selection-btn {
+  padding: 6px 12px;
+  border: 1px solid #D3D3DE;
+  border-radius: 4px;
+  background-color: #F8F9FA;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Helvetica;
+  transition: background-color 0.2s, border-color 0.2s; }
+  .selection-btn:hover {
+    background-color: #E5E5FC;
+    border-color: #A8A8BD; }
+
+.highlight-btn {
+  color: #333; }
+
+.note-btn {
+  color: #333; }
+
+/* 笔记编辑对话框 */
+.note-edit-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center; }
+
+.note-edit-content {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh; }
+
+.note-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #E0E0E0;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Helvetica; }
+
+.note-edit-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s; }
+  .note-edit-close:hover {
+    background-color: #F0F0F0;
+    color: #333; }
+
+.note-edit-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto; }
+
+.note-edit-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  border: 1px solid #D3D3DE;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: Helvetica;
+  resize: vertical;
+  box-sizing: border-box; }
+  .note-edit-textarea:focus {
+    outline: none;
+    border-color: #A8A8BD; }
+
+.note-edit-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 15px 20px;
+  border-top: 1px solid #E0E0E0; }
+
+.note-edit-btn {
+  padding: 8px 20px;
+  border: 1px solid #D3D3DE;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Helvetica;
+  transition: background-color 0.2s, border-color 0.2s; }
+
+.cancel-btn {
+  background-color: #F8F9FA;
+  color: #333; }
+  .cancel-btn:hover {
+    background-color: #E5E5FC;
+    border-color: #A8A8BD; }
+
+.save-btn {
+  background-color: #E5E5FC;
+  color: #333; }
+  .save-btn:hover {
+    background-color: #D3D3DE;
+    border-color: #A8A8BD; }
+
+/* 显示笔记栏按钮（当笔记栏隐藏时） */
+.note-sidebar-show-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 80px;
+  background-color: #E5E5FC;
+  border: none;
+  border-left: 2px solid #D3D3DE;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: Helvetica;
+  color: #333;
+  z-index: 999;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transition: background-color 0.2s; }
+  .note-sidebar-show-btn:hover {
+    background-color: #D3D3DE; }
