@@ -1523,15 +1523,15 @@ label {
 .user-auth-bar {
     position: fixed;
     top: 0;
-    right: 220px; // 从 180px 增加到 220px，再往左移一点，确保不挡住训练按钮
-    padding: 10px 20px;
+    right: 280px; // 向左移动，避免遮挡笔记栏（笔记栏宽度260px + 20px间距）
+    padding: 6px 12px; // 减小padding
     background-color: rgba(128, 108, 183, 0.9);
     color: white;
     z-index: 100;
     display: flex;
     align-items: center;
-    gap: 15px;
-    font-size: 18px;
+    gap: 10px; // 减小间距
+    font-size: 14px; // 减小字体
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px; // 添加右侧圆角
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -1544,12 +1544,13 @@ label {
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px; // 减小间距
 }
 
 .user-name {
     font-weight: 500;
     color: white;
+    font-size: 14px; // 减小字体大小
 }
 
 .login-buttons {
@@ -1562,8 +1563,8 @@ label {
     border: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.15);
     color: white;
-    padding: 6px 16px;
-    font-size: 16px;
+    padding: 4px 12px; // 减小padding
+    font-size: 13px; // 减小字体
     font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
@@ -1636,14 +1637,16 @@ label {
     z-index: 1000;
     display: none;
     flex-direction: column;
-    transition: transform 0.3s ease;
-
-    &:not(.hidden) {
-        display: flex;
-    }
+    transition: transform 0.3s ease, display 0.3s ease;
 
     &.hidden {
+        display: none !important;
         transform: translateX(100%);
+    }
+
+    &:not(.hidden) {
+        display: flex !important;
+        transform: translateX(0);
     }
 }
 

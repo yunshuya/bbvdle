@@ -1333,15 +1333,15 @@ label {
 .user-auth-bar {
   position: fixed;
   top: 0;
-  right: 220px;
-  padding: 10px 20px;
+  right: 280px;
+  padding: 6px 12px;
   background-color: rgba(128, 108, 183, 0.9);
   color: white;
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 18px;
+  gap: 10px;
+  font-size: 14px;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
@@ -1352,11 +1352,12 @@ label {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 15px; }
+  gap: 10px; }
 
 .user-name {
   font-weight: 500;
-  color: white; }
+  color: white;
+  font-size: 14px; }
 
 .login-buttons {
   display: flex;
@@ -1367,8 +1368,8 @@ label {
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.15);
   color: white;
-  padding: 6px 16px;
-  font-size: 16px;
+  padding: 4px 12px;
+  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
@@ -1431,11 +1432,13 @@ label {
   z-index: 1000;
   display: none;
   flex-direction: column;
-  transition: transform 0.3s ease; }
-  .education-note-sidebar:not(.hidden) {
-    display: flex; }
+  transition: transform 0.3s ease, display 0.3s ease; }
   .education-note-sidebar.hidden {
+    display: none !important;
     transform: translateX(100%); }
+  .education-note-sidebar:not(.hidden) {
+    display: flex !important;
+    transform: translateX(0); }
 
 .note-sidebar-header {
   display: flex;

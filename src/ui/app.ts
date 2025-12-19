@@ -890,7 +890,8 @@ function switchTab(tabType: string): void {
     const noteShowBtn = document.getElementById("noteSidebarShowBtn");
     if (tabType !== "education") {
         if (noteSidebar) {
-            noteSidebar.style.display = "none";
+            noteSidebar.classList.add("hidden");
+            noteSidebar.style.removeProperty('display');
         }
         if (noteShowBtn) {
             noteShowBtn.style.display = "none";
@@ -946,8 +947,8 @@ function switchTab(tabType: string): void {
             const networkNoteSidebar = document.getElementById("educationNoteSidebar");
             const networkNoteShowBtn = document.getElementById("noteSidebarShowBtn");
             if (networkNoteSidebar) {
-                networkNoteSidebar.style.display = "none";
                 networkNoteSidebar.classList.add("hidden");
+                networkNoteSidebar.style.removeProperty('display');
             }
             if (networkNoteShowBtn) {
                 networkNoteShowBtn.style.display = "none";
@@ -959,8 +960,8 @@ function switchTab(tabType: string): void {
             const progressNoteSidebar = document.getElementById("educationNoteSidebar");
             const progressNoteShowBtn = document.getElementById("noteSidebarShowBtn");
             if (progressNoteSidebar) {
-                progressNoteSidebar.style.display = "none";
                 progressNoteSidebar.classList.add("hidden");
+                progressNoteSidebar.style.removeProperty('display');
             }
             if (progressNoteShowBtn) {
                 progressNoteShowBtn.style.display = "none";
@@ -972,8 +973,8 @@ function switchTab(tabType: string): void {
             const vizNoteSidebar = document.getElementById("educationNoteSidebar");
             const vizNoteShowBtn = document.getElementById("noteSidebarShowBtn");
             if (vizNoteSidebar) {
-                vizNoteSidebar.style.display = "none";
                 vizNoteSidebar.classList.add("hidden");
+                vizNoteSidebar.style.removeProperty('display');
             }
             if (vizNoteShowBtn) {
                 vizNoteShowBtn.style.display = "none";
@@ -982,14 +983,35 @@ function switchTab(tabType: string): void {
             break;
         case "education":
             document.getElementById("paramshell").style.display = "none";
-            // 显示笔记栏（仅在教学页面）
+            // 笔记栏默认隐藏，显示"显示笔记栏"按钮（仅在教学页面）
             const noteSidebar = document.getElementById("educationNoteSidebar");
             const noteShowBtn = document.getElementById("noteSidebarShowBtn");
             if (noteSidebar) {
-                noteSidebar.classList.remove("hidden");
-                noteSidebar.style.display = "flex";
-                if (noteShowBtn && !noteSidebar.classList.contains("hidden")) {
-                    noteShowBtn.style.display = "none";
+                // 检查笔记栏是否隐藏
+                const isHidden = noteSidebar.classList.contains("hidden") || 
+                               noteSidebar.style.display === "none" || 
+                               window.getComputedStyle(noteSidebar).display === "none";
+                
+                if (isHidden) {
+                    // 如果笔记栏是隐藏的，显示"显示笔记栏"按钮
+                    if (noteShowBtn) {
+                        noteShowBtn.style.display = "block";
+                    }
+                    noteSidebar.classList.add("hidden");
+                    noteSidebar.style.removeProperty('display');
+                } else {
+                    // 如果笔记栏已经显示，保持显示状态
+                    noteSidebar.classList.remove("hidden");
+                    // 移除可能存在的内联display样式，让CSS规则生效
+                    noteSidebar.style.removeProperty('display');
+                    if (noteShowBtn) {
+                        noteShowBtn.style.display = "none";
+                    }
+                }
+            } else {
+                // 如果笔记栏不存在，显示"显示笔记栏"按钮
+                if (noteShowBtn) {
+                    noteShowBtn.style.display = "block";
                 }
             }
             // 重新设置笔记标记的点击事件
@@ -1422,15 +1444,27 @@ function getRangeRect(range: Range): DOMRect | null {
 
 // 笔记功能相关函数
 function setupNoteFeature(): void {
-    // 初始化笔记栏显示状态
+    // 初始化笔记栏显示状态 - 默认隐藏
     const sidebar = document.getElementById("educationNoteSidebar");
     const toggleBtn = document.getElementById("noteSidebarToggle");
     const showBtn = document.getElementById("noteSidebarShowBtn");
+    
+    // 设置默认隐藏状态
+    if (sidebar) {
+        sidebar.classList.add("hidden");
+        // 移除内联display样式，让CSS的hidden规则生效
+        sidebar.style.removeProperty('display');
+    }
+    if (showBtn) {
+        showBtn.style.display = "none"; // 默认也隐藏显示按钮，只在education标签时显示
+    }
     
     if (toggleBtn) {
         toggleBtn.addEventListener("click", () => {
             if (sidebar) {
                 sidebar.classList.add("hidden");
+                // 移除内联display样式，让CSS的hidden规则生效
+                sidebar.style.removeProperty('display');
                 if (showBtn) {
                     showBtn.style.display = "block";
                 }
@@ -1441,7 +1475,9 @@ function setupNoteFeature(): void {
     if (showBtn) {
         showBtn.addEventListener("click", () => {
             if (sidebar) {
+                // 移除hidden类（CSS会自动显示笔记栏）
                 sidebar.classList.remove("hidden");
+                // 隐藏"显示笔记栏"按钮
                 showBtn.style.display = "none";
             }
         });
@@ -1629,7 +1665,8 @@ function addNoteMarkClickHandler(markElement: HTMLElement): void {
             if (sidebar) {
                 if (sidebar.classList.contains("hidden")) {
                     sidebar.classList.remove("hidden");
-                    sidebar.style.display = "flex";
+                    // 移除可能存在的内联display样式，让CSS规则生效
+                    sidebar.style.removeProperty('display');
                     if (showBtn) {
                         showBtn.style.display = "none";
                     }
@@ -1820,6 +1857,8 @@ function updateNoteList(): void {
                 const sidebar = document.getElementById("educationNoteSidebar");
                 if (sidebar && sidebar.classList.contains("hidden")) {
                     sidebar.classList.remove("hidden");
+                    // 移除可能存在的内联display样式，让CSS规则生效
+                    sidebar.style.removeProperty('display');
                     const showBtn = document.getElementById("noteSidebarShowBtn");
                     if (showBtn) {
                         showBtn.style.display = "none";
@@ -1847,7 +1886,8 @@ function scrollToNoteInSidebar(noteId: string): void {
     if (sidebar) {
         if (sidebar.classList.contains("hidden")) {
             sidebar.classList.remove("hidden");
-            sidebar.style.display = "flex";
+            // 移除可能存在的内联display样式，让CSS规则生效
+            sidebar.style.removeProperty('display');
             const showBtn = document.getElementById("noteSidebarShowBtn");
             if (showBtn) {
                 showBtn.style.display = "none";
