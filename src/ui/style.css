@@ -459,15 +459,6 @@ a.overlayLinks {
   font-family: Helvetica;
   padding-bottom: 3%; }
 
-#quizTab {
-  width: 90%;
-  height: 100%;
-  background: #F1FAFF;
-  padding-left: 5%;
-  padding-right: calc(5% + 200px);
-  padding-top: 3%;
-  overflow-y: auto; }
-
 #educationTab {
   width: 90%;
   height: 100%;

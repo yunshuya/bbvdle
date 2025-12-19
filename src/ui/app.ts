@@ -356,31 +356,6 @@ function setupOptionOnClicks(): void {
     addOnClickToOptions("educationAct", (articleType) => {
         document.getElementById("education" + articleType).scrollIntoView(true);
     });
-    addOnClickToOptions("quizCategories", (quizType) => {
-        // 隐藏所有测验内容
-        const quizBasic = document.getElementById("quizBasic");
-        const quizLayers = document.getElementById("quizLayers");
-        const quizTraining = document.getElementById("quizTraining");
-        if (quizBasic) quizBasic.style.display = "none";
-        if (quizLayers) quizLayers.style.display = "none";
-        if (quizTraining) quizTraining.style.display = "none";
-        
-        // 显示选中的测验内容
-        let quizElement: HTMLElement | null = null;
-        if (quizType === "basic") {
-            quizElement = quizBasic;
-        } else if (quizType === "layers") {
-            quizElement = quizLayers;
-        } else if (quizType === "training") {
-            quizElement = quizTraining;
-        }
-        
-        if (quizElement) {
-            quizElement.style.display = "block";
-            // 使用 block: "nearest" 避免页面跳转
-            quizElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-    });
     addOnClickToOptions("classes", (_, element) => {
         selectOption("classes", element);
         if (model.architecture != null) {
@@ -873,8 +848,6 @@ export function tabSelected(): string {
         return "progressTab";
     } else if (document.getElementById("visualizationTab").style.display !== "none") {
         return "visualizationTab";
-    } else if (document.getElementById("quizTab").style.display !== "none") {
-        return "quizTab";
     } else if (document.getElementById("educationTab").style.display !== "none") {
         return "educationTab";
     } else {
@@ -910,7 +883,6 @@ function switchTab(tabType: string): void {
     document.getElementById("networkTab").style.display = "none";
     document.getElementById("progressTab").style.display = "none";
     document.getElementById("visualizationTab").style.display = "none";
-    document.getElementById("quizTab").style.display = "none";
     document.getElementById("educationTab").style.display = "none";
     
     // 隐藏笔记栏（除非切换到education标签）
@@ -929,14 +901,12 @@ function switchTab(tabType: string): void {
     document.getElementById("networkMenu").style.display = "none";
     document.getElementById("progressMenu").style.display = "none";
     document.getElementById("visualizationMenu").style.display = "none";
-    document.getElementById("quizMenu").style.display = "none";
     document.getElementById("educationMenu").style.display = "none";
 
     // Hide all paramshells
     document.getElementById("networkParamshell").style.display = "none";
     document.getElementById("progressParamshell").style.display = "none";
     document.getElementById("visualizationParamshell").style.display = "none";
-    document.getElementById("quizParamshell").style.display = "none";
     document.getElementById("educationParamshell").style.display = "none";
 
     // Hide taskSteps by default
@@ -949,7 +919,6 @@ function switchTab(tabType: string): void {
     document.getElementById("network").classList.remove("tab-selected");
     document.getElementById("progress").classList.remove("tab-selected");
     document.getElementById("visualization").classList.remove("tab-selected");
-    document.getElementById("quiz").classList.remove("tab-selected");
     document.getElementById("education").classList.remove("tab-selected");
 
     // Display only the selected tab
@@ -972,18 +941,52 @@ function switchTab(tabType: string): void {
     }
 
     switch (tabType) {
-        case "network": resizeMiddleSVG(); break;
-        case "progress": setupPlots(); break;
-        case "visualization": showPredictions(); break;
-        case "quiz":
-            document.getElementById("paramshell").style.display = "none";
+        case "network":
+            // 确保笔记栏隐藏
+            const networkNoteSidebar = document.getElementById("educationNoteSidebar");
+            const networkNoteShowBtn = document.getElementById("noteSidebarShowBtn");
+            if (networkNoteSidebar) {
+                networkNoteSidebar.style.display = "none";
+                networkNoteSidebar.classList.add("hidden");
+            }
+            if (networkNoteShowBtn) {
+                networkNoteShowBtn.style.display = "none";
+            }
+            resizeMiddleSVG();
+            break;
+        case "progress":
+            // 确保笔记栏隐藏
+            const progressNoteSidebar = document.getElementById("educationNoteSidebar");
+            const progressNoteShowBtn = document.getElementById("noteSidebarShowBtn");
+            if (progressNoteSidebar) {
+                progressNoteSidebar.style.display = "none";
+                progressNoteSidebar.classList.add("hidden");
+            }
+            if (progressNoteShowBtn) {
+                progressNoteShowBtn.style.display = "none";
+            }
+            setupPlots();
+            break;
+        case "visualization":
+            // 确保笔记栏隐藏
+            const vizNoteSidebar = document.getElementById("educationNoteSidebar");
+            const vizNoteShowBtn = document.getElementById("noteSidebarShowBtn");
+            if (vizNoteSidebar) {
+                vizNoteSidebar.style.display = "none";
+                vizNoteSidebar.classList.add("hidden");
+            }
+            if (vizNoteShowBtn) {
+                vizNoteShowBtn.style.display = "none";
+            }
+            showPredictions();
             break;
         case "education":
             document.getElementById("paramshell").style.display = "none";
-            // 显示笔记栏
+            // 显示笔记栏（仅在教学页面）
             const noteSidebar = document.getElementById("educationNoteSidebar");
             const noteShowBtn = document.getElementById("noteSidebarShowBtn");
             if (noteSidebar) {
+                noteSidebar.classList.remove("hidden");
                 noteSidebar.style.display = "flex";
                 if (noteShowBtn && !noteSidebar.classList.contains("hidden")) {
                     noteShowBtn.style.display = "none";
@@ -1005,7 +1008,7 @@ function switchTab(tabType: string): void {
     }
 
     const tabMapping = ["blanktab", "network", "progress", "visualization",
-        "middleblanktab", "quiz", "education", "bottomblanktab"];
+        "middleblanktab", "education", "bottomblanktab"];
     const index = tabMapping.indexOf(tabType);
 
     document.getElementById(tabMapping[index - 1]).classList.add("top_neighbor_tab-selected");
