@@ -1,7 +1,8 @@
-﻿﻿<meta charset="utf-8"/>
+﻿<meta charset="utf-8"/>
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="欢迎来到BBVDLE，让您能够智能化、可视化地学习神经网络。">
 	<title>BBVDLE ~ 基于可视化积木编程的深度学习教学平台 ~</title>
 
@@ -48,6 +49,60 @@
 	<link rel="icon" type="image/x-icon" sizes="16x16" href="favicon.ico">
 	<link rel='stylesheet' href='src/ui/style.css'>
 	<script src='dist/bundle.js'></script>
+    <script>
+        // Fix for exerciseMenu staying visible on other tabs and paramshell visibility/position
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all tab links
+            const tabs = ['network', 'progress', 'visualization', 'education', 'exercise'];
+            
+            // Function to update layout based on current tab
+            function updateLayout(tab) {
+                const middle = document.getElementById('middle');
+                const paramshell = document.getElementById('paramshell');
+                
+                // Hide exerciseMenu by default
+                document.getElementById('exerciseMenu').style.display = 'none';
+                
+                if (tab === 'network' || tab === 'progress' || tab === 'visualization') {
+                    // Show paramshell on these tabs
+                    paramshell.style.display = 'block';
+                    // Set middle width to account for paramshell
+                    middle.style.width = 'calc(100% - 430px)';
+                    // Ensure correct positioning
+                    middle.style.float = 'left';
+                    paramshell.style.float = 'right';
+                } else if (tab === 'exercise') {
+                    // Hide paramshell on exercise tab
+                    paramshell.style.display = 'none';
+                    // Set middle width to full width
+                    middle.style.width = 'calc(100% - 250px)';
+                    middle.style.float = 'left';
+                    // Show exerciseMenu only on exercise tab
+                    document.getElementById('exerciseMenu').style.display = null;
+                } else if (tab === 'education') {
+                    // Hide paramshell on education tab
+                    paramshell.style.display = 'none';
+                    // Set middle width to full width
+                    middle.style.width = 'calc(100% - 250px)';
+                    middle.style.float = 'left';
+                }
+            }
+            
+            // Initialize layout based on current selected tab
+            const currentTab = document.querySelector('.tab-selected').id;
+            updateLayout(currentTab);
+            
+            // Add click event listeners to all tab links
+            tabs.forEach(tab => {
+                const tabElement = document.getElementById(tab);
+                if (tabElement) {
+                    tabElement.addEventListener('click', function() {
+                        updateLayout(tab);
+                    });
+                }
+            });
+        });
+    </script>
 </head>
 
 
@@ -171,6 +226,9 @@
 
 		<div title = '教学' class = 'option tab-option' id = 'education' data-optionValue = 'education'>
 			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+		</div>
+		<div title = '练习' class = 'option tab-option' id = 'exercise' data-optionValue = 'exercise'>
+			<svg class = 'icon' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H8v-2h2V9h2v2h2v2h-2v4zm4-8h-2V7h2v2zm0 4h-2v-2h2v2z"/></svg>
 		</div>
 		<div id = 'bottomblanktab' > </div>
 	</div>
@@ -424,17 +482,12 @@
 		
 				<div class = 'option select-option education-option' data-optionValue = 'empty'>
 					 <a href="#educationempty" style="text-decoration: none; color: inherit; display: block;">
-                         
+                          
                     </a>
 				</div>
-	
 			</div>
 		</div>
-		
-
 	</div>
-
-	
 
 	<!-- The middle canvas -->
 	<div id = 'middle'>
@@ -1256,11 +1309,9 @@
 						<p>为了充分利用 GPU 提供的并行计算能力，Transformer 使用多头注意力机制进行并行实现。多头注意力机制允许同时处理多个注意力机制，从而提高计算效率。</p>
 						<p>相比于 LSTM 和 RNN，Transformer 深度学习模型的优势之一是能够同时处理多个单词。这得益于 Transformer 的并行计算能力，使得它能够更高效地处理序列数据。</p>
 			</div>
-			
-			
 			</div>
-        
-						<div class="educationTitle">激活函数</div>
+
+			<div class="educationTitle">激活函数</div>
                         <p>激活函数为神经网络引入了非线性，使其能够学习并模拟复杂的数据模式。没有它，神经网络就只是一堆线性回归的堆叠。</p>
 			<div id="educationReLU">
 				 <div class="educationTitle">ReLU-线性整流函数</div>
@@ -1316,13 +1367,8 @@
 					<p>    </p>
 					<p>    </p>
 					<p>    </p>
-					
 				 </div>
 			</div>
-			
-
-
-			<div style="height:100px;"> </div>
 
 		</div>
 
@@ -1363,7 +1409,2251 @@
 		<!-- 隐藏笔记栏的按钮（当笔记栏隐藏时显示） -->
 		<button id="noteSidebarShowBtn" class="note-sidebar-show-btn" style="display: none;" title="显示笔记栏">笔记</button>
 
-		<div id = 'loadingDataTab' style="display: none">
+		<div id = 'exerciseTab' style="display: none">
+			<div class="exercise-layout">
+				<!-- 左侧导航栏 -->
+				<div class="exercise-left-nav">
+					<div class="nav-header">
+						<h3>练习模块</h3>
+					</div>
+					<div class="nav-content">
+						<!-- 基础组件模块 -->
+						<div class="nav-category">
+							<div class="nav-category-title" data-category="basic">
+								<span class="category-number">1</span>
+								<span class="category-name">基础组件模块</span>
+								<span class="category-count">(50题)</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="neural-layers">
+								<span class="subcategory-name">神经网络层</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="activations">
+								<span class="subcategory-name">激活函数</span>
+							</div>
+						</div>
+
+						<!-- 核心架构模块 -->
+						<div class="nav-category">
+							<div class="nav-category-title" data-category="core">
+								<span class="category-number">2</span>
+								<span class="category-name">核心架构模块</span>
+								<span class="category-count">(50题)</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="perceptron">
+								<span class="subcategory-name">感知机</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="cnn">
+								<span class="subcategory-name">CNN</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="rnn">
+								<span class="subcategory-name">RNN</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="transformer">
+								<span class="subcategory-name">Transformer</span>
+							</div>
+						</div>
+
+						<!-- 综合应用模块 -->
+						<div class="nav-category">
+							<div class="nav-category-title" data-category="comprehensive">
+								<span class="category-number">3</span>
+								<span class="category-name">综合应用模块</span>
+								<span class="category-count">(55题)</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="arch-selection">
+								<span class="subcategory-name">架构选择与对比</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="problem-diagnosis">
+								<span class="subcategory-name">问题诊断与调优</span>
+							</div>
+							<div class="nav-subcategory" data-subcategory="advanced">
+								<span class="subcategory-name">前沿与交叉领域</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 中间题目区域 -->
+				<div class="exercise-center-content" style="overflow-y: auto; max-height: 100vh;">
+					<div class="content-header">
+						<h2 class="exercise-main-title">深度学习综合练习</h2>
+						<p class="exercise-main-desc">
+							点击左侧导航栏的题目类型开始练习。每道题目都有详细解答，帮助您巩固深度学习知识。
+						</p>
+					</div>
+					
+					<!-- 题目内容区域，仿照教学页面格式 -->
+					<div id="exerciseQuestionsTab" class="exercise-questions-tab">
+						<!-- 基础组件：神经网络层（1-30题） -->
+						<div id="exerciseNeuralLayers" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">基础组件模块</span>
+									<span class="title-icon">🧩</span>
+								</div>
+								<h2 class="title-name">神经网络层</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										30道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：1-30
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="neural_layers_quiz">
+									<div class="card-content">
+										<p>检测你对神经网络层的理解，包括全连接层、卷积层、池化层等基础组件。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 1 -->
+										<div class="question">
+											<p><strong>1. 全连接层（Dense）的主要功能是什么？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q1" value="A"> A. 提取图像局部特征</label>
+												<label><input type="radio" name="neural_layers_q1" value="B"> B. 学习输入特征之间的全局模式</label>
+												<label><input type="radio" name="neural_layers_q1" value="C"> C. 降低数据维度防止过拟合</label>
+												<label><input type="radio" name="neural_layers_q1" value="D"> D. 标准化输入数据</label>
+											</div>
+										</div>
+										<!-- 题目 2 -->
+										<div class="question">
+											<p><strong>2. 卷积层（Convolution）最擅长处理哪种类型的数据？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q2" value="A"> A. 时间序列数据</label>
+												<label><input type="radio" name="neural_layers_q2" value="B"> B. 结构化表格数据</label>
+												<label><input type="radio" name="neural_layers_q2" value="C"> C. 网格状数据（如图像、语音频谱图）</label>
+												<label><input type="radio" name="neural_layers_q2" value="D"> D. 文本数据</label>
+											</div>
+										</div>
+										<!-- 题目 3 -->
+										<div class="question">
+											<p><strong>3. 最大池化层（Max Pooling）的主要作用是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q3" value="A"> A. 增加特征图的通道数</label>
+												<label><input type="radio" name="neural_layers_q3" value="B"> B. 提取更精细的局部特征</label>
+												<label><input type="radio" name="neural_layers_q3" value="C"> C. 下采样并保持特征的平移不变性</label>
+												<label><input type="radio" name="neural_layers_q3" value="D"> D. 引入非线性变换</label>
+											</div>
+										</div>
+										<!-- 题目 4 -->
+										<div class="question">
+											<p><strong>4. Batch Normalization通常被放置在什么位置？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q4" value="A"> A. 激活函数之后，卷积层之前</label>
+												<label><input type="radio" name="neural_layers_q4" value="B"> B. 卷积层或全连接层之后，激活函数之前</label>
+												<label><input type="radio" name="neural_layers_q4" value="C"> C. 只在网络的最开始</label>
+												<label><input type="radio" name="neural_layers_q4" value="D"> D. 只在网络的最后输出层</label>
+											</div>
+										</div>
+										<!-- 题目 5 -->
+										<div class="question">
+											<p><strong>5. Dropout层在训练和测试阶段的行为分别是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q5" value="A"> A. 训练时丢弃部分神经元，测试时也丢弃</label>
+												<label><input type="radio" name="neural_layers_q5" value="B"> B. 训练时不丢弃，测试时丢弃</label>
+												<label><input type="radio" name="neural_layers_q5" value="C"> C. 训练时丢弃部分神经元，测试时使用全部神经元</label>
+												<label><input type="radio" name="neural_layers_q5" value="D"> D. 训练和测试都使用全部神经元</label>
+											</div>
+										</div>
+										<!-- 题目 6 -->
+										<div class="question">
+											<p><strong>6. 当需要将卷积神经网络的特征图转换为一维向量以输入全连接层时，应使用：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q6" value="A"> A. Concatenate层</label>
+												<label><input type="radio" name="neural_layers_q6" value="B"> B. Add层</label>
+												<label><input type="radio" name="neural_layers_q6" value="C"> C. Flatten层</label>
+												<label><input type="radio" name="neural_layers_q6" value="D"> D. Dropout层</label>
+											</div>
+										</div>
+										<!-- 题目 7 -->
+										<div class="question">
+											<p><strong>7. Concatenate层的主要功能是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q7" value="A"> A. 将多个张量逐元素相加</label>
+												<label><input type="radio" name="neural_layers_q7" value="B"> B. 将多个张量沿指定轴连接合并</label>
+												<label><input type="radio" name="neural_layers_q7" value="C"> C. 将张量从多维压平到一维</label>
+												<label><input type="radio" name="neural_layers_q7" value="D"> D. 标准化张量的分布</label>
+											</div>
+										</div>
+										<!-- 题目 8 -->
+										<div class="question">
+											<p><strong>8. Add层要求输入的多个张量必须：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q8" value="A"> A. 形状完全相同</label>
+												<label><input type="radio" name="neural_layers_q8" value="B"> B. 通道数相同即可</label>
+												<label><input type="radio" name="neural_layers_q8" value="C"> C. 批次大小相同即可</label>
+												<label><input type="radio" name="neural_layers_q8" value="D"> D. 没有任何限制</label>
+											</div>
+										</div>
+										<!-- 题目 9 -->
+										<div class="question">
+											<p><strong>9. 残差网络（ResNet）中的跳跃连接（Skip Connection）主要是通过什么层实现的？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q9" value="A"> A. Concatenate层</label>
+												<label><input type="radio" name="neural_layers_q9" value="B"> B. Add层</label>
+												<label><input type="radio" name="neural_layers_q9" value="C"> C. Multiply层</label>
+												<label><input type="radio" name="neural_layers_q9" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 10 -->
+										<div class="question">
+											<p><strong>10. 以下哪个层的主要目的是减少过拟合？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q10" value="A"> A. Convolution和Max Pooling</label>
+												<label><input type="radio" name="neural_layers_q10" value="B"> B. Dense和Flatten</label>
+												<label><input type="radio" name="neural_layers_q10" value="C"> C. Dropout和Batch Normalization</label>
+												<label><input type="radio" name="neural_layers_q10" value="D"> D. Add和Concatenate</label>
+											</div>
+										</div>
+										<!-- 题目 11 -->
+										<div class="question">
+											<p><strong>11. 在CNN中，通常紧跟在卷积层之后的是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q11" value="A"> A. 另一个卷积层</label>
+												<label><input type="radio" name="neural_layers_q11" value="B"> B. 池化层（Pooling）</label>
+												<label><input type="radio" name="neural_layers_q11" value="C"> C. 全连接层</label>
+												<label><input type="radio" name="neural_layers_q11" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 12 -->
+										<div class="question">
+											<p><strong>12. 哪种层可以帮助解决深层神经网络中的"内部协变量偏移"问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q12" value="A"> A. Dropout</label>
+												<label><input type="radio" name="neural_layers_q12" value="B"> B. Batch Normalization</label>
+												<label><input type="radio" name="neural_layers_q12" value="C"> C. Max Pooling</label>
+												<label><input type="radio" name="neural_layers_q12" value="D"> D. Convolution</label>
+											</div>
+										</div>
+										<!-- 题目 13 -->
+										<div class="question">
+											<p><strong>13. 如果想要构建一个多分支的网络结构（如Inception模块），将不同分支的特征融合，最应该使用：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q13" value="A"> A. Add层</label>
+												<label><input type="radio" name="neural_layers_q13" value="B"> B. Multiply层</label>
+												<label><input type="radio" name="neural_layers_q13" value="C"> C. Concatenate层</label>
+												<label><input type="radio" name="neural_layers_q13" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 14 -->
+										<div class="question">
+											<p><strong>14. 对于一个二分类任务，最后一层应该使用什么层？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q14" value="A"> A. 一个神经元的Dense层 + Sigmoid激活</label>
+												<label><input type="radio" name="neural_layers_q14" value="B"> B. 两个神经元的Dense层 + Softmax激活</label>
+												<label><input type="radio" name="neural_layers_q14" value="C"> C. 卷积层 + ReLU激活</label>
+												<label><input type="radio" name="neural_layers_q14" value="D"> D. Dropout层</label>
+											</div>
+										</div>
+										<!-- 题目 15 -->
+										<div class="question">
+											<p><strong>15. Flatten层会改变以下哪个维度？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q15" value="A"> A. 批次大小（Batch Size）</label>
+												<label><input type="radio" name="neural_layers_q15" value="B"> B. 通道数（Channels）</label>
+												<label><input type="radio" name="neural_layers_q15" value="C"> C. 空间维度（Height, Width）</label>
+												<label><input type="radio" name="neural_layers_q15" value="D"> D. 不会改变任何维度，只是重新排列</label>
+											</div>
+										</div>
+										<!-- 题目 16 -->
+										<div class="question">
+											<p><strong>16. 在训练初期，Batch Normalization允许使用更大的学习率，主要是因为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q16" value="A"> A. 它增加了网络的复杂度</label>
+												<label><input type="radio" name="neural_layers_q16" value="B"> B. 它减少了梯度消失的风险</label>
+												<label><input type="radio" name="neural_layers_q16" value="C"> C. 它标准化了层输入，使优化地形更平滑</label>
+												<label><input type="radio" name="neural_layers_q16" value="D"> D. 它引入了随机性</label>
+											</div>
+										</div>
+										<!-- 题目 17 -->
+										<div class="question">
+											<p><strong>17. Dropout的保留概率（如0.5）表示：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q17" value="A"> A. 训练时有50%的神经元被永久删除</label>
+												<label><input type="radio" name="neural_layers_q17" value="B"> B. 训练时每个神经元有50%的概率被临时置零</label>
+												<label><input type="radio" name="neural_layers_q17" value="C"> C. 测试时有50%的神经元被使用</label>
+												<label><input type="radio" name="neural_layers_q17" value="D"> D. 学习率降低50%</label>
+											</div>
+										</div>
+										<!-- 题目 18 -->
+										<div class="question">
+											<p><strong>18. 哪个层没有需要训练的参数？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q18" value="A"> A. Dense层</label>
+												<label><input type="radio" name="neural_layers_q18" value="B"> B. Convolution层</label>
+												<label><input type="radio" name="neural_layers_q18" value="C"> C. Max Pooling层</label>
+												<label><input type="radio" name="neural_layers_q18" value="D"> D. Batch Normalization层</label>
+											</div>
+										</div>
+										<!-- 题目 19 -->
+										<div class="question">
+											<p><strong>19. 如果你想减少特征图的空间尺寸但保留最显著的特征，应该使用：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q19" value="A"> A. 卷积层（stride=2）</label>
+												<label><input type="radio" name="neural_layers_q19" value="B"> B. 最大池化层</label>
+												<label><input type="radio" name="neural_layers_q19" value="C"> C. Dropout层</label>
+												<label><input type="radio" name="neural_layers_q19" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 20 -->
+										<div class="question">
+											<p><strong>20. Concatenate和Add层的主要区别在于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q20" value="A"> A. Concatenate增加输出维度，Add不增加</label>
+												<label><input type="radio" name="neural_layers_q20" value="B"> B. Add增加输出维度，Concatenate不增加</label>
+												<label><input type="radio" name="neural_layers_q20" value="C"> C. 两者都增加输出维度</label>
+												<label><input type="radio" name="neural_layers_q20" value="D"> D. 两者都不增加输出维度</label>
+											</div>
+										</div>
+										<!-- 题目 21 -->
+										<div class="question">
+											<p><strong>21. 在图像分割任务中，经常使用"编码器-解码器"结构，解码器中常用什么层来增大特征图尺寸？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q21" value="A"> A. 最大池化层（Max Pooling）</label>
+												<label><input type="radio" name="neural_layers_q21" value="B"> B. 转置卷积层（Transposed Convolution）</label>
+												<label><input type="radio" name="neural_layers_q21" value="C"> C. Dropout层</label>
+												<label><input type="radio" name="neural_layers_q21" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 22 -->
+										<div class="question">
+											<p><strong>22. 如果一个网络的训练误差很低但验证误差很高，首先应该考虑增加什么层？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q22" value="A"> A. 更多的Dense层</label>
+												<label><input type="radio" name="neural_layers_q22" value="B"> B. Dropout层</label>
+												<label><input type="radio" name="neural_layers_q22" value="C"> C. Batch Normalization层</label>
+												<label><input type="radio" name="neural_layers_q22" value="D"> D. Convolution层</label>
+											</div>
+										</div>
+										<!-- 题目 23 -->
+										<div class="question">
+											<p><strong>23. Batch Normalization在测试阶段使用的均值和方差是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q23" value="A"> A. 当前测试批次的均值和方差</label>
+												<label><input type="radio" name="neural_layers_q23" value="B"> B. 训练阶段通过移动平均计算得到的全局均值和方差</label>
+												<label><input type="radio" name="neural_layers_q23" value="C"> C. 固定的0和1</label>
+												<label><input type="radio" name="neural_layers_q23" value="D"> D. 随机初始化的值</label>
+											</div>
+										</div>
+										<!-- 题目 24 -->
+										<div class="question">
+											<p><strong>24. 哪一对层通常被一起使用来构建CNN的基础特征提取模块？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q24" value="A"> A. Dense和Dropout</label>
+												<label><input type="radio" name="neural_layers_q24" value="B"> B. Convolution和Max Pooling</label>
+												<label><input type="radio" name="neural_layers_q24" value="C"> C. Flatten和Dense</label>
+												<label><input type="radio" name="neural_layers_q24" value="D"> D. Add和Concatenate</label>
+											</div>
+										</div>
+										<!-- 题目 25 -->
+										<div class="question">
+											<p><strong>25. 在一维卷积中，通常用于处理什么类型的数据？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q25" value="A"> A. 图像</label>
+												<label><input type="radio" name="neural_layers_q25" value="B"> B. 时间序列或文本</label>
+												<label><input type="radio" name="neural_layers_q25" value="C"> C. 视频</label>
+												<label><input type="radio" name="neural_layers_q25" value="D"> D. 3D物体</label>
+											</div>
+										</div>
+										<!-- 题目 26 -->
+										<div class="question">
+											<p><strong>26. 全局平均池化（Global Average Pooling）层有时可以替代什么层？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q26" value="A"> A. 卷积层</label>
+												<label><input type="radio" name="neural_layers_q26" value="B"> B. 全连接层</label>
+												<label><input type="radio" name="neural_layers_q26" value="C"> C. Dropout层</label>
+												<label><input type="radio" name="neural_layers_q26" value="D"> D. Flatten层</label>
+											</div>
+										</div>
+										<!-- 题目 27 -->
+										<div class="question">
+											<p><strong>27. 哪个操作有助于增加模型的非线性表达能力？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q27" value="A"> A. 使用多个线性层堆叠</label>
+												<label><input type="radio" name="neural_layers_q27" value="B"> B. 在层之间添加激活函数</label>
+												<label><input type="radio" name="neural_layers_q27" value="C"> C. 使用更大的批次大小</label>
+												<label><input type="radio" name="neural_layers_q27" value="D"> D. 增加学习率</label>
+											</div>
+										</div>
+										<!-- 题目 28 -->
+										<div class="question">
+											<p><strong>28. 如果输入图像尺寸为224x224x3，经过一个滤波器大小为3x3、步长为1、填充为"相同"的卷积层后，输出特征图尺寸为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q28" value="A"> A. 222x222</label>
+												<label><input type="radio" name="neural_layers_q28" value="B"> B. 224x224</label>
+												<label><input type="radio" name="neural_layers_q28" value="C"> C. 226x226</label>
+												<label><input type="radio" name="neural_layers_q28" value="D"> D. 112x112</label>
+											</div>
+										</div>
+										<!-- 题目 29 -->
+										<div class="question">
+											<p><strong>29. 深度可分离卷积（Depthwise Separable Convolution）与标准卷积相比，主要优点是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q29" value="A"> A. 提取更丰富的特征</label>
+												<label><input type="radio" name="neural_layers_q29" value="B"> B. 极大地减少计算量和参数量</label>
+												<label><input type="radio" name="neural_layers_q29" value="C"> C. 避免梯度消失</label>
+												<label><input type="radio" name="neural_layers_q29" value="D"> D. 防止过拟合</label>
+											</div>
+										</div>
+										<!-- 题目 30 -->
+										<div class="question">
+											<p><strong>30. 在网络中，早期的卷积层通常学习到的是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="neural_layers_q30" value="A"> A. 高级语义特征（如"狗头"、"车轮"）</label>
+												<label><input type="radio" name="neural_layers_q30" value="B"> B. 低级视觉特征（如边缘、颜色、纹理）</label>
+												<label><input type="radio" name="neural_layers_q30" value="C"> C. 全局上下文信息</label>
+												<label><input type="radio" name="neural_layers_q30" value="D"> D. 与任务无关的噪声</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="neural_layers_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 基础组件：激活函数（31-50题） -->
+						<div id="exerciseActivations" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">基础组件模块</span>
+									<span class="title-icon">⚡</span>
+								</div>
+								<h2 class="title-name">激活函数</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										20道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：31-50
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="activations_quiz">
+									<div class="card-content">
+										<p>基于"激活函数"章节，检查你对不同激活函数特性的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 31 -->
+										<div class="question">
+											<p><strong>31. ReLU激活函数的数学表达式是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q31" value="A"> A. f(x) = 1 / (1 + e^(-x))</label>
+												<label><input type="radio" name="activations_q31" value="B"> B. f(x) = max(0, x)</label>
+												<label><input type="radio" name="activations_q31" value="C"> C. f(x) = (e^x - e^(-x)) / (e^x + e^(-x))</label>
+												<label><input type="radio" name="activations_q31" value="D"> D. f(x) = x</label>
+											</div>
+										</div>
+										<!-- 题目 32 -->
+										<div class="question">
+											<p><strong>32. 当输入为很大的负数时，ReLU的梯度是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q32" value="A"> A. 1</label>
+												<label><input type="radio" name="activations_q32" value="B"> B. 0</label>
+												<label><input type="radio" name="activations_q32" value="C"> C. -1</label>
+												<label><input type="radio" name="activations_q32" value="D"> D. 无穷大</label>
+											</div>
+										</div>
+										<!-- 题目 33 -->
+										<div class="question">
+											<p><strong>33. Sigmoid函数将输入映射到哪个区间？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q33" value="A"> A. (0, 1)</label>
+												<label><input type="radio" name="activations_q33" value="B"> B. (-1, 1)</label>
+												<label><input type="radio" name="activations_q33" value="C"> C. (0, +∞)</label>
+												<label><input type="radio" name="activations_q33" value="D"> D. (-∞, +∞)</label>
+											</div>
+										</div>
+										<!-- 题目 34 -->
+										<div class="question">
+											<p><strong>34. 以下哪个激活函数是"零中心"的（输出均值为0）？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q34" value="A"> A. ReLU</label>
+												<label><input type="radio" name="activations_q34" value="B"> B. Sigmoid</label>
+												<label><input type="radio" name="activations_q34" value="C"> C. Tanh</label>
+												<label><input type="radio" name="activations_q34" value="D"> D. 都不是</label>
+											</div>
+										</div>
+										<!-- 题目 35 -->
+										<div class="question">
+											<p><strong>35. 在二分类任务的输出层，最常用的激活函数是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q35" value="A"> A. ReLU</label>
+												<label><input type="radio" name="activations_q35" value="B"> B. Tanh</label>
+												<label><input type="radio" name="activations_q35" value="C"> C. Sigmoid</label>
+												<label><input type="radio" name="activations_q35" value="D"> D. Softmax</label>
+											</div>
+										</div>
+										<!-- 题目 36 -->
+										<div class="question">
+											<p><strong>36. 在多分类任务（如10个类别）的输出层，应该使用什么激活函数？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q36" value="A"> A. ReLU</label>
+												<label><input type="radio" name="activations_q36" value="B"> B. Sigmoid</label>
+												<label><input type="radio" name="activations_q36" value="C"> C. Tanh</label>
+												<label><input type="radio" name="activations_q36" value="D"> D. Softmax</label>
+											</div>
+										</div>
+										<!-- 题目 37 -->
+										<div class="question">
+											<p><strong>37. 哪个激活函数存在"梯度饱和"问题，当输入绝对值很大时梯度接近于零？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q37" value="A"> A. 仅Sigmoid</label>
+												<label><input type="radio" name="activations_q37" value="B"> B. 仅Tanh</label>
+												<label><input type="radio" name="activations_q37" value="C"> C. Sigmoid和Tanh</label>
+												<label><input type="radio" name="activations_q37" value="D"> D. ReLU</label>
+											</div>
+										</div>
+										<!-- 题目 38 -->
+										<div class="question">
+											<p><strong>38. ReLU激活函数相比Sigmoid和Tanh的一个主要优势是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q38" value="A"> A. 计算更复杂</label>
+												<label><input type="radio" name="activations_q38" value="B"> B. 缓解了梯度消失问题（在正区间）</label>
+												<label><input type="radio" name="activations_q38" value="C"> C. 输出范围更小</label>
+												<label><input type="radio" name="activations_q38" value="D"> D. 是零中心的</label>
+											</div>
+										</div>
+										<!-- 题目 39 -->
+										<div class="question">
+											<p><strong>39. Leaky ReLU是对标准ReLU的改进，主要解决了什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q39" value="A"> A. 计算速度慢</label>
+												<label><input type="radio" name="activations_q39" value="B"> B. 正区间的梯度爆炸</label>
+												<label><input type="radio" name="activations_q39" value="C"> C. 负区间的神经元死亡</label>
+												<label><input type="radio" name="activations_q39" value="D"> D. 输出范围太大</label>
+											</div>
+										</div>
+										<!-- 题目 40 -->
+										<div class="question">
+											<p><strong>40. Softmax函数的输出之和总是等于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q40" value="A"> A. 0</label>
+												<label><input type="radio" name="activations_q40" value="B"> B. 0.5</label>
+												<label><input type="radio" name="activations_q40" value="C"> C. 1</label>
+												<label><input type="radio" name="activations_q40" value="D"> D. 取决于输入</label>
+											</div>
+										</div>
+										<!-- 题目 41 -->
+										<div class="question">
+											<p><strong>41. 在隐藏层中，目前最常用的激活函数是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q41" value="A"> A. Sigmoid</label>
+												<label><input type="radio" name="activations_q41" value="B"> B. Tanh</label>
+												<label><input type="radio" name="activations_q41" value="C"> C. ReLU及其变体</label>
+												<label><input type="radio" name="activations_q41" value="D"> D. Softmax</label>
+											</div>
+										</div>
+										<!-- 题目 42 -->
+										<div class="question">
+											<p><strong>42. 对于一个回归任务（预测一个连续值），输出层通常使用什么激活函数？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q42" value="A"> A. Sigmoid</label>
+												<label><input type="radio" name="activations_q42" value="B"> B. Tanh</label>
+												<label><input type="radio" name="activations_q42" value="C"> C. ReLU</label>
+												<label><input type="radio" name="activations_q42" value="D"> D. 线性激活（或无激活函数）</label>
+											</div>
+										</div>
+										<!-- 题目 43 -->
+										<div class="question">
+											<p><strong>43. Tanh激活函数可以由Sigmoid函数变换得到，公式是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q43" value="A"> A. tanh(x) = sigmoid(x)</label>
+												<label><input type="radio" name="activations_q43" value="B"> B. tanh(x) = 2 * sigmoid(x) - 1</label>
+												<label><input type="radio" name="activations_q43" value="C"> C. tanh(x) = sigmoid(2x)</label>
+												<label><input type="radio" name="activations_q43" value="D"> D. tanh(x) = sigmoid(x) / 2</label>
+											</div>
+										</div>
+										<!-- 题目 44 -->
+										<div class="question">
+											<p><strong>44. 哪个激活函数对输入的缩放不敏感？即，输入乘以一个常数，输出分布形状不变？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q44" value="A"> A. Sigmoid</label>
+												<label><input type="radio" name="activations_q44" value="B"> B. Tanh</label>
+												<label><input type="radio" name="activations_q44" value="C"> C. ReLU</label>
+												<label><input type="radio" name="activations_q44" value="D"> D. 都不敏感</label>
+											</div>
+										</div>
+										<!-- 题目 45 -->
+										<div class="question">
+											<p><strong>45. 在训练深度网络时，使用ReLU可能导致什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q45" value="A"> A. 梯度爆炸</label>
+												<label><input type="radio" name="activations_q45" value="B"> B. 神经元死亡（Dead Neurons）</label>
+												<label><input type="radio" name="activations_q45" value="C"> C. 输出不是零中心</label>
+												<label><input type="radio" name="activations_q45" value="D"> D. B和C</label>
+											</div>
+										</div>
+										<!-- 题目 46 -->
+										<div class="question">
+											<p><strong>46. Sigmoid函数的导数最大值是多少？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q46" value="A"> A. 0</label>
+												<label><input type="radio" name="activations_q46" value="B"> B. 0.25</label>
+												<label><input type="radio" name="activations_q46" value="C"> C. 0.5</label>
+												<label><input type="radio" name="activations_q46" value="D"> D. 1</label>
+											</div>
+										</div>
+										<!-- 题目 47 -->
+										<div class="question">
+											<p><strong>47. 当我们需要神经网络的输出表示一个概率分布（多标签分类）时，可以使用？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q47" value="A"> A. 多个Sigmoid</label>
+												<label><input type="radio" name="activations_q47" value="B"> B. 一个Softmax</label>
+												<label><input type="radio" name="activations_q47" value="C"> C. Tanh</label>
+												<label><input type="radio" name="activations_q47" value="D"> D. ReLU</label>
+											</div>
+										</div>
+										<!-- 题目 48 -->
+										<div class="question">
+											<p><strong>48. ELU（指数线性单元）激活函数相比ReLU的主要改进是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q48" value="A"> A. 计算更快</label>
+												<label><input type="radio" name="activations_q48" value="B"> B. 对负输入有非零输出，且平滑渐近</label>
+												<label><input type="radio" name="activations_q48" value="C"> C. 输出范围更大</label>
+												<label><input type="radio" name="activations_q48" value="D"> D. 解决了梯度爆炸</label>
+											</div>
+										</div>
+										<!-- 题目 49 -->
+										<div class="question">
+											<p><strong>49. Softmax函数常用于什么类型的层之后？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q49" value="A"> A. 卷积层</label>
+												<label><input type="radio" name="activations_q49" value="B"> B. 池化层</label>
+												<label><input type="radio" name="activations_q49" value="C"> C. 全连接层</label>
+												<label><input type="radio" name="activations_q49" value="D"> D. Dropout层</label>
+											</div>
+										</div>
+										<!-- 题目 50 -->
+										<div class="question">
+											<p><strong>50. 以下关于激活函数的说法，哪一项是错误的？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="activations_q50" value="A"> A. 激活函数为神经网络引入了非线性</label>
+												<label><input type="radio" name="activations_q50" value="B"> B. 没有激活函数，多层网络等价于单层线性模型</label>
+												<label><input type="radio" name="activations_q50" value="C"> C. 所有的激活函数都是可微的</label>
+												<label><input type="radio" name="activations_q50" value="D"> D. 激活函数的选择会影响训练的难易和速度</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="activations_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 核心架构：感知机（51-60题） -->
+						<div id="exercisePerceptron" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">核心架构模块</span>
+									<span class="title-icon">🧠</span>
+								</div>
+								<h2 class="title-name">感知机</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										10道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：51-60
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="perceptron_quiz">
+									<div class="card-content">
+										<p>检测你对感知机基础概念和多层感知机工作原理的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 51 -->
+										<div class="question">
+											<p><strong>51. 感知机（Perceptron）是哪种模型的雏形？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q51" value="A"> A. 卷积神经网络</label>
+												<label><input type="radio" name="perceptron_q51" value="B"> B. 循环神经网络</label>
+												<label><input type="radio" name="perceptron_q51" value="C"> C. Transformer</label>
+												<label><input type="radio" name="perceptron_q51" value="D"> D. 人工神经网络</label>
+											</div>
+										</div>
+										<!-- 题目 52 -->
+										<div class="question">
+											<p><strong>52. 单层感知机无法解决什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q52" value="A"> A. 线性回归</label>
+												<label><input type="radio" name="perceptron_q52" value="B"> B. 线性分类</label>
+												<label><input type="radio" name="perceptron_q52" value="C"> C. 逻辑与（AND）</label>
+												<label><input type="radio" name="perceptron_q52" value="D"> D. 异或（XOR）</label>
+											</div>
+										</div>
+										<!-- 题目 53 -->
+										<div class="question">
+											<p><strong>53. 多层感知机（MLP）克服单层感知机局限的关键是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q53" value="A"> A. 使用更多的输入特征</label>
+												<label><input type="radio" name="perceptron_q53" value="B"> B. 引入隐藏层和非线性激活函数</label>
+												<label><input type="radio" name="perceptron_q53" value="C"> C. 使用更小的学习率</label>
+												<label><input type="radio" name="perceptron_q53" value="D"> D. 增加更多的输出神经元</label>
+											</div>
+										</div>
+										<!-- 题目 54 -->
+										<div class="question">
+											<p><strong>54. 神经网络中的"前向传播"是指：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q54" value="A"> A. 从输出层向输入层传递梯度</label>
+												<label><input type="radio" name="perceptron_q54" value="B"> B. 从输入层向输出层计算预测值</label>
+												<label><input type="radio" name="perceptron_q54" value="C"> C. 更新网络权重</label>
+												<label><input type="radio" name="perceptron_q54" value="D"> D. 计算损失函数</label>
+											</div>
+										</div>
+										<!-- 题目 55 -->
+										<div class="question">
+											<p><strong>55. 反向传播（Backpropagation）算法主要用于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q55" value="A"> A. 计算神经网络的预测输出</label>
+												<label><input type="radio" name="perceptron_q55" value="B"> B. 计算损失函数相对于网络权重的梯度</label>
+												<label><input type="radio" name="perceptron_q55" value="C"> C. 初始化网络权重</label>
+												<label><input type="radio" name="perceptron_q55" value="D"> D. 选择最优的激活函数</label>
+											</div>
+										</div>
+										<!-- 题目 56 -->
+										<div class="question">
+											<p><strong>56. 以下哪个是典型的监督学习任务？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q56" value="A"> A. 聚类</label>
+												<label><input type="radio" name="perceptron_q56" value="B"> B. 降维</label>
+												<label><input type="radio" name="perceptron_q56" value="C"> C. 图像分类</label>
+												<label><input type="radio" name="perceptron_q56" value="D"> D. 关联规则挖掘</label>
+											</div>
+										</div>
+										<!-- 题目 57 -->
+										<div class="question">
+											<p><strong>57. 损失函数（Loss Function）的主要作用是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q57" value="A"> A. 衡量模型预测值与真实值之间的差异</label>
+												<label><input type="radio" name="perceptron_q57" value="B"> B. 决定网络的结构</label>
+												<label><input type="radio" name="perceptron_q57" value="C"> C. 选择优化算法</label>
+												<label><input type="radio" name="perceptron_q57" value="D"> D. 初始化网络参数</label>
+											</div>
+										</div>
+										<!-- 题目 58 -->
+										<div class="question">
+											<p><strong>58. 梯度下降（Gradient Descent）优化算法的核心思想是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q58" value="A"> A. 沿着损失函数梯度的反方向更新参数，以减小损失</label>
+												<label><input type="radio" name="perceptron_q58" value="B"> B. 沿着损失函数梯度的正方向更新参数，以增大损失</label>
+												<label><input type="radio" name="perceptron_q58" value="C"> C. 随机更新参数</label>
+												<label><input type="radio" name="perceptron_q58" value="D"> D. 保持参数不变</label>
+											</div>
+										</div>
+										<!-- 题目 59 -->
+										<div class="question">
+											<p><strong>59. 过拟合（Overfitting）是指模型：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q59" value="A"> A. 在训练集和测试集上都表现很差</label>
+												<label><input type="radio" name="perceptron_q59" value="B"> B. 在训练集上表现很好，但在未见过的测试集上表现很差</label>
+												<label><input type="radio" name="perceptron_q59" value="C"> C. 在训练集上表现很差，但在测试集上表现很好</label>
+												<label><input type="radio" name="perceptron_q59" value="D"> D. 无法收敛</label>
+											</div>
+										</div>
+										<!-- 题目 60 -->
+										<div class="question">
+											<p><strong>60. 以下哪种方法不能用于防止过拟合？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="perceptron_q60" value="A"> A. 获取更多训练数据</label>
+												<label><input type="radio" name="perceptron_q60" value="B"> B. 使用Dropout</label>
+												<label><input type="radio" name="perceptron_q60" value="C"> C. 减少网络层数（减小模型容量）</label>
+												<label><input type="radio" name="perceptron_q60" value="D"> D. 增加网络层数（增大模型容量）</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="perceptron_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 核心架构：CNN（61-75题） -->
+						<div id="exerciseCNN" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">核心架构模块</span>
+									<span class="title-icon">🔍</span>
+								</div>
+								<h2 class="title-name">卷积神经网络 (CNN)</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										15道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：61-75
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="cnn_quiz">
+									<div class="card-content">
+										<p>检测你对卷积神经网络结构和原理的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 61 -->
+										<div class="question">
+											<p><strong>61. 卷积神经网络（CNN）的核心思想是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q61" value="A"> A. 参数共享和局部连接</label>
+												<label><input type="radio" name="cnn_q61" value="B"> B. 全局连接和循环反馈</label>
+												<label><input type="radio" name="cnn_q61" value="C"> C. 自注意力机制</label>
+												<label><input type="radio" name="cnn_q61" value="D"> D. 门控机制</label>
+											</div>
+										</div>
+										<!-- 题目 62 -->
+										<div class="question">
+											<p><strong>62. 在CNN中，一个滤波器（或卷积核）的作用类似于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q62" value="A"> A. 一个全连接层</label>
+												<label><input type="radio" name="cnn_q62" value="B"> B. 一个特征检测器</label>
+												<label><input type="radio" name="cnn_q62" value="C"> C. 一个池化操作</label>
+												<label><input type="radio" name="cnn_q62" value="D"> D. 一个激活函数</label>
+											</div>
+										</div>
+										<!-- 题目 63 -->
+										<div class="question">
+											<p><strong>63. LeNet-5是早期成功的CNN，主要应用于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q63" value="A"> A. ImageNet图像分类</label>
+												<label><input type="radio" name="cnn_q63" value="B"> B. 人脸识别</label>
+												<label><input type="radio" name="cnn_q63" value="C"> C. 手写数字识别</label>
+												<label><input type="radio" name="cnn_q63" value="D"> D. 目标检测</label>
+											</div>
+										</div>
+										<!-- 题目 64 -->
+										<div class="question">
+											<p><strong>64. AlexNet在2012年ImageNet竞赛中获胜的关键因素不包括：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q64" value="A"> A. 使用更深的网络结构</label>
+												<label><input type="radio" name="cnn_q64" value="B"> B. 使用ReLU激活函数缓解梯度消失</label>
+												<label><input type="radio" name="cnn_q64" value="C"> C. 使用Dropout防止过拟合</label>
+												<label><input type="radio" name="cnn_q64" value="D"> D. 使用Transformer模块</label>
+											</div>
+										</div>
+										<!-- 题目 65 -->
+										<div class="question">
+											<p><strong>65. 填充（Padding）在卷积操作中的主要作用是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q65" value="A"> A. 增加特征图的通道数</label>
+												<label><input type="radio" name="cnn_q65" value="B"> B. 控制输出特征图的空间尺寸，防止过快缩小</label>
+												<label><input type="radio" name="cnn_q65" value="C"> C. 引入非线性</label>
+												<label><input type="radio" name="cnn_q65" value="D"> D. 减少计算量</label>
+											</div>
+										</div>
+										<!-- 题目 66 -->
+										<div class="question">
+											<p><strong>66. 步长（Stride）在卷积操作中是指：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q66" value="A"> A. 滤波器的大小</label>
+												<label><input type="radio" name="cnn_q66" value="B"> B. 滤波器每次移动的像素数</label>
+												<label><input type="radio" name="cnn_q66" value="C"> C. 输入图像的通道数</label>
+												<label><input type="radio" name="cnn_q66" value="D"> D. 激活函数的类型</label>
+											</div>
+										</div>
+										<!-- 题目 67 -->
+										<div class="question">
+											<p><strong>67. VGGNet的主要贡献是证明了：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q67" value="A"> A. 网络的深度是提升性能的关键</label>
+												<label><input type="radio" name="cnn_q67" value="B"> B. 使用大尺寸卷积核更好</label>
+												<label><input type="radio" name="cnn_q67" value="C"> C. 残差连接至关重要</label>
+												<label><input type="radio" name="cnn_q67" value="D"> D. 注意力机制最有效</label>
+											</div>
+										</div>
+										<!-- 题目 68 -->
+										<div class="question">
+											<p><strong>68. GoogLeNet（Inception v1）的核心模块Inception的主要设计理念是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q68" value="A"> A. 网络越深越好</label>
+												<label><input type="radio" name="cnn_q68" value="B"> B. 在同一层使用不同尺寸的卷积核来捕获多尺度信息</label>
+												<label><input type="radio" name="cnn_q68" value="C"> C. 使用跳跃连接</label>
+												<label><input type="radio" name="cnn_q68" value="D"> D. 仅使用1x1卷积</label>
+											</div>
+										</div>
+										<!-- 题目 69 -->
+										<div class="question">
+											<p><strong>69. 在Inception模块中，1x1卷积的主要作用是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q69" value="A"> A. 增加空间维度</label>
+												<label><input type="radio" name="cnn_q69" value="B"> B. 降维，减少计算量和参数量</label>
+												<label><input type="radio" name="cnn_q69" value="C"> C. 提取大范围特征</label>
+												<label><input type="radio" name="cnn_q69" value="D"> D. 代替池化层</label>
+											</div>
+										</div>
+										<!-- 题目 70 -->
+										<div class="question">
+											<p><strong>70. 残差网络（ResNet）解决了深度CNN中的什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q70" value="A"> A. 计算量过大</label>
+												<label><input type="radio" name="cnn_q70" value="B"> B. 梯度消失和网络退化（性能饱和甚至下降）</label>
+												<label><input type="radio" name="cnn_q70" value="C"> C. 过拟合</label>
+												<label><input type="radio" name="cnn_q70" value="D"> D. 特征提取能力不足</label>
+											</div>
+										</div>
+										<!-- 题目 71 -->
+										<div class="question">
+											<p><strong>71. ResNet中的"残差块"学习的是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q71" value="A"> A. 期望的输出H(x)</label>
+												<label><input type="radio" name="cnn_q71" value="B"> B. 期望的输出与输入之间的残差F(x) = H(x) - x</label>
+												<label><input type="radio" name="cnn_q71" value="C"> C. 输入的恒等映射x</label>
+												<label><input type="radio" name="cnn_q71" value="D"> D. 随机噪声</label>
+											</div>
+										</div>
+										<!-- 题目 72 -->
+										<div class="question">
+											<p><strong>72. DenseNet的核心思想是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q72" value="A"> A. 每一层都直接连接到输入层</label>
+												<label><input type="radio" name="cnn_q72" value="B"> B. 每一层都接受前面所有层的输出作为输入</label>
+												<label><input type="radio" name="cnn_q72" value="C"> C. 只有相邻层之间有连接</label>
+												<label><input type="radio" name="cnn_q72" value="D"> D. 使用非常大的卷积核</label>
+											</div>
+										</div>
+										<!-- 题目 73 -->
+										<div class="question">
+											<p><strong>73. MobileNet的主要目标是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q73" value="A"> A. 获得最高的分类准确率</label>
+												<label><input type="radio" name="cnn_q73" value="B"> B. 构建最深的网络</label>
+												<label><input type="radio" name="cnn_q73" value="C"> C. 设计轻量级模型，适用于移动和嵌入式设备</label>
+												<label><input type="radio" name="cnn_q73" value="D"> D. 证明注意力机制的有效性</label>
+											</div>
+										</div>
+										<!-- 题目 74 -->
+										<div class="question">
+											<p><strong>74. 在目标检测任务中，R-CNN、Fast R-CNN、Faster R-CNN等算法属于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q74" value="A"> A. 单阶段检测器</label>
+												<label><input type="radio" name="cnn_q74" value="B"> B. 两阶段检测器</label>
+												<label><input type="radio" name="cnn_q74" value="C"> C. 纯CNN分类器</label>
+												<label><input type="radio" name="cnn_q74" value="D"> D. 生成对抗网络</label>
+											</div>
+										</div>
+										<!-- 题目 75 -->
+										<div class="question">
+											<p><strong>75. YOLO（You Only Look Once）和SSD（Single Shot MultiBox Detector）属于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="cnn_q75" value="A"> A. 两阶段检测器</label>
+												<label><input type="radio" name="cnn_q75" value="B"> B. 单阶段检测器</label>
+												<label><input type="radio" name="cnn_q75" value="C"> C. 语义分割模型</label>
+												<label><input type="radio" name="cnn_q75" value="D"> D. 实例分割模型</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="cnn_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 核心架构：RNN（76-90题） -->
+						<div id="exerciseRNN" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">核心架构模块</span>
+									<span class="title-icon">🔄</span>
+								</div>
+								<h2 class="title-name">循环神经网络 (RNN)</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										15道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：76-90
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="rnn_quiz">
+									<div class="card-content">
+										<p>检测你对循环神经网络及其变体的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 76 -->
+										<div class="question">
+											<p><strong>76. 循环神经网络（RNN）最适用于处理什么类型的数据？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q76" value="A"> A. 独立的图像数据</label>
+												<label><input type="radio" name="rnn_q76" value="B"> B. 具有序列依赖关系的数据（如文本、时间序列）</label>
+												<label><input type="radio" name="rnn_q76" value="C"> C. 高维表格数据</label>
+												<label><input type="radio" name="rnn_q76" value="D"> D. 3D点云数据</label>
+											</div>
+										</div>
+										<!-- 题目 77 -->
+										<div class="question">
+											<p><strong>77. 在RNN中，隐藏状态（Hidden State）的作用是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q77" value="A"> A. 存储当前输入的信息</label>
+												<label><input type="radio" name="rnn_q77" value="B"> B. 存储从序列开始到当前时刻的累积信息</label>
+												<label><input type="radio" name="rnn_q77" value="C"> C. 仅存储上一时刻的输出</label>
+												<label><input type="radio" name="rnn_q77" value="D"> D. 存储网络参数</label>
+											</div>
+										</div>
+										<!-- 题目 78 -->
+										<div class="question">
+											<p><strong>78. 传统RNN在训练长序列时面临的主要问题是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q78" value="A"> A. 计算速度慢</label>
+												<label><input type="radio" name="rnn_q78" value="B"> B. 梯度消失或梯度爆炸</label>
+												<label><input type="radio" name="rnn_q78" value="C"> C. 参数过少</label>
+												<label><input type="radio" name="rnn_q78" value="D"> D. 无法处理变长序列</label>
+											</div>
+										</div>
+										<!-- 题目 79 -->
+										<div class="question">
+											<p><strong>79. 长短期记忆网络（LSTM）引入什么机制来解决梯度问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q79" value="A"> A. 跳跃连接</label>
+												<label><input type="radio" name="rnn_q79" value="B"> B. 门控机制（输入门、遗忘门、输出门）</label>
+												<label><input type="radio" name="rnn_q79" value="C"> C. 注意力机制</label>
+												<label><input type="radio" name="rnn_q79" value="D"> D. 卷积操作</label>
+											</div>
+										</div>
+										<!-- 题目 80 -->
+										<div class="question">
+											<p><strong>80. 在LSTM中，遗忘门（Forget Gate）决定：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q80" value="A"> A. 哪些新信息要存入细胞状态</label>
+												<label><input type="radio" name="rnn_q80" value="B"> B. 从细胞状态中丢弃哪些旧信息</label>
+												<label><input type="radio" name="rnn_q80" value="C"> C. 基于细胞状态输出什么信息</label>
+												<label><input type="radio" name="rnn_q80" value="D"> D. 当前输入的重要性</label>
+											</div>
+										</div>
+										<!-- 题目 81 -->
+										<div class="question">
+											<p><strong>81. 门控循环单元（GRU）与LSTM的主要区别是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q81" value="A"> A. GRU没有门控机制</label>
+												<label><input type="radio" name="rnn_q81" value="B"> B. GRU将LSTM的输入门和遗忘门合并为更新门，并简化了结构</label>
+												<label><input type="radio" name="rnn_q81" value="C"> C. GRU比LSTM计算更复杂</label>
+												<label><input type="radio" name="rnn_q81" value="D"> D. GRU不能缓解梯度消失</label>
+											</div>
+										</div>
+										<!-- 题目 82 -->
+										<div class="question">
+											<p><strong>82. 双向RNN（Bi-RNN）的特点是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q82" value="A"> A. 只能从左到右处理序列</label>
+												<label><input type="radio" name="rnn_q82" value="B"> B. 同时从左到右和从右到左处理序列，融合两个方向的信息</label>
+												<label><input type="radio" name="rnn_q82" value="C"> C. 随机处理序列</label>
+												<label><input type="radio" name="rnn_q82" value="D"> D. 跳跃处理序列</label>
+											</div>
+										</div>
+										<!-- 题目 83 -->
+										<div class="question">
+											<p><strong>83. Seq2Seq（序列到序列）模型通常用于什么任务？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q83" value="A"> A. 图像分类</label>
+												<label><input type="radio" name="rnn_q83" value="B"> B. 机器翻译、文本摘要</label>
+												<label><input type="radio" name="rnn_q83" value="C"> C. 目标检测</label>
+												<label><input type="radio" name="rnn_q83" value="D"> D. 聚类分析</label>
+											</div>
+										</div>
+										<!-- 题目 84 -->
+										<div class="question">
+											<p><strong>84. 在传统的Seq2Seq模型中，编码器将整个输入序列编码为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q84" value="A"> A. 一个词向量序列</label>
+												<label><input type="radio" name="rnn_q84" value="B"> B. 一个固定长度的上下文向量</label>
+												<label><input type="radio" name="rnn_q84" value="C"> C. 一个注意力权重矩阵</label>
+												<label><input type="radio" name="rnn_q84" value="D"> D. 一个分类概率</label>
+											</div>
+										</div>
+										<!-- 题目 85 -->
+										<div class="question">
+											<p><strong>85. 注意力机制（Attention）被引入Seq2Seq模型，主要是为了解决什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q85" value="A"> A. 编码器和解码器训练不同步</label>
+												<label><input type="radio" name="rnn_q85" value="B"> B. 固定长度上下文向量的信息瓶颈问题</label>
+												<label><input type="radio" name="rnn_q85" value="C"> C. RNN计算速度慢</label>
+												<label><input type="radio" name="rnn_q85" value="D"> D. 梯度消失</label>
+											</div>
+										</div>
+										<!-- 题目 86 -->
+										<div class="question">
+											<p><strong>86. Transformer模型完全基于以下哪种机制？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q86" value="A"> A. 卷积</label>
+												<label><input type="radio" name="rnn_q86" value="B"> B. 循环</label>
+												<label><input type="radio" name="rnn_q86" value="C"> C. 自注意力（Self-Attention）</label>
+												<label><input type="radio" name="rnn_q86" value="D"> D. 门控</label>
+											</div>
+										</div>
+										<!-- 题目 87 -->
+										<div class="question">
+											<p><strong>87. 在Transformer的自注意力机制中，一个序列中的每个词会生成三个向量，它们是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q87" value="A"> A. Query, Key, Value</label>
+												<label><input type="radio" name="rnn_q87" value="B"> B. Input, Output, State</label>
+												<label><input type="radio" name="rnn_q87" value="C"> C. Source, Target, Context</label>
+												<label><input type="radio" name="rnn_q87" value="D"> D. Word, Position, Embedding</label>
+											</div>
+										</div>
+										<!-- 题目 88 -->
+										<div class="question">
+											<p><strong>88. 自注意力机制中，计算第i个词与第j个词之间的相关性（注意力分数）是通过：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q88" value="A"> A. 计算Query_i与Key_j的点积</label>
+												<label><input type="radio" name="rnn_q88" value="B"> B. 计算Value_i与Value_j的点积</label>
+												<label><input type="radio" name="rnn_q88" value="C"> C. 计算Query_i与Query_j的余弦相似度</label>
+												<label><input type="radio" name="rnn_q88" value="D"> D. 直接使用一个可学习的参数</label>
+											</div>
+										</div>
+										<!-- 题目 89 -->
+										<div class="question">
+											<p><strong>89. Transformer为什么要使用多头注意力（Multi-Head Attention）？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q89" value="A"> A. 为了增加模型深度</label>
+												<label><input type="radio" name="rnn_q89" value="B"> B. 为了让模型同时关注来自不同表示子空间的信息</label>
+												<label><input type="radio" name="rnn_q89" value="C"> C. 为了减少计算量</label>
+												<label><input type="radio" name="rnn_q89" value="D"> D. 为了引入循环连接</label>
+											</div>
+										</div>
+										<!-- 题目 90 -->
+										<div class="question">
+											<p><strong>90. Transformer中的位置编码（Positional Encoding）是必需的，因为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="rnn_q90" value="A"> A. 自注意力机制本身具有位置感知能力</label>
+												<label><input type="radio" name="rnn_q90" value="B"> B. 自注意力机制是排列不变的，需要额外注入序列的顺序信息</label>
+												<label><input type="radio" name="rnn_q90" value="C"> C. 它可以帮助防止过拟合</label>
+												<label><input type="radio" name="rnn_q90" value="D"> D. 它用于替代词嵌入（Word Embedding）</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="rnn_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 核心架构：Transformer（91-100题） -->
+						<div id="exerciseTransformer" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">核心架构模块</span>
+									<span class="title-icon">🎯</span>
+								</div>
+								<h2 class="title-name">Transformer</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										10道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：91-100
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="transformer_quiz">
+									<div class="card-content">
+										<p>检测你对Transformer架构和注意力机制的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 91 -->
+										<div class="question">
+											<p><strong>91. Transformer模型完全基于以下哪种机制？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q91" value="A"> A. 卷积</label>
+												<label><input type="radio" name="transformer_q91" value="B"> B. 循环</label>
+												<label><input type="radio" name="transformer_q91" value="C"> C. 自注意力（Self-Attention）</label>
+												<label><input type="radio" name="transformer_q91" value="D"> D. 门控</label>
+											</div>
+										</div>
+										<!-- 题目 92 -->
+										<div class="question">
+											<p><strong>92. 在Transformer的自注意力机制中，一个序列中的每个词会生成三个向量，它们是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q92" value="A"> A. Query, Key, Value</label>
+												<label><input type="radio" name="transformer_q92" value="B"> B. Input, Output, State</label>
+												<label><input type="radio" name="transformer_q92" value="C"> C. Source, Target, Context</label>
+												<label><input type="radio" name="transformer_q92" value="D"> D. Word, Position, Embedding</label>
+											</div>
+										</div>
+										<!-- 题目 93 -->
+										<div class="question">
+											<p><strong>93. 自注意力机制中，计算第i个词与第j个词之间的相关性（注意力分数）是通过：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q93" value="A"> A. 计算Query_i与Key_j的点积</label>
+												<label><input type="radio" name="transformer_q93" value="B"> B. 计算Value_i与Value_j的点积</label>
+												<label><input type="radio" name="transformer_q93" value="C"> C. 计算Query_i与Query_j的余弦相似度</label>
+												<label><input type="radio" name="transformer_q93" value="D"> D. 直接使用一个可学习的参数</label>
+											</div>
+										</div>
+										<!-- 题目 94 -->
+										<div class="question">
+											<p><strong>94. Transformer为什么要使用多头注意力（Multi-Head Attention）？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q94" value="A"> A. 为了增加模型深度</label>
+												<label><input type="radio" name="transformer_q94" value="B"> B. 为了让模型同时关注来自不同表示子空间的信息</label>
+												<label><input type="radio" name="transformer_q94" value="C"> C. 为了减少计算量</label>
+												<label><input type="radio" name="transformer_q94" value="D"> D. 为了引入循环连接</label>
+											</div>
+										</div>
+										<!-- 题目 95 -->
+										<div class="question">
+											<p><strong>95. Transformer中的位置编码（Positional Encoding）是必需的，因为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q95" value="A"> A. 自注意力机制本身具有位置感知能力</label>
+												<label><input type="radio" name="transformer_q95" value="B"> B. 自注意力机制是排列不变的，需要额外注入序列的顺序信息</label>
+												<label><input type="radio" name="transformer_q95" value="C"> C. 它可以帮助防止过拟合</label>
+												<label><input type="radio" name="transformer_q95" value="D"> D. 它用于替代词嵌入（Word Embedding）</label>
+											</div>
+										</div>
+										<!-- 题目 96 -->
+										<div class="question">
+											<p><strong>96. Transformer编码器层主要由哪两个子层组成？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q96" value="A"> A. 自注意力子层和前馈神经网络子层</label>
+												<label><input type="radio" name="transformer_q96" value="B"> B. 卷积子层和池化子层</label>
+												<label><input type="radio" name="transformer_q96" value="C"> C. LSTM子层和GRU子层</label>
+												<label><input type="radio" name="transformer_q96" value="D"> D. 编码子层和解码子层</label>
+											</div>
+										</div>
+										<!-- 题目 97 -->
+										<div class="question">
+											<p><strong>97. Transformer模型在训练时相比RNN的一个巨大优势是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q97" value="A"> A. 参数更少</label>
+												<label><input type="radio" name="transformer_q97" value="B"> B. 可以更好地处理长程依赖</label>
+												<label><input type="radio" name="transformer_q97" value="C"> C. 具有高度的并行计算能力</label>
+												<label><input type="radio" name="transformer_q97" value="D"> D. B和C</label>
+											</div>
+										</div>
+										<!-- 题目 98 -->
+										<div class="question">
+											<p><strong>98. BERT（Bidirectional Encoder Representations from Transformers）模型是基于Transformer的：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q98" value="A"> A. 仅编码器结构</label>
+												<label><input type="radio" name="transformer_q98" value="B"> B. 仅解码器结构</label>
+												<label><input type="radio" name="transformer_q98" value="C"> C. 编码器-解码器结构</label>
+												<label><input type="radio" name="transformer_q98" value="D"> D. 卷积-Transformer混合结构</label>
+											</div>
+										</div>
+										<!-- 题目 99 -->
+										<div class="question">
+											<p><strong>99. GPT（Generative Pre-trained Transformer）系列模型是基于Transformer的：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q99" value="A"> A. 仅编码器结构</label>
+												<label><input type="radio" name="transformer_q99" value="B"> B. 仅解码器结构</label>
+												<label><input type="radio" name="transformer_q99" value="C"> C. 编码器-解码器结构</label>
+												<label><input type="radio" name="transformer_q99" value="D"> D. 注意力-卷积结构</label>
+											</div>
+										</div>
+										<!-- 题目 100 -->
+										<div class="question">
+											<p><strong>100. Vision Transformer（ViT）成功地将Transformer应用于计算机视觉，其关键步骤是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="transformer_q100" value="A"> A. 直接将像素输入Transformer</label>
+												<label><input type="radio" name="transformer_q100" value="B"> B. 将图像分割成小块（Patches），并将其视为一个序列</label>
+												<label><input type="radio" name="transformer_q100" value="C"> C. 先用CNN提取特征，再输入Transformer</label>
+												<label><input type="radio" name="transformer_q100" value="D"> D. 在图像上应用循环注意力</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="transformer_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 综合应用：架构选择与对比（101-120题） -->
+						<div id="exerciseArchSelection" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">综合应用模块</span>
+									<span class="title-icon">📊</span>
+								</div>
+								<h2 class="title-name">架构选择与对比</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										20道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：101-120
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="arch_selection_quiz">
+									<div class="card-content">
+										<p>检测你根据任务需求选择合适神经网络架构的能力。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 101 -->
+										<div class="question">
+											<p><strong>101. 对于图像分类任务（如ImageNet），以下哪种架构在传统上被认为是最佳选择？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q101" value="A"> A. 纯RNN</label>
+												<label><input type="radio" name="arch_selection_q101" value="B"> B. Transformer</label>
+												<label><input type="radio" name="arch_selection_q101" value="C"> C. 卷积神经网络（如ResNet, EfficientNet）</label>
+												<label><input type="radio" name="arch_selection_q101" value="D"> D. 多层感知机（MLP）</label>
+											</div>
+										</div>
+										<!-- 题目 102 -->
+										<div class="question">
+											<p><strong>102. 当你需要处理一个长文档并理解其整体情感时，哪种架构可能更合适？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q102" value="A"> A. CNN</label>
+												<label><input type="radio" name="arch_selection_q102" value="B"> B. RNN/LSTM</label>
+												<label><input type="radio" name="arch_selection_q102" value="C"> C. Transformer（如BERT）</label>
+												<label><input type="radio" name="arch_selection_q102" value="D"> D. 单层感知机</label>
+											</div>
+										</div>
+										<!-- 题目 103 -->
+										<div class="question">
+											<p><strong>103. 在资源受限的移动设备上进行实时图像分类，应优先考虑哪种模型？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q103" value="A"> A. ResNet-152</label>
+												<label><input type="radio" name="arch_selection_q103" value="B"> B. VGG-19</label>
+												<label><input type="radio" name="arch_selection_q103" value="C"> C. MobileNet 或 ShuffleNet</label>
+												<label><input type="radio" name="arch_selection_q103" value="D"> D. DenseNet-201</label>
+											</div>
+										</div>
+										<!-- 题目 104 -->
+										<div class="question">
+											<p><strong>104. 对于机器翻译任务，以下哪种架构组合是当前最主流的？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q104" value="A"> A. 编码器用CNN，解码器用RNN</label>
+												<label><input type="radio" name="arch_selection_q104" value="B"> B. 编码器和解码器都用RNN（如LSTM）</label>
+												<label><input type="radio" name="arch_selection_q104" value="C"> C. 编码器和解码器都用Transformer</label>
+												<label><input type="radio" name="arch_selection_q104" value="D"> D. 编码器用RNN，解码器用MLP</label>
+											</div>
+										</div>
+										<!-- 题目 105 -->
+										<div class="question">
+											<p><strong>105. 哪种模型架构天生适合处理视频数据（时空序列）？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q105" value="A"> A. 2D CNN</label>
+												<label><input type="radio" name="arch_selection_q105" value="B"> B. 3D CNN</label>
+												<label><input type="radio" name="arch_selection_q105" value="C"> C. 纯LSTM</label>
+												<label><input type="radio" name="arch_selection_q105" value="D"> D. 纯Transformer</label>
+											</div>
+										</div>
+										<!-- 题目 106 -->
+										<div class="question">
+											<p><strong>106. 哪个任务不适合用标准的卷积神经网络（CNN）直接处理？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q106" value="A"> A. 图像风格迁移</label>
+												<label><input type="radio" name="arch_selection_q106" value="B"> B. 股票价格时间序列预测</label>
+												<label><input type="radio" name="arch_selection_q106" value="C"> C. 人脸识别</label>
+												<label><input type="radio" name="arch_selection_q106" value="D"> D. 目标检测</label>
+											</div>
+										</div>
+										<!-- 题目 107 -->
+										<div class="question">
+											<p><strong>107. 如果你想建立一个聊天机器人，需要模型能根据对话历史生成连贯的回复，最好使用：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q107" value="A"> A. 一个图像分类模型</label>
+												<label><input type="radio" name="arch_selection_q107" value="B"> B. 一个基于Transformer的解码器模型（如GPT）</label>
+												<label><input type="radio" name="arch_selection_q107" value="C"> C. 一个简单的线性回归模型</label>
+												<label><input type="radio" name="arch_selection_q107" value="D"> D. 一个无监督聚类模型</label>
+											</div>
+										</div>
+										<!-- 题目 108 -->
+										<div class="question">
+											<p><strong>108. 对比CNN和RNN，以下说法正确的是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q108" value="A"> A. CNN只能处理固定长度的输入，RNN可以处理变长输入</label>
+												<label><input type="radio" name="arch_selection_q108" value="B"> B. RNN的并行计算能力优于CNN</label>
+												<label><input type="radio" name="arch_selection_q108" value="C"> C. CNN天然适合处理序列数据，RNN天然适合处理图像数据</label>
+												<label><input type="radio" name="arch_selection_q108" value="D"> D. 两者都不能处理非线性问题</label>
+											</div>
+										</div>
+										<!-- 题目 109 -->
+										<div class="question">
+											<p><strong>109. Transformer相比LSTM，在训练速度上的主要优势来自于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q109" value="A"> A. 参数更少</label>
+												<label><input type="radio" name="arch_selection_q109" value="B"> B. 不需要梯度下降</label>
+												<label><input type="radio" name="arch_selection_q109" value="C"> C. 序列计算可以完全并行化</label>
+												<label><input type="radio" name="arch_selection_q109" value="D"> D. 使用了更简单的激活函数</label>
+											</div>
+										</div>
+										<!-- 题目 110 -->
+										<div class="question">
+											<p><strong>110. 将CNN和RNN结合使用的常见场景是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q110" value="A"> A. 图像描述生成（Image Captioning）</label>
+												<label><input type="radio" name="arch_selection_q110" value="B"> B. 文本分类</label>
+												<label><input type="radio" name="arch_selection_q110" value="C"> C. 语音识别</label>
+												<label><input type="radio" name="arch_selection_q110" value="D"> D. A和C</label>
+											</div>
+										</div>
+										<!-- 题目 111 -->
+										<div class="question">
+											<p><strong>111. 残差连接（Residual Connection）最初在哪个架构中被普及？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q111" value="A"> A. VGG</label>
+												<label><input type="radio" name="arch_selection_q111" value="B"> B. Inception</label>
+												<label><input type="radio" name="arch_selection_q111" value="C"> C. ResNet</label>
+												<label><input type="radio" name="arch_selection_q111" value="D"> D. Transformer</label>
+											</div>
+										</div>
+										<!-- 题目 112 -->
+										<div class="question">
+											<p><strong>112. 以下哪种技术主要是为了减少模型的内存占用和计算量？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q112" value="A"> A. 使用更大的批量大小（Batch Size）</label>
+												<label><input type="radio" name="arch_selection_q112" value="B"> B. 使用深度可分离卷积</label>
+												<label><input type="radio" name="arch_selection_q112" value="C"> C. 使用更复杂的激活函数</label>
+												<label><input type="radio" name="arch_selection_q112" value="D"> D. 使用更深的网络</label>
+											</div>
+										</div>
+										<!-- 题目 113 -->
+										<div class="question">
+											<p><strong>113. "迁移学习"在深度学习中的常见做法是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q113" value="A"> A. 在一个大数据集上预训练模型，然后在小数据集上微调</label>
+												<label><input type="radio" name="arch_selection_q113" value="B"> B. 随机初始化权重，直接在小数据集上训练</label>
+												<label><input type="radio" name="arch_selection_q113" value="C"> C. 只使用无标签数据训练</label>
+												<label><input type="radio" name="arch_selection_q113" value="D"> D. 不断改变网络结构</label>
+											</div>
+										</div>
+										<!-- 题目 114 -->
+										<div class="question">
+											<p><strong>114. 当处理的数据集非常小（如几百张图片）时，以下哪种策略最可能有效？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q114" value="A"> A. 从头开始训练一个很深的ResNet</label>
+												<label><input type="radio" name="arch_selection_q114" value="B"> B. 使用迁移学习，并可能进行数据增强</label>
+												<label><input type="radio" name="arch_selection_q114" value="C"> C. 使用更复杂的模型</label>
+												<label><input type="radio" name="arch_selection_q114" value="D"> D. 增加更多的全连接层</label>
+											</div>
+										</div>
+										<!-- 题目 115 -->
+										<div class="question">
+											<p><strong>115. 模型集成（Ensemble）通常能提升性能，因为它：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q115" value="A"> A. 减少了单个模型的偏差（Bias）</label>
+												<label><input type="radio" name="arch_selection_q115" value="B"> B. 减少了单个模型的方差（Variance）</label>
+												<label><input type="radio" name="arch_selection_q115" value="C"> C. 同时减少了偏差和方差</label>
+												<label><input type="radio" name="arch_selection_q115" value="D"> D. 只是让模型变得更大</label>
+											</div>
+										</div>
+										<!-- 题目 116 -->
+										<div class="question">
+											<p><strong>116. 以下哪种现象可能表明学习率设置得太高？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q116" value="A"> A. 训练损失缓慢下降</label>
+												<label><input type="radio" name="arch_selection_q116" value="B"> B. 训练损失震荡剧烈，甚至发散（NaN）</label>
+												<label><input type="radio" name="arch_selection_q116" value="C"> C. 验证准确率稳步提升</label>
+												<label><input type="radio" name="arch_selection_q116" value="D"> D. 模型很快收敛到一个很差的局部最优解</label>
+											</div>
+										</div>
+										<!-- 题目 117 -->
+										<div class="question">
+											<p><strong>117. 早停法（Early Stopping）是一种正则化技术，它通过什么来防止过拟合？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q117" value="A"> A. 在损失函数中添加惩罚项</label>
+												<label><input type="radio" name="arch_selection_q117" value="B"> B. 随机丢弃神经元</label>
+												<label><input type="radio" name="arch_selection_q117" value="C"> C. 在验证集性能开始下降时停止训练</label>
+												<label><input type="radio" name="arch_selection_q117" value="D"> D. 对输入数据进行标准化</label>
+											</div>
+										</div>
+										<!-- 题目 118 -->
+										<div class="question">
+											<p><strong>118. 批标准化（BatchNorm）和丢弃法（Dropout）一起使用时，通常的顺序是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q118" value="A"> A. Dropout -> BatchNorm -> 激活函数</label>
+												<label><input type="radio" name="arch_selection_q118" value="B"> B. 卷积层 -> BatchNorm -> 激活函数 -> Dropout</label>
+												<label><input type="radio" name="arch_selection_q118" value="C"> C. 卷积层 -> Dropout -> BatchNorm -> 激活函数</label>
+												<label><input type="radio" name="arch_selection_q118" value="D"> D. 顺序无关紧要</label>
+											</div>
+										</div>
+										<!-- 题目 119 -->
+										<div class="question">
+											<p><strong>119. 对于自然语言处理任务，词嵌入（Word Embedding）层的作用是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q119" value="A"> A. 将高维的one-hot词向量映射到低维的稠密向量</label>
+												<label><input type="radio" name="arch_selection_q119" value="B"> B. 提取图像的边缘特征</label>
+												<label><input type="radio" name="arch_selection_q119" value="C"> C. 进行池化操作</label>
+												<label><input type="radio" name="arch_selection_q119" value="D"> D. 计算注意力分数</label>
+											</div>
+										</div>
+										<!-- 题目 120 -->
+										<div class="question">
+											<p><strong>120. 胶囊网络（Capsule Network）试图解决传统CNN的什么局限性？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="arch_selection_q120" value="A"> A. 计算速度慢</label>
+												<label><input type="radio" name="arch_selection_q120" value="B"> B. 对物体的空间层次关系（如部件之间的相对位置和姿态）建模能力弱</label>
+												<label><input type="radio" name="arch_selection_q120" value="C"> C. 无法处理序列数据</label>
+												<label><input type="radio" name="arch_selection_q120" value="D"> D. 参数过多</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="arch_selection_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 综合应用：问题诊断与调优（121-135题） -->
+						<div id="exerciseProblemDiagnosis" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">综合应用模块</span>
+									<span class="title-icon">🔧</span>
+								</div>
+								<h2 class="title-name">问题诊断与调优</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										15道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：121-135
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="problem_diagnosis_quiz">
+									<div class="card-content">
+										<p>检测你对深度学习模型问题诊断和调优的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 121 -->
+										<div class="question">
+											<p><strong>121. 训练一个CNN时，发现训练准确率很高（99%），但验证准确率很低（60%）。最可能的原因是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q121" value="A"> A. 欠拟合</label>
+												<label><input type="radio" name="problem_diagnosis_q121" value="B"> B. 过拟合</label>
+												<label><input type="radio" name="problem_diagnosis_q121" value="C"> C. 学习率太低</label>
+												<label><input type="radio" name="problem_diagnosis_q121" value="D"> D. 批次大小太小</label>
+											</div>
+										</div>
+										<!-- 题目 122 -->
+										<div class="question">
+											<p><strong>122. 如果模型的训练损失和验证损失都很高且很接近，这通常意味着？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q122" value="A"> A. 过拟合</label>
+												<label><input type="radio" name="problem_diagnosis_q122" value="B"> B. 欠拟合</label>
+												<label><input type="radio" name="problem_diagnosis_q122" value="C"> C. 训练正好</label>
+												<label><input type="radio" name="problem_diagnosis_q122" value="D"> D. 梯度爆炸</label>
+											</div>
+										</div>
+										<!-- 题目 123 -->
+										<div class="question">
+											<p><strong>123. 训练过程中损失值突然变成NaN，首先应该检查？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q123" value="A"> A. 学习率是否太高</label>
+												<label><input type="radio" name="problem_diagnosis_q123" value="B"> B. 数据中是否存在异常值或未归一化</label>
+												<label><input type="radio" name="problem_diagnosis_q123" value="C"> C. 网络结构是否太深</label>
+												<label><input type="radio" name="problem_diagnosis_q123" value="D"> D. A和B</label>
+											</div>
+										</div>
+										<!-- 题目 124 -->
+										<div class="question">
+											<p><strong>124. 使用ReLU激活函数的深层网络，如果很多神经元的输出持续为0，这种现象称为？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q124" value="A"> A. 梯度爆炸</label>
+												<label><input type="radio" name="problem_diagnosis_q124" value="B"> B. 神经元死亡</label>
+												<label><input type="radio" name="problem_diagnosis_q124" value="C"> C. 过拟合</label>
+												<label><input type="radio" name="problem_diagnosis_q124" value="D"> D. 欠拟合</label>
+											</div>
+										</div>
+										<!-- 题目 125 -->
+										<div class="question">
+											<p><strong>125. 为了缓解梯度消失问题，可以采取的措施不包括：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q125" value="A"> A. 使用ReLU等非饱和激活函数</label>
+												<label><input type="radio" name="problem_diagnosis_q125" value="B"> B. 使用残差连接</label>
+												<label><input type="radio" name="problem_diagnosis_q125" value="C"> C. 使用梯度裁剪（Gradient Clipping）</label>
+												<label><input type="radio" name="problem_diagnosis_q125" value="D"> D. 使用Batch Normalization</label>
+											</div>
+										</div>
+										<!-- 题目 126 -->
+										<div class="question">
+											<p><strong>126. 当增加网络深度时，如果性能不再提升甚至下降，除了梯度问题，还可能是因为？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q126" value="A"> A. 模型容量过大</label>
+												<label><input type="radio" name="problem_diagnosis_q126" value="B"> B. 恒等映射变得难以学习</label>
+												<label><input type="radio" name="problem_diagnosis_q126" value="C"> C. 学习率太小</label>
+												<label><input type="radio" name="problem_diagnosis_q126" value="D"> D. 数据太少</label>
+											</div>
+										</div>
+										<!-- 题目 127 -->
+										<div class="question">
+											<p><strong>127. 在训练Transformer时，通常使用哪种优化器？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q127" value="A"> A. SGD（随机梯度下降）</label>
+												<label><input type="radio" name="problem_diagnosis_q127" value="B"> B. SGD with Momentum</label>
+												<label><input type="radio" name="problem_diagnosis_q127" value="C"> C. Adam 或 AdamW</label>
+												<label><input type="radio" name="problem_diagnosis_q127" value="D"> D. Adagrad</label>
+											</div>
+										</div>
+										<!-- 题目 128 -->
+										<div class="question">
+											<p><strong>128. 训练时使用更大的批量大小（Batch Size）可能导致：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q128" value="A"> A. 更稳定的梯度估计，可能允许更大的学习率</label>
+												<label><input type="radio" name="problem_diagnosis_q128" value="B"> B. 更快的模型收敛</label>
+												<label><input type="radio" name="problem_diagnosis_q128" value="C"> C. 需要更多的GPU内存</label>
+												<label><input type="radio" name="problem_diagnosis_q128" value="D"> D. 以上都是</label>
+											</div>
+										</div>
+										<!-- 题目 129 -->
+										<div class="question">
+											<p><strong>129. 权重衰减（Weight Decay）是一种正则化技术，它通过在损失函数中添加什么来实现？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q129" value="A"> A. 权重的L1范数</label>
+												<label><input type="radio" name="problem_diagnosis_q129" value="B"> B. 权重的L2范数</label>
+												<label><input type="radio" name="problem_diagnosis_q129" value="C"> C. 激活值的范数</label>
+												<label><input type="radio" name="problem_diagnosis_q129" value="D"> D. 输入的范数</label>
+											</div>
+										</div>
+										<!-- 题目 130 -->
+										<div class="question">
+											<p><strong>130. 当使用预训练语言模型（如BERT）进行文本分类微调时，通常的做法是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q130" value="A"> A. 冻结所有预训练层，只训练新添加的分类头</label>
+												<label><input type="radio" name="problem_diagnosis_q130" value="B"> B. 解冻所有层，全部重新训练</label>
+												<label><input type="radio" name="problem_diagnosis_q130" value="C"> C. 解冻最后几层和分类头进行训练，保持底层冻结</label>
+												<label><input type="radio" name="problem_diagnosis_q130" value="D"> D. B或C都是常见做法</label>
+											</div>
+										</div>
+										<!-- 题目 131 -->
+										<div class="question">
+											<p><strong>131. 知识蒸馏（Knowledge Distillation）的主要思想是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q131" value="A"> A. 用一个大的"教师模型"来指导一个小的"学生模型"的训练</label>
+												<label><input type="radio" name="problem_diagnosis_q131" value="B"> B. 让多个模型投票决定预测结果</label>
+												<label><input type="radio" name="problem_diagnosis_q131" value="C"> C. 将模型的知识存储到数据库中</label>
+												<label><input type="radio" name="problem_diagnosis_q131" value="D"> D. 增加模型的深度和宽度</label>
+											</div>
+										</div>
+										<!-- 题目 132 -->
+										<div class="question">
+											<p><strong>132. 神经架构搜索（Neural Architecture Search, NAS）的目标是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q132" value="A"> A. 自动寻找最优的网络结构</label>
+												<label><input type="radio" name="problem_diagnosis_q132" value="B"> B. 自动调整超参数（如学习率）</label>
+												<label><input type="radio" name="problem_diagnosis_q132" value="C"> C. 自动进行数据增强</label>
+												<label><input type="radio" name="problem_diagnosis_q132" value="D"> D. 自动标注数据</label>
+											</div>
+										</div>
+										<!-- 题目 133 -->
+										<div class="question">
+											<p><strong>133. 混合精度训练（Mixed Precision Training）的主要好处是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q133" value="A"> A. 减少模型大小</label>
+												<label><input type="radio" name="problem_diagnosis_q133" value="B"> B. 减少GPU内存占用并加快训练速度</label>
+												<label><input type="radio" name="problem_diagnosis_q133" value="C"> C. 提高模型精度</label>
+												<label><input type="radio" name="problem_diagnosis_q133" value="D"> D. 让模型更容易收敛</label>
+											</div>
+										</div>
+										<!-- 题目 134 -->
+										<div class="question">
+											<p><strong>134. 标签平滑（Label Smoothing）被用来缓解什么问题？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q134" value="A"> A. 类别不平衡</label>
+												<label><input type="radio" name="problem_diagnosis_q134" value="B"> B. 模型对预测结果过于自信（过度拟合硬标签）</label>
+												<label><input type="radio" name="problem_diagnosis_q134" value="C"> C. 梯度消失</label>
+												<label><input type="radio" name="problem_diagnosis_q134" value="D"> D. 训练速度慢</label>
+											</div>
+										</div>
+										<!-- 题目 135 -->
+										<div class="question">
+											<p><strong>135. 数据集存在严重的类别不平衡时，以下哪种方法可能无效？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="problem_diagnosis_q135" value="A"> A. 对少数类进行过采样（如SMOTE）</label>
+												<label><input type="radio" name="problem_diagnosis_q135" value="B"> B. 对多数类进行欠采样</label>
+												<label><input type="radio" name="problem_diagnosis_q135" value="C"> C. 在损失函数中使用类别权重</label>
+												<label><input type="radio" name="problem_diagnosis_q135" value="D"> D. 简单地收集更多数据但不平衡类别比例</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="problem_diagnosis_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<!-- 综合应用：前沿与交叉领域（136-155题） -->
+						<div id="exerciseAdvanced" style="display: block;">
+							<div class="exercise-section-title">
+								<div class="title-header">
+									<span class="title-tag">综合应用模块</span>
+									<span class="title-icon">📚</span>
+								</div>
+								<h2 class="title-name">前沿与交叉领域</h2>
+								<div class="title-info">
+									<span class="info-item">
+										<i class="icon-question"></i>
+										20道题目
+									</span>
+									<span class="info-item">
+										<i class="icon-clock"></i>
+										题号：136-155
+									</span>
+								</div>
+							</div>
+							<div class="exercise-section-content">
+								<div class="exercise-card" data-exercise="advanced_quiz">
+									<div class="card-content">
+										<p>检测你对深度学习前沿与交叉领域的理解。</p>
+										<button class="start-exercise-btn">开始练习</button>
+									</div>
+									<div class="card-questions" style="display:none;">
+										<!-- 题目 136 -->
+										<div class="question">
+											<p><strong>136. 生成对抗网络（GAN）由哪两部分组成？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q136" value="A"> A. 编码器和解码器</label>
+												<label><input type="radio" name="advanced_q136" value="B"> B. 生成器和判别器</label>
+												<label><input type="radio" name="advanced_q136" value="C"> C. 教师和学生</label>
+												<label><input type="radio" name="advanced_q136" value="D"> D. 主角和配角</label>
+											</div>
+										</div>
+										<!-- 题目 137 -->
+										<div class="question">
+											<p><strong>137. 自监督学习（Self-Supervised Learning）的主要特点是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q137" value="A"> A. 完全不需要数据</label>
+												<label><input type="radio" name="advanced_q137" value="B"> B. 从无标签数据中自动构造监督信号进行学习</label>
+												<label><input type="radio" name="advanced_q137" value="C"> C. 只需要少量标签</label>
+												<label><input type="radio" name="advanced_q137" value="D"> D. 只使用强化学习信号</label>
+											</div>
+										</div>
+										<!-- 题目 138 -->
+										<div class="question">
+											<p><strong>138. 对比学习（Contrastive Learning）的核心思想是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q138" value="A"> A. 拉近相似样本的表示，推远不相似样本的表示</label>
+												<label><input type="radio" name="advanced_q138" value="B"> B. 最大化所有样本表示之间的相似度</label>
+												<label><input type="radio" name="advanced_q138" value="C"> C. 最小化预测误差</label>
+												<label><input type="radio" name="advanced_q138" value="D"> D. 生成新的数据样本</label>
+											</div>
+										</div>
+										<!-- 题目 139 -->
+										<div class="question">
+											<p><strong>139. 图神经网络（GNN）专门用于处理什么类型的数据？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q139" value="A"> A. 规则网格数据（如图像）</label>
+												<label><input type="radio" name="advanced_q139" value="B"> B. 序列数据</label>
+												<label><input type="radio" name="advanced_q139" value="C"> C. 图结构数据（社交网络、分子结构）</label>
+												<label><input type="radio" name="advanced_q139" value="D"> D. 文本数据</label>
+											</div>
+										</div>
+										<!-- 题目 140 -->
+										<div class="question">
+											<p><strong>140. 神经辐射场（NeRF）主要用于哪个领域？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q140" value="A"> A. 自然语言处理</label>
+												<label><input type="radio" name="advanced_q140" value="B"> B. 三维场景重建与新视角合成</label>
+												<label><input type="radio" name="advanced_q140" value="C"> C. 时间序列预测</label>
+												<label><input type="radio" name="advanced_q140" value="D"> D. 语音合成</label>
+											</div>
+										</div>
+										<!-- 题目 141 -->
+										<div class="question">
+											<p><strong>141. 扩散模型（Diffusion Models）的图像生成过程可以描述为：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q141" value="A"> A. 一步到位地从噪声生成图像</label>
+												<label><input type="radio" name="advanced_q141" value="B"> B. 一个逐步去噪的过程，从随机噪声逐步重建出清晰图像</label>
+												<label><input type="radio" name="advanced_q141" value="C"> C. 一个逐步加噪的过程，从清晰图像变为噪声</label>
+												<label><input type="radio" name="advanced_q141" value="D"> D. 一个对抗博弈的过程</label>
+											</div>
+										</div>
+										<!-- 题目 142 -->
+										<div class="question">
+											<p><strong>142. 模型量化（Model Quantization）的主要目的是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q142" value="A"> A. 提高模型精度</label>
+												<label><input type="radio" name="advanced_q142" value="B"> B. 减少模型存储空间和加速推理</label>
+												<label><input type="radio" name="advanced_q142" value="C"> C. 让模型更容易训练</label>
+												<label><input type="radio" name="advanced_q142" value="D"> D. 增加模型非线性</label>
+											</div>
+										</div>
+										<!-- 题目 143 -->
+										<div class="question">
+											<p><strong>143. 终身学习（Lifelong Learning）或持续学习，试图解决的主要挑战是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q143" value="A"> A. 模型在学会新任务时，会灾难性地忘记旧任务</label>
+												<label><input type="radio" name="advanced_q143" value="B"> B. 模型训练速度太慢</label>
+												<label><input type="radio" name="advanced_q143" value="C"> C. 模型无法处理小数据</label>
+												<label><input type="radio" name="advanced_q143" value="D"> D. 模型解释性差</label>
+											</div>
+										</div>
+										<!-- 题目 144 -->
+										<div class="question">
+											<p><strong>144. 可解释人工智能（XAI）的目标是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q144" value="A"> A. 让模型跑得更快</label>
+												<label><input type="radio" name="advanced_q144" value="B"> B. 让人类理解模型的决策依据</label>
+												<label><input type="radio" name="advanced_q144" value="C"> C. 让模型变得更复杂</label>
+												<label><input type="radio" name="advanced_q144" value="D"> D. 自动设计模型架构</label>
+											</div>
+										</div>
+										<!-- 题目 145 -->
+										<div class="question">
+											<p><strong>145. 联邦学习（Federated Learning）的主要优势在于：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q145" value="A"> A. 集中所有数据进行训练，获得最佳性能</label>
+												<label><input type="radio" name="advanced_q145" value="B"> B. 在保护数据隐私的前提下，实现协同模型训练</label>
+												<label><input type="radio" name="advanced_q145" value="C"> C. 训练速度最快</label>
+												<label><input type="radio" name="advanced_q145" value="D"> D. 模型结构最简单</label>
+											</div>
+										</div>
+										<!-- 题目 146 -->
+										<div class="question">
+											<p><strong>146. 元学习（Meta-Learning）或"学会学习"，其目标是：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q146" value="A"> A. 快速适应新任务，只需少量样本</label>
+												<label><input type="radio" name="advanced_q146" value="B"> B. 一次性记住所有任务</label>
+												<label><input type="radio" name="advanced_q146" value="C"> C. 训练一个通用的、不做任何调整的模型</label>
+												<label><input type="radio" name="advanced_q146" value="D"> D. 避免使用梯度下降</label>
+											</div>
+										</div>
+										<!-- 题目 147 -->
+										<div class="question">
+											<p><strong>147. Transformer的注意力机制计算复杂度相对于序列长度n是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q147" value="A"> A. O(n)</label>
+												<label><input type="radio" name="advanced_q147" value="B"> B. O(n log n)</label>
+												<label><input type="radio" name="advanced_q147" value="C"> C. O(n²)</label>
+												<label><input type="radio" name="advanced_q147" value="D"> D. O(1)</label>
+											</div>
+										</div>
+										<!-- 题目 148 -->
+										<div class="question">
+											<p><strong>148. 为了降低Transformer处理长序列的计算开销，以下哪种不是有效方法？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q148" value="A"> A. 使用局部窗口注意力</label>
+												<label><input type="radio" name="advanced_q148" value="B"> B. 使用线性注意力（Linear Attention）</label>
+												<label><input type="radio" name="advanced_q148" value="C"> C. 将序列长度加倍</label>
+												<label><input type="radio" name="advanced_q148" value="D"> D. 使用轴向注意力（Axial Attention）</label>
+											</div>
+										</div>
+										<!-- 题目 149 -->
+										<div class="question">
+											<p><strong>149. 多模态学习（Multimodal Learning）是指：</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q149" value="A"> A. 只使用一种类型的数据</label>
+												<label><input type="radio" name="advanced_q149" value="B"> B. 联合利用多种类型的数据（如图像、文本、音频）进行学习</label>
+												<label><input type="radio" name="advanced_q149" value="C"> C. 使用多个相同的模型</label>
+												<label><input type="radio" name="advanced_q149" value="D"> D. 在不同的模式下训练模型</label>
+											</div>
+										</div>
+										<!-- 题目 150 -->
+										<div class="question">
+											<p><strong>150. 强化学习（Reinforcement Learning）中，智能体通过什么来学习？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q150" value="A"> A. 带标签的训练数据</label>
+												<label><input type="radio" name="advanced_q150" value="B"> B. 与环境的交互获得的奖励信号</label>
+												<label><input type="radio" name="advanced_q150" value="C"> C. 无标签的数据聚类</label>
+												<label><input type="radio" name="advanced_q150" value="D"> D. 教师的示范</label>
+											</div>
+										</div>
+										<!-- 题目 151 -->
+										<div class="question">
+											<p><strong>151. 在深度学习与强化学习的结合中，深度Q网络（DQN）使用什么来近似Q值函数？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q151" value="A"> A. 线性函数</label>
+												<label><input type="radio" name="advanced_q151" value="B"> B. 决策树</label>
+												<label><input type="radio" name="advanced_q151" value="C"> C. 深度神经网络</label>
+												<label><input type="radio" name="advanced_q151" value="D"> D. 支持向量机</label>
+											</div>
+										</div>
+										<!-- 题目 152 -->
+										<div class="question">
+											<p><strong>152. 稀疏注意力（Sparse Attention）和门控机制的结合，在哪个知名模型中得到了体现？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q152" value="A"> A. ResNet</label>
+												<label><input type="radio" name="advanced_q152" value="B"> B. LSTM</label>
+												<label><input type="radio" name="advanced_q152" value="C"> C. GPT-3</label>
+												<label><input type="radio" name="advanced_q152" value="D"> D. Switch Transformer</label>
+											</div>
+										</div>
+										<!-- 题目 153 -->
+										<div class="question">
+											<p><strong>153. 自回归模型（如GPT）和自编码模型（如BERT）在预训练目标上的主要区别是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q153" value="A"> A. 自回归模型预测未来token，自编码模型重建被掩码的token</label>
+												<label><input type="radio" name="advanced_q153" value="B"> B. 自回归模型使用卷积，自编码模型使用注意力</label>
+												<label><input type="radio" name="advanced_q153" value="C"> C. 自回归模型更小，自编码模型更大</label>
+												<label><input type="radio" name="advanced_q153" value="D"> D. 没有区别</label>
+											</div>
+										</div>
+										<!-- 题目 154 -->
+										<div class="question">
+											<p><strong>154. 大语言模型（LLM）出现"幻觉"（Hallucination）问题是指？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q154" value="A"> A. 模型产生与输入无关或事实错误的文本</label>
+												<label><input type="radio" name="advanced_q154" value="B"> B. 模型运行速度变慢</label>
+												<label><input type="radio" name="advanced_q154" value="C"> C. 模型无法理解指令</label>
+												<label><input type="radio" name="advanced_q154" value="D"> D. 模型参数量太大</label>
+											</div>
+										</div>
+										<!-- 题目 155 -->
+										<div class="question">
+											<p><strong>155. MoE（Mixture of Experts）架构的核心优势是？</strong></p>
+											<div class="options">
+												<label><input type="radio" name="advanced_q155" value="A"> A. 用极少的计算量激活全部参数</label>
+												<label><input type="radio" name="advanced_q155" value="B"> B. 用少量计算激活大量参数，实现模型容量与计算效率的分离</label>
+												<label><input type="radio" name="advanced_q155" value="C"> C. 让模型完全串行计算</label>
+												<label><input type="radio" name="advanced_q155" value="D"> D. 消除了所有参数</label>
+											</div>
+										</div>
+										<!-- 得分显示和提交按钮 -->
+										<div class="score-display"></div>
+										<button class="submit-quiz-btn" data-category="advanced_quiz">提交答案</button>
+										<button class="close-exercise-btn">收起练习</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+					</div>
+				</div>
+
+					
+				<div class="exercise-right-status">
+					<div class="status-header">
+					<h3>📊 答题进度</h3>
+					<div class="progress-indicator">
+						<div class="progress-text">当前进度</div>
+						<div class="progress-number">0/155</div>
+					</div>
+					</div>
+					
+					<div class="status-content">
+					<!-- 基础组件模块进度 -->
+					<div class="status-category">
+						<h4>🧩 基础组件模块 (50题)</h4>
+						
+						<div class="status-subcategory-container">
+						<!-- 神经网络层：1-30题 -->
+						<div class="status-subcategory">
+							<h5>神经网络层 (30题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="1" data-tooltip="神经网络层 - 题目1"></div>
+							<div class="status-item unanswered" data-question="2" data-tooltip="神经网络层 - 题目2"></div>
+							<div class="status-item unanswered" data-question="3" data-tooltip="神经网络层 - 题目3"></div>
+							<div class="status-item unanswered" data-question="4" data-tooltip="神经网络层 - 题目4"></div>
+							<div class="status-item unanswered" data-question="5" data-tooltip="神经网络层 - 题目5"></div>
+							<div class="status-item unanswered" data-question="6" data-tooltip="神经网络层 - 题目6"></div>
+							<div class="status-item unanswered" data-question="7" data-tooltip="神经网络层 - 题目7"></div>
+							<div class="status-item unanswered" data-question="8" data-tooltip="神经网络层 - 题目8"></div>
+							<div class="status-item unanswered" data-question="9" data-tooltip="神经网络层 - 题目9"></div>
+							<div class="status-item unanswered" data-question="10" data-tooltip="神经网络层 - 题目10"></div>
+							<div class="status-item unanswered" data-question="11" data-tooltip="神经网络层 - 题目11"></div>
+							<div class="status-item unanswered" data-question="12" data-tooltip="神经网络层 - 题目12"></div>
+							<div class="status-item unanswered" data-question="13" data-tooltip="神经网络层 - 题目13"></div>
+							<div class="status-item unanswered" data-question="14" data-tooltip="神经网络层 - 题目14"></div>
+							<div class="status-item unanswered" data-question="15" data-tooltip="神经网络层 - 题目15"></div>
+							<div class="status-item unanswered" data-question="16" data-tooltip="神经网络层 - 题目16"></div>
+							<div class="status-item unanswered" data-question="17" data-tooltip="神经网络层 - 题目17"></div>
+							<div class="status-item unanswered" data-question="18" data-tooltip="神经网络层 - 题目18"></div>
+							<div class="status-item unanswered" data-question="19" data-tooltip="神经网络层 - 题目19"></div>
+							<div class="status-item unanswered" data-question="20" data-tooltip="神经网络层 - 题目20"></div>
+							<div class="status-item unanswered" data-question="21" data-tooltip="神经网络层 - 题目21"></div>
+							<div class="status-item unanswered" data-question="22" data-tooltip="神经网络层 - 题目22"></div>
+							<div class="status-item unanswered" data-question="23" data-tooltip="神经网络层 - 题目23"></div>
+							<div class="status-item unanswered" data-question="24" data-tooltip="神经网络层 - 题目24"></div>
+							<div class="status-item unanswered" data-question="25" data-tooltip="神经网络层 - 题目25"></div>
+							<div class="status-item unanswered" data-question="26" data-tooltip="神经网络层 - 题目26"></div>
+							<div class="status-item unanswered" data-question="27" data-tooltip="神经网络层 - 题目27"></div>
+							<div class="status-item unanswered" data-question="28" data-tooltip="神经网络层 - 题目28"></div>
+							<div class="status-item unanswered" data-question="29" data-tooltip="神经网络层 - 题目29"></div>
+							<div class="status-item unanswered" data-question="30" data-tooltip="神经网络层 - 题目30"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 30</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- 激活函数：31-50题 -->
+						<div class="status-subcategory">
+							<h5>⚡ 激活函数 (20题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="31" data-tooltip="激活函数 - 题目31"></div>
+							<div class="status-item unanswered" data-question="32" data-tooltip="激活函数 - 题目32"></div>
+							<div class="status-item unanswered" data-question="33" data-tooltip="激活函数 - 题目33"></div>
+							<div class="status-item unanswered" data-question="34" data-tooltip="激活函数 - 题目34"></div>
+							<div class="status-item unanswered" data-question="35" data-tooltip="激活函数 - 题目35"></div>
+							<div class="status-item unanswered" data-question="36" data-tooltip="激活函数 - 题目36"></div>
+							<div class="status-item unanswered" data-question="37" data-tooltip="激活函数 - 题目37"></div>
+							<div class="status-item unanswered" data-question="38" data-tooltip="激活函数 - 题目38"></div>
+							<div class="status-item unanswered" data-question="39" data-tooltip="激活函数 - 题目39"></div>
+							<div class="status-item unanswered" data-question="40" data-tooltip="激活函数 - 题目40"></div>
+							<div class="status-item unanswered" data-question="41" data-tooltip="激活函数 - 题目41"></div>
+							<div class="status-item unanswered" data-question="42" data-tooltip="激活函数 - 题目42"></div>
+							<div class="status-item unanswered" data-question="43" data-tooltip="激活函数 - 题目43"></div>
+							<div class="status-item unanswered" data-question="44" data-tooltip="激活函数 - 题目44"></div>
+							<div class="status-item unanswered" data-question="45" data-tooltip="激活函数 - 题目45"></div>
+							<div class="status-item unanswered" data-question="46" data-tooltip="激活函数 - 题目46"></div>
+							<div class="status-item unanswered" data-question="47" data-tooltip="激活函数 - 题目47"></div>
+							<div class="status-item unanswered" data-question="48" data-tooltip="激活函数 - 题目48"></div>
+							<div class="status-item unanswered" data-question="49" data-tooltip="激活函数 - 题目49"></div>
+							<div class="status-item unanswered" data-question="50" data-tooltip="激活函数 - 题目50"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 20</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						</div>
+					</div>
+				
+					<!-- 核心架构模块进度 -->
+					<div class="status-category">
+						<h4>🏗️ 核心架构模块 (50题)</h4>
+						
+						<div class="status-subcategory-container">
+						<!-- 感知机：51-60题 -->
+						<div class="status-subcategory">
+							<h5>🧠 感知机 (10题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="51" data-tooltip="感知机 - 题目51"></div>
+							<div class="status-item unanswered" data-question="52" data-tooltip="感知机 - 题目52"></div>
+							<div class="status-item unanswered" data-question="53" data-tooltip="感知机 - 题目53"></div>
+							<div class="status-item unanswered" data-question="54" data-tooltip="感知机 - 题目54"></div>
+							<div class="status-item unanswered" data-question="55" data-tooltip="感知机 - 题目55"></div>
+							<div class="status-item unanswered" data-question="56" data-tooltip="感知机 - 题目56"></div>
+							<div class="status-item unanswered" data-question="57" data-tooltip="感知机 - 题目57"></div>
+							<div class="status-item unanswered" data-question="58" data-tooltip="感知机 - 题目58"></div>
+							<div class="status-item unanswered" data-question="59" data-tooltip="感知机 - 题目59"></div>
+							<div class="status-item unanswered" data-question="60" data-tooltip="感知机 - 题目60"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 10</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- CNN：61-75题 -->
+						<div class="status-subcategory">
+							<h5>🔍 CNN (15题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="61" data-tooltip="CNN - 题目61"></div>
+							<div class="status-item unanswered" data-question="62" data-tooltip="CNN - 题目62"></div>
+							<div class="status-item unanswered" data-question="63" data-tooltip="CNN - 题目63"></div>
+							<div class="status-item unanswered" data-question="64" data-tooltip="CNN - 题目64"></div>
+							<div class="status-item unanswered" data-question="65" data-tooltip="CNN - 题目65"></div>
+							<div class="status-item unanswered" data-question="66" data-tooltip="CNN - 题目66"></div>
+							<div class="status-item unanswered" data-question="67" data-tooltip="CNN - 题目67"></div>
+							<div class="status-item unanswered" data-question="68" data-tooltip="CNN - 题目68"></div>
+							<div class="status-item unanswered" data-question="69" data-tooltip="CNN - 题目69"></div>
+							<div class="status-item unanswered" data-question="70" data-tooltip="CNN - 题目70"></div>
+							<div class="status-item unanswered" data-question="71" data-tooltip="CNN - 题目71"></div>
+							<div class="status-item unanswered" data-question="72" data-tooltip="CNN - 题目72"></div>
+							<div class="status-item unanswered" data-question="73" data-tooltip="CNN - 题目73"></div>
+							<div class="status-item unanswered" data-question="74" data-tooltip="CNN - 题目74"></div>
+							<div class="status-item unanswered" data-question="75" data-tooltip="CNN - 题目75"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 15</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- RNN：76-90题 -->
+						<div class="status-subcategory">
+							<h5>🔄 RNN (15题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="76" data-tooltip="RNN - 题目76"></div>
+							<div class="status-item unanswered" data-question="77" data-tooltip="RNN - 题目77"></div>
+							<div class="status-item unanswered" data-question="78" data-tooltip="RNN - 题目78"></div>
+							<div class="status-item unanswered" data-question="79" data-tooltip="RNN - 题目79"></div>
+							<div class="status-item unanswered" data-question="80" data-tooltip="RNN - 题目80"></div>
+							<div class="status-item unanswered" data-question="81" data-tooltip="RNN - 题目81"></div>
+							<div class="status-item unanswered" data-question="82" data-tooltip="RNN - 题目82"></div>
+							<div class="status-item unanswered" data-question="83" data-tooltip="RNN - 题目83"></div>
+							<div class="status-item unanswered" data-question="84" data-tooltip="RNN - 题目84"></div>
+							<div class="status-item unanswered" data-question="85" data-tooltip="RNN - 题目85"></div>
+							<div class="status-item unanswered" data-question="86" data-tooltip="RNN - 题目86"></div>
+							<div class="status-item unanswered" data-question="87" data-tooltip="RNN - 题目87"></div>
+							<div class="status-item unanswered" data-question="88" data-tooltip="RNN - 题目88"></div>
+							<div class="status-item unanswered" data-question="89" data-tooltip="RNN - 题目89"></div>
+							<div class="status-item unanswered" data-question="90" data-tooltip="RNN - 题目90"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 15</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- Transformer：91-100题 -->
+						<div class="status-subcategory">
+							<h5>🎯 Transformer (10题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="91" data-tooltip="Transformer - 题目91"></div>
+							<div class="status-item unanswered" data-question="92" data-tooltip="Transformer - 题目92"></div>
+							<div class="status-item unanswered" data-question="93" data-tooltip="Transformer - 题目93"></div>
+							<div class="status-item unanswered" data-question="94" data-tooltip="Transformer - 题目94"></div>
+							<div class="status-item unanswered" data-question="95" data-tooltip="Transformer - 题目95"></div>
+							<div class="status-item unanswered" data-question="96" data-tooltip="Transformer - 题目96"></div>
+							<div class="status-item unanswered" data-question="97" data-tooltip="Transformer - 题目97"></div>
+							<div class="status-item unanswered" data-question="98" data-tooltip="Transformer - 题目98"></div>
+							<div class="status-item unanswered" data-question="99" data-tooltip="Transformer - 题目99"></div>
+							<div class="status-item unanswered" data-question="100" data-tooltip="Transformer - 题目100"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 10</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						</div>
+					</div>
+				
+					<!-- 综合应用模块进度 -->
+					<div class="status-category">
+						<h4>🚀 综合应用模块 (55题)</h4>
+						
+						<div class="status-subcategory-container">
+						<!-- 架构选择与对比：101-120题 -->
+						<div class="status-subcategory">
+							<h5>📊 架构选择与对比 (20题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="101" data-tooltip="架构选择与对比 - 题目101"></div>
+							<div class="status-item unanswered" data-question="102" data-tooltip="架构选择与对比 - 题目102"></div>
+							<div class="status-item unanswered" data-question="103" data-tooltip="架构选择与对比 - 题目103"></div>
+							<div class="status-item unanswered" data-question="104" data-tooltip="架构选择与对比 - 题目104"></div>
+							<div class="status-item unanswered" data-question="105" data-tooltip="架构选择与对比 - 题目105"></div>
+							<div class="status-item unanswered" data-question="106" data-tooltip="架构选择与对比 - 题目106"></div>
+							<div class="status-item unanswered" data-question="107" data-tooltip="架构选择与对比 - 题目107"></div>
+							<div class="status-item unanswered" data-question="108" data-tooltip="架构选择与对比 - 题目108"></div>
+							<div class="status-item unanswered" data-question="109" data-tooltip="架构选择与对比 - 题目109"></div>
+							<div class="status-item unanswered" data-question="110" data-tooltip="架构选择与对比 - 题目110"></div>
+							<div class="status-item unanswered" data-question="111" data-tooltip="架构选择与对比 - 题目111"></div>
+							<div class="status-item unanswered" data-question="112" data-tooltip="架构选择与对比 - 题目112"></div>
+							<div class="status-item unanswered" data-question="113" data-tooltip="架构选择与对比 - 题目113"></div>
+							<div class="status-item unanswered" data-question="114" data-tooltip="架构选择与对比 - 题目114"></div>
+							<div class="status-item unanswered" data-question="115" data-tooltip="架构选择与对比 - 题目115"></div>
+							<div class="status-item unanswered" data-question="116" data-tooltip="架构选择与对比 - 题目116"></div>
+							<div class="status-item unanswered" data-question="117" data-tooltip="架构选择与对比 - 题目117"></div>
+							<div class="status-item unanswered" data-question="118" data-tooltip="架构选择与对比 - 题目118"></div>
+							<div class="status-item unanswered" data-question="119" data-tooltip="架构选择与对比 - 题目119"></div>
+							<div class="status-item unanswered" data-question="120" data-tooltip="架构选择与对比 - 题目120"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 20</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- 问题诊断与调优：121-135题 -->
+						<div class="status-subcategory">
+							<h5>🔧 问题诊断与调优 (15题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="121" data-tooltip="问题诊断与调优 - 题目121"></div>
+							<div class="status-item unanswered" data-question="122" data-tooltip="问题诊断与调优 - 题目122"></div>
+							<div class="status-item unanswered" data-question="123" data-tooltip="问题诊断与调优 - 题目123"></div>
+							<div class="status-item unanswered" data-question="124" data-tooltip="问题诊断与调优 - 题目124"></div>
+							<div class="status-item unanswered" data-question="125" data-tooltip="问题诊断与调优 - 题目125"></div>
+							<div class="status-item unanswered" data-question="126" data-tooltip="问题诊断与调优 - 题目126"></div>
+							<div class="status-item unanswered" data-question="127" data-tooltip="问题诊断与调优 - 题目127"></div>
+							<div class="status-item unanswered" data-question="128" data-tooltip="问题诊断与调优 - 题目128"></div>
+							<div class="status-item unanswered" data-question="129" data-tooltip="问题诊断与调优 - 题目129"></div>
+							<div class="status-item unanswered" data-question="130" data-tooltip="问题诊断与调优 - 题目130"></div>
+							<div class="status-item unanswered" data-question="131" data-tooltip="问题诊断与调优 - 题目131"></div>
+							<div class="status-item unanswered" data-question="132" data-tooltip="问题诊断与调优 - 题目132"></div>
+							<div class="status-item unanswered" data-question="133" data-tooltip="问题诊断与调优 - 题目133"></div>
+							<div class="status-item unanswered" data-question="134" data-tooltip="问题诊断与调优 - 题目134"></div>
+							<div class="status-item unanswered" data-question="135" data-tooltip="问题诊断与调优 - 题目135"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 15</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						
+						<!-- 前沿与交叉领域：136-155题 -->
+						<div class="status-subcategory">
+							<h5>📚 前沿与交叉领域 (20题)</h5>
+							<div class="status-grid">
+							<div class="status-item unanswered" data-question="136" data-tooltip="前沿与交叉领域 - 题目136"></div>
+							<div class="status-item unanswered" data-question="137" data-tooltip="前沿与交叉领域 - 题目137"></div>
+							<div class="status-item unanswered" data-question="138" data-tooltip="前沿与交叉领域 - 题目138"></div>
+							<div class="status-item unanswered" data-question="139" data-tooltip="前沿与交叉领域 - 题目139"></div>
+							<div class="status-item unanswered" data-question="140" data-tooltip="前沿与交叉领域 - 题目140"></div>
+							<div class="status-item unanswered" data-question="141" data-tooltip="前沿与交叉领域 - 题目141"></div>
+							<div class="status-item unanswered" data-question="142" data-tooltip="前沿与交叉领域 - 题目142"></div>
+							<div class="status-item unanswered" data-question="143" data-tooltip="前沿与交叉领域 - 题目143"></div>
+							<div class="status-item unanswered" data-question="144" data-tooltip="前沿与交叉领域 - 题目144"></div>
+							<div class="status-item unanswered" data-question="145" data-tooltip="前沿与交叉领域 - 题目145"></div>
+							<div class="status-item unanswered" data-question="146" data-tooltip="前沿与交叉领域 - 题目146"></div>
+							<div class="status-item unanswered" data-question="147" data-tooltip="前沿与交叉领域 - 题目147"></div>
+							<div class="status-item unanswered" data-question="148" data-tooltip="前沿与交叉领域 - 题目148"></div>
+							<div class="status-item unanswered" data-question="149" data-tooltip="前沿与交叉领域 - 题目149"></div>
+							<div class="status-item unanswered" data-question="150" data-tooltip="前沿与交叉领域 - 题目150"></div>
+							<div class="status-item unanswered" data-question="151" data-tooltip="前沿与交叉领域 - 题目151"></div>
+							<div class="status-item unanswered" data-question="152" data-tooltip="前沿与交叉领域 - 题目152"></div>
+							<div class="status-item unanswered" data-question="153" data-tooltip="前沿与交叉领域 - 题目153"></div>
+							<div class="status-item unanswered" data-question="154" data-tooltip="前沿与交叉领域 - 题目154"></div>
+							<div class="status-item unanswered" data-question="155" data-tooltip="前沿与交叉领域 - 题目155"></div>
+							</div>
+							<div class="module-stats">
+							<span class="unanswered-count">未答: 20</span>
+							<span class="correct-count">正确: 0</span>
+							<span class="incorrect-count">错误: 0</span>
+							</div>
+						</div>
+						</div>
+					</div>
+					</div>
+				</div>
+				<!-- 右侧答题状态区域 -->
+
+			</div>
+		</div>
+
+		<div id = 'loadingDataTab' style="display: none;">
 			<div id='loadingMNIST'>
 				加载中 <span id="datasetLoadingName">MNIST</span> 数据集
 			</div>
@@ -1432,15 +3722,6 @@
 			<div id="exportPython" class="select-option right-option">导出 Python</div>
 			<div id="exportJulia" class="select-option right-option">导出 Julia</div>
 			<div id="copyModel" class="select-option right-option">模型链接</div>
-			<div class="option-dropdown">
-				<div style="float:left">导出训练数据</div>
-				<div style="float:right">〉</div>
-				<div class="dropdown-content right">
-					<div id="exportTrainingHistoryJson" class="option select-option">导出 JSON</div>
-					<div id="exportTrainingHistoryCsv" class="option select-option last-dropdown">导出 CSV</div>
-				</div>
-			</div>
-			<div id="exportTrainingCharts" class="select-option right-option">导出训练图表</div>
 		</div>
 		<div id = 'networkParamshell'>
 
@@ -1495,9 +3776,509 @@
 		<div id = 'educationParamshell' style="display: none">
 		</div>
 
-	</div>
+		<!-- Exercise menu -->
+		<div id = 'exerciseMenu' style="display: none">
+			<div class="exercise-right-status">
+				<div class="status-header">
+					<h3>答题进度</h3>
+				</div>
+				<div class="status-content">
+					<!-- 基础组件模块进度 -->
+					<div class="status-category">
+						<h4>基础组件模块 (50题)</h4>
+						<div class="status-grid">
+							<!-- 神经网络层：1-30题 -->
+							<div class="status-subcategory">
+								<h5>神经网络层</h5>
+								<div class="status-grid">
+									<!-- 1-30题的小方块 -->
+									<div class="status-item unanswered" data-question="1" data-tooltip="神经网络层 - 题目1"></div>
+									<div class="status-item unanswered" data-question="2" data-tooltip="神经网络层 - 题目2"></div>
+									<div class="status-item unanswered" data-question="3" data-tooltip="神经网络层 - 题目3"></div>
+									<div class="status-item unanswered" data-question="4" data-tooltip="神经网络层 - 题目4"></div>
+									<div class="status-item unanswered" data-question="5" data-tooltip="神经网络层 - 题目5"></div>
+									<div class="status-item unanswered" data-question="6" data-tooltip="神经网络层 - 题目6"></div>
+									<div class="status-item unanswered" data-question="7" data-tooltip="神经网络层 - 题目7"></div>
+									<div class="status-item unanswered" data-question="8" data-tooltip="神经网络层 - 题目8"></div>
+									<div class="status-item unanswered" data-question="9" data-tooltip="神经网络层 - 题目9"></div>
+									<div class="status-item unanswered" data-question="10" data-tooltip="神经网络层 - 题目10"></div>
+									<div class="status-item unanswered" data-question="11" data-tooltip="神经网络层 - 题目11"></div>
+									<div class="status-item unanswered" data-question="12" data-tooltip="神经网络层 - 题目12"></div>
+									<div class="status-item unanswered" data-question="13" data-tooltip="神经网络层 - 题目13"></div>
+									<div class="status-item unanswered" data-question="14" data-tooltip="神经网络层 - 题目14"></div>
+									<div class="status-item unanswered" data-question="15" data-tooltip="神经网络层 - 题目15"></div>
+									<div class="status-item unanswered" data-question="16" data-tooltip="神经网络层 - 题目16"></div>
+									<div class="status-item unanswered" data-question="17" data-tooltip="神经网络层 - 题目17"></div>
+									<div class="status-item unanswered" data-question="18" data-tooltip="神经网络层 - 题目18"></div>
+									<div class="status-item unanswered" data-question="19" data-tooltip="神经网络层 - 题目19"></div>
+									<div class="status-item unanswered" data-question="20" data-tooltip="神经网络层 - 题目20"></div>
+									<div class="status-item unanswered" data-question="21" data-tooltip="神经网络层 - 题目21"></div>
+									<div class="status-item unanswered" data-question="22" data-tooltip="神经网络层 - 题目22"></div>
+									<div class="status-item unanswered" data-question="23" data-tooltip="神经网络层 - 题目23"></div>
+									<div class="status-item unanswered" data-question="24" data-tooltip="神经网络层 - 题目24"></div>
+									<div class="status-item unanswered" data-question="25" data-tooltip="神经网络层 - 题目25"></div>
+									<div class="status-item unanswered" data-question="26" data-tooltip="神经网络层 - 题目26"></div>
+									<div class="status-item unanswered" data-question="27" data-tooltip="神经网络层 - 题目27"></div>
+									<div class="status-item unanswered" data-question="28" data-tooltip="神经网络层 - 题目28"></div>
+									<div class="status-item unanswered" data-question="29" data-tooltip="神经网络层 - 题目29"></div>
+									<div class="status-item unanswered" data-question="30" data-tooltip="神经网络层 - 题目30"></div>
+								</div>
+							</div>
+							
+							<!-- 激活函数：31-50题 -->
+							<div class="status-subcategory">
+								<h5>激活函数</h5>
+								<div class="status-grid">
+									<!-- 31-50题的小方块 -->
+									<div class="status-item unanswered" data-question="31" data-tooltip="激活函数 - 题目31"></div>
+									<div class="status-item unanswered" data-question="32" data-tooltip="激活函数 - 题目32"></div>
+									<div class="status-item unanswered" data-question="33" data-tooltip="激活函数 - 题目33"></div>
+									<div class="status-item unanswered" data-question="34" data-tooltip="激活函数 - 题目34"></div>
+									<div class="status-item unanswered" data-question="35" data-tooltip="激活函数 - 题目35"></div>
+									<div class="status-item unanswered" data-question="36" data-tooltip="激活函数 - 题目36"></div>
+									<div class="status-item unanswered" data-question="37" data-tooltip="激活函数 - 题目37"></div>
+									<div class="status-item unanswered" data-question="38" data-tooltip="激活函数 - 题目38"></div>
+									<div class="status-item unanswered" data-question="39" data-tooltip="激活函数 - 题目39"></div>
+									<div class="status-item unanswered" data-question="40" data-tooltip="激活函数 - 题目40"></div>
+									<div class="status-item unanswered" data-question="41" data-tooltip="激活函数 - 题目41"></div>
+									<div class="status-item unanswered" data-question="42" data-tooltip="激活函数 - 题目42"></div>
+									<div class="status-item unanswered" data-question="43" data-tooltip="激活函数 - 题目43"></div>
+									<div class="status-item unanswered" data-question="44" data-tooltip="激活函数 - 题目44"></div>
+									<div class="status-item unanswered" data-question="45" data-tooltip="激活函数 - 题目45"></div>
+									<div class="status-item unanswered" data-question="46" data-tooltip="激活函数 - 题目46"></div>
+									<div class="status-item unanswered" data-question="47" data-tooltip="激活函数 - 题目47"></div>
+									<div class="status-item unanswered" data-question="48" data-tooltip="激活函数 - 题目48"></div>
+									<div class="status-item unanswered" data-question="49" data-tooltip="激活函数 - 题目49"></div>
+									<div class="status-item unanswered" data-question="50" data-tooltip="激活函数 - 题目50"></div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-</div>
+					<!-- 核心架构模块进度 -->
+					<div class="status-category">
+						<h4>核心架构模块 (50题)</h4>
+						<div class="status-grid">
+							<!-- 感知机：51-60题 -->
+							<div class="status-subcategory">
+								<h5>感知机</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="51" data-tooltip="感知机 - 题目51"></div>
+									<div class="status-item unanswered" data-question="52" data-tooltip="感知机 - 题目52"></div>
+									<div class="status-item unanswered" data-question="53" data-tooltip="感知机 - 题目53"></div>
+									<div class="status-item unanswered" data-question="54" data-tooltip="感知机 - 题目54"></div>
+									<div class="status-item unanswered" data-question="55" data-tooltip="感知机 - 题目55"></div>
+									<div class="status-item unanswered" data-question="56" data-tooltip="感知机 - 题目56"></div>
+									<div class="status-item unanswered" data-question="57" data-tooltip="感知机 - 题目57"></div>
+									<div class="status-item unanswered" data-question="58" data-tooltip="感知机 - 题目58"></div>
+									<div class="status-item unanswered" data-question="59" data-tooltip="感知机 - 题目59"></div>
+									<div class="status-item unanswered" data-question="60" data-tooltip="感知机 - 题目60"></div>
+								</div>
+							</div>
+							
+							<!-- CNN：61-80题 -->
+							<div class="status-subcategory">
+								<h5>CNN</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="61" data-tooltip="CNN - 题目61"></div>
+									<div class="status-item unanswered" data-question="62" data-tooltip="CNN - 题目62"></div>
+									<div class="status-item unanswered" data-question="63" data-tooltip="CNN - 题目63"></div>
+									<div class="status-item unanswered" data-question="64" data-tooltip="CNN - 题目64"></div>
+									<div class="status-item unanswered" data-question="65" data-tooltip="CNN - 题目65"></div>
+									<div class="status-item unanswered" data-question="66" data-tooltip="CNN - 题目66"></div>
+									<div class="status-item unanswered" data-question="67" data-tooltip="CNN - 题目67"></div>
+									<div class="status-item unanswered" data-question="68" data-tooltip="CNN - 题目68"></div>
+									<div class="status-item unanswered" data-question="69" data-tooltip="CNN - 题目69"></div>
+									<div class="status-item unanswered" data-question="70" data-tooltip="CNN - 题目70"></div>
+									<div class="status-item unanswered" data-question="71" data-tooltip="CNN - 题目71"></div>
+									<div class="status-item unanswered" data-question="72" data-tooltip="CNN - 题目72"></div>
+									<div class="status-item unanswered" data-question="73" data-tooltip="CNN - 题目73"></div>
+									<div class="status-item unanswered" data-question="74" data-tooltip="CNN - 题目74"></div>
+									<div class="status-item unanswered" data-question="75" data-tooltip="CNN - 题目75"></div>
+									<div class="status-item unanswered" data-question="76" data-tooltip="CNN - 题目76"></div>
+									<div class="status-item unanswered" data-question="77" data-tooltip="CNN - 题目77"></div>
+									<div class="status-item unanswered" data-question="78" data-tooltip="CNN - 题目78"></div>
+									<div class="status-item unanswered" data-question="79" data-tooltip="CNN - 题目79"></div>
+									<div class="status-item unanswered" data-question="80" data-tooltip="CNN - 题目80"></div>
+								</div>
+							</div>
+							
+							<!-- RNN：81-100题 -->
+							<div class="status-subcategory">
+								<h5>RNN</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="81" data-tooltip="RNN - 题目81"></div>
+									<div class="status-item unanswered" data-question="82" data-tooltip="RNN - 题目82"></div>
+									<div class="status-item unanswered" data-question="83" data-tooltip="RNN - 题目83"></div>
+									<div class="status-item unanswered" data-question="84" data-tooltip="RNN - 题目84"></div>
+									<div class="status-item unanswered" data-question="85" data-tooltip="RNN - 题目85"></div>
+									<div class="status-item unanswered" data-question="86" data-tooltip="RNN - 题目86"></div>
+									<div class="status-item unanswered" data-question="87" data-tooltip="RNN - 题目87"></div>
+									<div class="status-item unanswered" data-question="88" data-tooltip="RNN - 题目88"></div>
+									<div class="status-item unanswered" data-question="89" data-tooltip="RNN - 题目89"></div>
+									<div class="status-item unanswered" data-question="90" data-tooltip="RNN - 题目90"></div>
+									<div class="status-item unanswered" data-question="91" data-tooltip="RNN - 题目91"></div>
+									<div class="status-item unanswered" data-question="92" data-tooltip="RNN - 题目92"></div>
+									<div class="status-item unanswered" data-question="93" data-tooltip="RNN - 题目93"></div>
+									<div class="status-item unanswered" data-question="94" data-tooltip="RNN - 题目94"></div>
+									<div class="status-item unanswered" data-question="95" data-tooltip="RNN - 题目95"></div>
+									<div class="status-item unanswered" data-question="96" data-tooltip="RNN - 题目96"></div>
+									<div class="status-item unanswered" data-question="97" data-tooltip="RNN - 题目97"></div>
+									<div class="status-item unanswered" data-question="98" data-tooltip="RNN - 题目98"></div>
+									<div class="status-item unanswered" data-question="99" data-tooltip="RNN - 题目99"></div>
+									<div class="status-item unanswered" data-question="100" data-tooltip="RNN - 题目100"></div>
+								</div>
+							</div>
+							
+							<!-- Transformer：101-110题 -->
+							<div class="status-subcategory">
+								<h5>Transformer</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="101" data-tooltip="Transformer - 题目101"></div>
+									<div class="status-item unanswered" data-question="102" data-tooltip="Transformer - 题目102"></div>
+									<div class="status-item unanswered" data-question="103" data-tooltip="Transformer - 题目103"></div>
+									<div class="status-item unanswered" data-question="104" data-tooltip="Transformer - 题目104"></div>
+									<div class="status-item unanswered" data-question="105" data-tooltip="Transformer - 题目105"></div>
+									<div class="status-item unanswered" data-question="106" data-tooltip="Transformer - 题目106"></div>
+									<div class="status-item unanswered" data-question="107" data-tooltip="Transformer - 题目107"></div>
+									<div class="status-item unanswered" data-question="108" data-tooltip="Transformer - 题目108"></div>
+									<div class="status-item unanswered" data-question="109" data-tooltip="Transformer - 题目109"></div>
+									<div class="status-item unanswered" data-question="110" data-tooltip="Transformer - 题目110"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- 综合应用模块进度 -->
+					<div class="status-category">
+						<h4>综合应用模块 (55题)</h4>
+						<div class="status-grid">
+							<!-- 架构选择与对比：111-130题 -->
+							<div class="status-subcategory">
+								<h5>架构选择与对比</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="111" data-tooltip="架构选择与对比 - 题目111"></div>
+									<div class="status-item unanswered" data-question="112" data-tooltip="架构选择与对比 - 题目112"></div>
+									<div class="status-item unanswered" data-question="113" data-tooltip="架构选择与对比 - 题目113"></div>
+									<div class="status-item unanswered" data-question="114" data-tooltip="架构选择与对比 - 题目114"></div>
+									<div class="status-item unanswered" data-question="115" data-tooltip="架构选择与对比 - 题目115"></div>
+									<div class="status-item unanswered" data-question="116" data-tooltip="架构选择与对比 - 题目116"></div>
+									<div class="status-item unanswered" data-question="117" data-tooltip="架构选择与对比 - 题目117"></div>
+									<div class="status-item unanswered" data-question="118" data-tooltip="架构选择与对比 - 题目118"></div>
+									<div class="status-item unanswered" data-question="119" data-tooltip="架构选择与对比 - 题目119"></div>
+									<div class="status-item unanswered" data-question="120" data-tooltip="架构选择与对比 - 题目120"></div>
+									<div class="status-item unanswered" data-question="121" data-tooltip="架构选择与对比 - 题目121"></div>
+									<div class="status-item unanswered" data-question="122" data-tooltip="架构选择与对比 - 题目122"></div>
+									<div class="status-item unanswered" data-question="123" data-tooltip="架构选择与对比 - 题目123"></div>
+									<div class="status-item unanswered" data-question="124" data-tooltip="架构选择与对比 - 题目124"></div>
+									<div class="status-item unanswered" data-question="125" data-tooltip="架构选择与对比 - 题目125"></div>
+									<div class="status-item unanswered" data-question="126" data-tooltip="架构选择与对比 - 题目126"></div>
+									<div class="status-item unanswered" data-question="127" data-tooltip="架构选择与对比 - 题目127"></div>
+									<div class="status-item unanswered" data-question="128" data-tooltip="架构选择与对比 - 题目128"></div>
+									<div class="status-item unanswered" data-question="129" data-tooltip="架构选择与对比 - 题目129"></div>
+									<div class="status-item unanswered" data-question="130" data-tooltip="架构选择与对比 - 题目130"></div>
+								</div>
+							</div>
+							
+							<!-- 问题诊断与调优：131-150题 -->
+							<div class="status-subcategory">
+								<h5>问题诊断与调优</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="131" data-tooltip="问题诊断与调优 - 题目131"></div>
+									<div class="status-item unanswered" data-question="132" data-tooltip="问题诊断与调优 - 题目132"></div>
+									<div class="status-item unanswered" data-question="133" data-tooltip="问题诊断与调优 - 题目133"></div>
+									<div class="status-item unanswered" data-question="134" data-tooltip="问题诊断与调优 - 题目134"></div>
+									<div class="status-item unanswered" data-question="135" data-tooltip="问题诊断与调优 - 题目135"></div>
+									<div class="status-item unanswered" data-question="136" data-tooltip="问题诊断与调优 - 题目136"></div>
+									<div class="status-item unanswered" data-question="137" data-tooltip="问题诊断与调优 - 题目137"></div>
+									<div class="status-item unanswered" data-question="138" data-tooltip="问题诊断与调优 - 题目138"></div>
+									<div class="status-item unanswered" data-question="139" data-tooltip="问题诊断与调优 - 题目139"></div>
+									<div class="status-item unanswered" data-question="140" data-tooltip="问题诊断与调优 - 题目140"></div>
+									<div class="status-item unanswered" data-question="141" data-tooltip="问题诊断与调优 - 题目141"></div>
+									<div class="status-item unanswered" data-question="142" data-tooltip="问题诊断与调优 - 题目142"></div>
+									<div class="status-item unanswered" data-question="143" data-tooltip="问题诊断与调优 - 题目143"></div>
+									<div class="status-item unanswered" data-question="144" data-tooltip="问题诊断与调优 - 题目144"></div>
+									<div class="status-item unanswered" data-question="145" data-tooltip="问题诊断与调优 - 题目145"></div>
+									<div class="status-item unanswered" data-question="146" data-tooltip="问题诊断与调优 - 题目146"></div>
+									<div class="status-item unanswered" data-question="147" data-tooltip="问题诊断与调优 - 题目147"></div>
+									<div class="status-item unanswered" data-question="148" data-tooltip="问题诊断与调优 - 题目148"></div>
+									<div class="status-item unanswered" data-question="149" data-tooltip="问题诊断与调优 - 题目149"></div>
+									<div class="status-item unanswered" data-question="150" data-tooltip="问题诊断与调优 - 题目150"></div>
+								</div>
+							</div>
+							
+							<!-- 前沿与交叉领域：151-165题 -->
+							<div class="status-subcategory">
+								<h5>前沿与交叉领域</h5>
+								<div class="status-grid">
+									<div class="status-item unanswered" data-question="151" data-tooltip="前沿与交叉领域 - 题目151"></div>
+									<div class="status-item unanswered" data-question="152" data-tooltip="前沿与交叉领域 - 题目152"></div>
+									<div class="status-item unanswered" data-question="153" data-tooltip="前沿与交叉领域 - 题目153"></div>
+									<div class="status-item unanswered" data-question="154" data-tooltip="前沿与交叉领域 - 题目154"></div>
+									<div class="status-item unanswered" data-question="155" data-tooltip="前沿与交叉领域 - 题目155"></div>
+									<div class="status-item unanswered" data-question="156" data-tooltip="前沿与交叉领域 - 题目156"></div>
+									<div class="status-item unanswered" data-question="157" data-tooltip="前沿与交叉领域 - 题目157"></div>
+									<div class="status-item unanswered" data-question="158" data-tooltip="前沿与交叉领域 - 题目158"></div>
+									<div class="status-item unanswered" data-question="159" data-tooltip="前沿与交叉领域 - 题目159"></div>
+									<div class="status-item unanswered" data-question="160" data-tooltip="前沿与交叉领域 - 题目160"></div>
+									<div class="status-item unanswered" data-question="161" data-tooltip="前沿与交叉领域 - 题目161"></div>
+									<div class="status-item unanswered" data-question="162" data-tooltip="前沿与交叉领域 - 题目162"></div>
+									<div class="status-item unanswered" data-question="163" data-tooltip="前沿与交叉领域 - 题目163"></div>
+									<div class="status-item unanswered" data-question="164" data-tooltip="前沿与交叉领域 - 题目164"></div>
+									<div class="status-item unanswered" data-question="165" data-tooltip="前沿与交叉领域 - 题目165"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+    </div>
+    <!-- 修复开始练习按钮点击无响应和页面滚动问题 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 保持body和html的overflow为hidden，只让中间的#middle区域滚动
+            
+            // 修复开始练习按钮点击无响应问题
+            const startButtons = document.querySelectorAll(".start-exercise-btn");
+            console.log("找到的开始练习按钮数量:", startButtons.length);
+            startButtons.forEach((button, index) => {
+                console.log(`为按钮 ${index} 添加事件监听器`);
+                // 移除可能存在的旧事件监听器
+                button.onclick = null;
+                button.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    console.log("按钮被点击了");
+                    const card = this.closest(".exercise-card");
+                    console.log("找到的练习卡片:", card);
+                    if (card) {
+                        const content = card.querySelector(".card-content");
+                        const questions = card.querySelector(".card-questions");
+                        console.log("找到的card-content:", content);
+                        console.log("找到的card-questions:", questions);
+                        if (content && questions) {
+                            content.style.display = "none";
+                            questions.style.display = "block";
+                            questions.scrollIntoView({ behavior: "smooth", block: "center" });
+                            console.log("已切换到题目视图");
+                        } else {
+                            console.log("未找到card-content或card-questions元素");
+                        }
+                    } else {
+                        console.log("未找到练习卡片");
+                    }
+                });
+            });
+            
+            // 为收起练习按钮添加事件监听器
+            const closeButtons = document.querySelectorAll(".close-exercise-btn");
+            console.log("找到的收起练习按钮数量:", closeButtons.length);
+            closeButtons.forEach((button, index) => {
+                console.log(`为收起按钮 ${index} 添加事件监听器`);
+                // 移除可能存在的旧事件监听器
+                button.onclick = null;
+                button.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    console.log("收起按钮被点击了");
+                    const card = this.closest(".exercise-card");
+                    console.log("找到的练习卡片:", card);
+                    if (card) {
+                        const content = card.querySelector(".card-content");
+                        const questions = card.querySelector(".card-questions");
+                        console.log("找到的card-content:", content);
+                        console.log("找到的card-questions:", questions);
+                        if (content && questions) {
+                            questions.style.display = "none";
+                            content.style.display = "block";
+                            content.scrollIntoView({ behavior: "smooth", block: "center" });
+                            console.log("已收起练习");
+                        } else {
+                            console.log("未找到card-content或card-questions元素");
+                        }
+                    } else {
+                        console.log("未找到练习卡片");
+                    }
+                });
+            });
+            
+            // 直接为提交答案按钮添加事件监听器，确保点击有反应
+            const submitButtons = document.querySelectorAll(".submit-quiz-btn");
+            console.log("找到的提交答案按钮数量:", submitButtons.length);
+            submitButtons.forEach((button, index) => {
+                console.log(`为提交按钮 ${index} 添加事件监听器`);
+                // 移除可能存在的旧事件监听器
+                button.onclick = null;
+                button.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    console.log("提交按钮被点击了");
+                    const category = this.getAttribute("data-category");
+                    console.log("按钮的data-category属性值:", category);
+                    if (category) {
+                        // 这里直接实现提交答案的逻辑，不依赖外部函数
+                        console.log(`准备处理${category}的答案提交`);
+                        
+                        // 首先找到对应的练习卡片
+                        const card = this.closest(".exercise-card");
+                        console.log("找到的练习卡片:", card);
+                        if (!card) {
+                            console.error("未找到练习卡片");
+                            return;
+                        }
+                        
+                        const questionsContainer = card.querySelector(".card-questions");
+                        if (!questionsContainer) {
+                            console.error("未找到题目容器");
+                            return;
+                        }
+                        
+                        const questions = questionsContainer.querySelectorAll(".question");
+                        if (!questions.length) {
+                            console.error("未找到题目");
+                            return;
+                        }
+                        
+                        // 定义正确答案，与exercises.ts中的定义一致
+                        const quizAnswers = {
+                            overview_quiz: {
+                                1: "B",
+                                2: "C",
+                                3: "A"
+                            },
+                            overfitting_quiz: {
+                                1: "C",
+                                2: "B",
+                                3: "A"
+                            },
+                            mlp_quiz: {
+                                1: "A",
+                                2: "B",
+                                3: "D"
+                            },
+                            cnn_quiz: {
+                                1: "B",
+                                2: "A",
+                                3: "C"
+                            },
+                            modern_cnn_quiz: {
+                                1: "C",
+                                2: "B",
+                                3: "D"
+                            },
+                            rnn_quiz: {
+                                1: "A",
+                                2: "D",
+                                3: "B"
+                            },
+                            modern_rnn_quiz: {
+                                1: "B",
+                                2: "C",
+                                3: "A"
+                            },
+                            transformer_quiz: {
+                                1: "C",
+                                2: "A",
+                                3: "D"
+                            },
+                            activations_quiz: {
+                                1: "B",
+                                2: "A",
+                                3: "C"
+                            }
+                        };
+                        
+                        const answers = quizAnswers[category] || {};
+                        let score = 0;
+                        
+                        // 提取category的前缀部分（例如从overview_quiz提取overview）
+                        const categoryPrefix = category.split('_')[0];
+                        
+                        questions.forEach((qEl, index) => {
+                            const questionIndex = index + 1;
+                            const selected = qEl.querySelector(`input[name="${categoryPrefix}_q${questionIndex}"]:checked`);
+                            
+                            const existingFeedback = qEl.querySelector(".answer-feedback");
+                            if (existingFeedback) existingFeedback.remove();
+                            
+                            const feedback = document.createElement("div");
+                            feedback.classList.add("answer-feedback");
+                            
+                            const correct = answers[questionIndex];
+                            if (selected) {
+                                if (selected.value === correct) {
+                                    score++;
+                                    feedback.classList.add("correct");
+                                    feedback.textContent = `✓ 回答正确！正确答案：${correct}`;
+                                } else {
+                                    feedback.classList.add("incorrect");
+                                    feedback.textContent = `✗ 回答错误。正确答案：${correct}`;
+                                }
+                            } else {
+                                feedback.classList.add("incorrect");
+                                feedback.textContent = `⚠ 请先选择一个选项。正确答案：${correct}`;
+                            }
+                            
+                            qEl.appendChild(feedback);
+                        });
+                        
+                        // 更新卡片分数显示
+                        const scoreElement = card.querySelector(".score-display");
+                        if (scoreElement) {
+                            scoreElement.textContent = `本次得分：${score} / ${questions.length}`;
+                            scoreElement.style.display = "block";
+                        }
+                        
+                        console.log("答案提交完成，得分：", score);
+                    } else {
+                        console.log("未找到data-category属性");
+                    }
+                });
+            });
+            
+            // 实现练习页面导航联动功能
+            document.addEventListener('DOMContentLoaded', () => {
+                // 获取所有左侧导航栏的子分类项
+                const navItems = document.querySelectorAll('.exercise-left-nav .option[data-subcategory]');
+                
+                // 为每个子分类项添加点击事件监听器
+                navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const category = item.dataset.category;
+                        const subcategory = item.dataset.subcategory;
+                        
+                        // 构造对应的题目区域ID
+                        let targetId = '';
+                        if (category === 'basic') {
+                            targetId = `exerciseBasic${subcategory}`;
+                        } else if (category === 'core') {
+                            targetId = `exerciseCore${subcategory}`;
+                        } else if (category === 'comprehensive') {
+                            targetId = `exerciseComprehensive${subcategory}`;
+                        }
+                        
+                        // 找到目标元素并滚动到可视区域
+                        const targetElement = document.getElementById(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                            
+                            // 高亮显示对应的题目卡片
+                            const allCards = document.querySelectorAll('.exercise-center-content .exercise-card');
+                            allCards.forEach(card => card.classList.remove('active'));
+                            
+                            const targetCard = targetElement.closest('.exercise-card');
+                            if (targetCard) {
+                                targetCard.classList.add('active');
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
 
