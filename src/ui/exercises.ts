@@ -160,7 +160,28 @@ export function initializeExerciseSystem(): void {
                 if (content && questions) {
                     content.style.display = "none";
                     questions.style.display = "block";
-                    questions.scrollIntoView({ behavior: "smooth", block: "center" });
+                    // 延迟滚动，确保DOM已更新
+                    setTimeout(() => {
+                        const centerContent = document.querySelector(".exercise-center-content") as HTMLElement;
+                        if (centerContent) {
+                            // 在中间内容区域内滚动到第一个题目
+                            const firstQuestion = questions.querySelector(".question-item, .quiz-question, .exercise-card") as HTMLElement;
+                            if (firstQuestion) {
+                                const rect = firstQuestion.getBoundingClientRect();
+                                const centerRect = centerContent.getBoundingClientRect();
+                                const scrollTop = centerContent.scrollTop + rect.top - centerRect.top - 20;
+                                centerContent.scrollTo({
+                                    top: Math.max(0, scrollTop),
+                                    behavior: "smooth"
+                                });
+                            } else {
+                                questions.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }
+                        } else {
+                            questions.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                    }, 100);
+
                     console.log("已切换到题目视图");
                 } else {
                     console.log("未找到card-content或card-questions元素");

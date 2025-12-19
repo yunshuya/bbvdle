@@ -72,13 +72,26 @@
                     middle.style.float = 'left';
                     paramshell.style.float = 'right';
                 } else if (tab === 'exercise') {
-                    // Hide paramshell on exercise tab
+                    // Hide paramshell on exercise tab and remove its space
                     paramshell.style.display = 'none';
-                    // Set middle width to full width
+                    paramshell.style.width = '0';
+                    paramshell.style.padding = '0';
+                    paramshell.style.margin = '0';
+                    paramshell.style.float = 'none';
+                    // Show exerciseMenu first and position it on the right
+                    const exerciseMenu = document.getElementById('exerciseMenu');
+                    if (exerciseMenu) {
+                        exerciseMenu.style.display = 'block';
+                        exerciseMenu.style.float = 'right';
+                        exerciseMenu.style.width = '450px';
+                        exerciseMenu.style.height = '100%';
+                        exerciseMenu.style.position = 'relative';
+                        exerciseMenu.style.zIndex = '10';
+                    }
+                    // Set middle width: left menu 250px, exerciseMenu floats on the right
                     middle.style.width = 'calc(100% - 250px)';
                     middle.style.float = 'left';
-                    // Show exerciseMenu only on exercise tab
-                    document.getElementById('exerciseMenu').style.display = null;
+                    middle.style.marginRight = '0';
                 } else if (tab === 'education') {
                     // Hide paramshell on education tab
                     paramshell.style.display = 'none';
@@ -3775,9 +3788,11 @@
 
 		<div id = 'educationParamshell' style="display: none">
 		</div>
+	</div>
+	<!-- End of paramshell -->
 
-		<!-- Exercise menu -->
-		<div id = 'exerciseMenu' style="display: none">
+	<!-- Exercise menu - moved outside paramshell to avoid being hidden when paramshell is hidden -->
+	<div id = 'exerciseMenu' style="display: none">
 			<div class="exercise-right-status">
 				<div class="status-header">
 					<h3>答题进度</h3>
@@ -4032,10 +4047,8 @@
 					</div>
 				</div>
 			</div>
-
-
 		</div>
-    </div>
+	<!-- End of exerciseMenu -->
     <!-- 修复开始练习按钮点击无响应和页面滚动问题 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -4238,41 +4251,84 @@
             
             // 实现练习页面导航联动功能
             document.addEventListener('DOMContentLoaded', () => {
+                // 建立导航项和练习卡片的映射关系
+                const exerciseMapping = {
+                    'neural-layers': 'neural_layers_quiz',
+                    'activations': 'activations_quiz',
+                    'perceptron': 'perceptron_quiz',
+                    'cnn': 'cnn_quiz',
+                    'rnn': 'rnn_quiz',
+                    'transformer': 'transformer_quiz',
+                    'arch-selection': 'arch_selection_quiz',
+                    'problem-diagnosis': 'problem_diagnosis_quiz',
+                    'advanced': 'advanced_quiz'
+                };
+                
                 // 获取所有左侧导航栏的子分类项
-                const navItems = document.querySelectorAll('.exercise-left-nav .option[data-subcategory]');
+                const navItems = document.querySelectorAll('.exercise-left-nav .nav-subcategory[data-subcategory]');
                 
                 // 为每个子分类项添加点击事件监听器
                 navItems.forEach(item => {
                     item.addEventListener('click', () => {
-                        const category = item.dataset.category;
-                        const subcategory = item.dataset.subcategory;
+                        const subcategory = item.getAttribute('data-subcategory');
+                        const exerciseId = exerciseMapping[subcategory];
                         
-                        // 构造对应的题目区域ID
-                        let targetId = '';
-                        if (category === 'basic') {
-                            targetId = `exerciseBasic${subcategory}`;
-                        } else if (category === 'core') {
-                            targetId = `exerciseCore${subcategory}`;
-                        } else if (category === 'comprehensive') {
-                            targetId = `exerciseComprehensive${subcategory}`;
-                        }
-                        
-                        // 找到目标元素并滚动到可视区域
-                        const targetElement = document.getElementById(targetId);
-                        if (targetElement) {
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
+                        if (exerciseId) {
+                            // 移除所有导航项的active状态
+                            navItems.forEach(nav => nav.classList.remove('active'));
+                            // 添加当前导航项的active状态
+                            item.classList.add('active');
                             
-                            // 高亮显示对应的题目卡片
-                            const allCards = document.querySelectorAll('.exercise-center-content .exercise-card');
-                            allCards.forEach(card => card.classList.remove('active'));
+                            // 找到对应的练习卡片
+                            const targetCard = document.querySelector(`.exercise-card[data-exercise="${exerciseId}"]`);
                             
-                            const targetCard = targetElement.closest('.exercise-card');
                             if (targetCard) {
-                                targetCard.classList.add('active');
+                                // 获取中间内容区域容器
+                                const centerContent = document.querySelector('.exercise-center-content');
+                                
+                                if (centerContent) {
+                                    // 计算卡片相对于容器的位置
+                                    const cardRect = targetCard.getBoundingClientRect();
+                                    const containerRect = centerContent.getBoundingClientRect();
+                                    
+                                    // 滚动到卡片位置（留出一些顶部间距）
+                                    const scrollTop = centerContent.scrollTop + cardRect.top - containerRect.top - 20;
+                                    
+                                    centerContent.scrollTo({
+                                        top: Math.max(0, scrollTop),
+                                        behavior: 'smooth'
+                                    });
+                                    
+                                    // 高亮显示对应的题目卡片
+                                    const allCards = document.querySelectorAll('.exercise-center-content .exercise-card');
+                                    allCards.forEach(card => card.classList.remove('active'));
+                                    targetCard.classList.add('active');
+                                    
+                                    // 添加一个短暂的视觉反馈（2秒后移除卡片高亮，但保留导航项高亮）
+                                    setTimeout(() => {
+                                        targetCard.classList.remove('active');
+                                    }, 2000);
+                                } else {
+                                    // 如果没有找到容器，使用默认的滚动方法
+                                    targetCard.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'start'
+                                    });
+                                    
+                                    // 高亮显示对应的题目卡片
+                                    const allCards = document.querySelectorAll('.exercise-center-content .exercise-card');
+                                    allCards.forEach(card => card.classList.remove('active'));
+                                    targetCard.classList.add('active');
+                                    
+                                    setTimeout(() => {
+                                        targetCard.classList.remove('active');
+                                    }, 2000);
+                                }
+                            } else {
+                                console.log(`未找到对应的练习卡片: ${exerciseId}`);
                             }
+                        } else {
+                            console.log(`未找到对应的映射关系: ${subcategory}`);
                         }
                     });
                 });

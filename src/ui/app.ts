@@ -951,10 +951,24 @@ function switchTab(tabType: string): void {
     
     // Display the appropriate menu
     if (tabType === "exercise") {
-        document.getElementById("exerciseMenu").style.display = null;
+        const exerciseMenu = document.getElementById("exerciseMenu");
+        if (exerciseMenu) {
+            exerciseMenu.style.display = "block";
+            exerciseMenu.style.float = "right";
+            exerciseMenu.style.width = "450px";
+            exerciseMenu.style.height = "100%";
+            exerciseMenu.style.position = "relative";
+            exerciseMenu.style.zIndex = "10";
+        }
         document.getElementById("menu").style.display = "none"; // 隐藏原来的导航栏
     } else {
-        document.getElementById("exerciseMenu").style.display = "none";
+        const exerciseMenu = document.getElementById("exerciseMenu");
+        if (exerciseMenu) {
+            exerciseMenu.style.display = "none";
+            exerciseMenu.style.float = "none";
+            exerciseMenu.style.width = "0";
+            exerciseMenu.style.height = "0";
+        }
         document.getElementById(tabType + "Menu").style.display = null;
         document.getElementById("menu").style.display = null; // 显示原来的导航栏
     }
@@ -1059,10 +1073,26 @@ function switchTab(tabType: string): void {
             const exerciseMiddle = document.getElementById("middle");
             if (exerciseParamshell) {
                 exerciseParamshell.style.display = "none";
+                exerciseParamshell.style.width = "0";
+                exerciseParamshell.style.padding = "0";
+                exerciseParamshell.style.margin = "0";
+            }
+            // 确保exerciseMenu显示并定位在右侧（在设置middle宽度之前）
+            const exerciseMenuEl = document.getElementById("exerciseMenu");
+            if (exerciseMenuEl) {
+                exerciseMenuEl.style.display = "block";
+                exerciseMenuEl.style.float = "right";
+                exerciseMenuEl.style.width = "450px";
+                exerciseMenuEl.style.height = "100%";
+                exerciseMenuEl.style.position = "relative";
+                exerciseMenuEl.style.zIndex = "10";
             }
             if (exerciseMiddle) {
+                // 练习页面：左侧菜单250px，右侧exerciseMenu浮动占据450px
+                // middle宽度 = 100% - 250px (left menu)，exerciseMenu浮动在右侧
                 exerciseMiddle.style.width = "calc(100% - 250px)";
                 exerciseMiddle.style.float = "left";
+                exerciseMiddle.style.marginRight = "0";
             }
             // 确保笔记栏隐藏
             const exerciseNoteSidebar = document.getElementById("educationNoteSidebar");
@@ -1086,6 +1116,9 @@ function switchTab(tabType: string): void {
         if (mainParamshell) {
             mainParamshell.style.display = "block";
             mainParamshell.style.float = "right";
+            mainParamshell.style.width = "180px";
+            mainParamshell.style.paddingLeft = "10px";
+            mainParamshell.style.paddingRight = "10px";
         }
         if (middle) {
             middle.style.width = "calc(100% - 430px)";
@@ -1095,10 +1128,37 @@ function switchTab(tabType: string): void {
         // 教学标签页隐藏paramshell
         if (mainParamshell) {
             mainParamshell.style.display = "none";
+            mainParamshell.style.width = "0";
         }
         if (middle) {
             middle.style.width = "calc(100% - 250px)";
             middle.style.float = "left";
+        }
+    } else if (tabType === "exercise") {
+        // 练习标签页：确保paramshell完全隐藏且不占用空间
+        if (mainParamshell) {
+            mainParamshell.style.display = "none";
+            mainParamshell.style.width = "0";
+            mainParamshell.style.padding = "0";
+            mainParamshell.style.margin = "0";
+            mainParamshell.style.float = "none";
+        }
+        // 确保exerciseMenu显示并定位在右侧（在设置middle宽度之前）
+        const exerciseMenuEl = document.getElementById("exerciseMenu");
+        if (exerciseMenuEl) {
+            exerciseMenuEl.style.display = "block";
+            exerciseMenuEl.style.float = "right";
+            exerciseMenuEl.style.width = "450px";
+            exerciseMenuEl.style.height = "100%";
+            exerciseMenuEl.style.position = "relative";
+            exerciseMenuEl.style.zIndex = "10";
+        }
+        if (middle) {
+            // 练习页面：左侧菜单250px，右侧exerciseMenu浮动占据450px
+            // middle宽度 = 100% - 250px (left menu)，exerciseMenu浮动在右侧
+            middle.style.width = "calc(100% - 250px)";
+            middle.style.float = "left";
+            middle.style.marginRight = "0";
         }
     }
 
@@ -2284,3 +2344,4 @@ function setupAuthSystem(): void {
     
  
         
+
