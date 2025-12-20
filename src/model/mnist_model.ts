@@ -12,7 +12,6 @@ import {plotAccuracy,
 
 import {dataset, AirPassengersData} from "./data";
 import { model } from "./params_object";
-import { displayError } from "../ui/error";
 
 interface IBatchMetric {
     batch: number;
@@ -115,19 +114,6 @@ export async function train(): Promise<void> {
     setupPlots();
     setupTestResults();
     await dataset.load();
-    
-    // ==================== 0. 检查模型架构是否存在 ====================
-    // 如果模型架构不存在，抛出错误提示用户先构建模型
-    if (!model.architecture) {
-        const errorMsg = "模型架构尚未构建！请确保网络结构已正确连接（从Input到Output）。";
-        console.error(errorMsg);
-        displayError(new Error(errorMsg));
-        return;
-    }
-    
-    // 检查模型是否已编译（通过检查是否有loss函数）
-    // 如果模型未编译，会在下面的compile步骤中处理
-    
     trainingHistory = {
         startedAt: new Date().toISOString(),
         dataset: dataset.pythonName ?? dataset.constructor.name ?? "unknown",
@@ -203,44 +189,15 @@ export async function train(): Promise<void> {
         console.log("Model output shape:", model.architecture.outputs[0].shape);
         console.log("Model summary:");
         model.architecture.summary();
-        
-        // 检查模型输入输出形状是否合理
-        const inputShape = model.architecture.inputs[0].shape;
-        const outputShape = model.architecture.outputs[0].shape;
-        
-        if (!inputShape || inputShape.length === 0) {
-            const errorMsg = "模型输入形状无效！请检查网络结构。";
-            console.error(errorMsg);
-            displayError(new Error(errorMsg));
-            return;
-        }
-        
-        if (!outputShape || outputShape.length === 0) {
-            const errorMsg = "模型输出形状无效！请检查网络结构。";
-            console.error(errorMsg);
-            displayError(new Error(errorMsg));
-            return;
-        }
-        
-        console.log("模型形状检查通过：输入", inputShape, "输出", outputShape);
     }
 
     // ==================== 5. 模型编译 ====================
     // 编译模型：设置损失函数、指标和优化器
-    // 注意：如果模型已经编译过，重新编译不会重置权重，只会更新优化器和损失函数
-    try {
-        model.architecture.compile({
-            loss,        // 损失函数：'meanSquaredError' 或 'meanAbsoluteError'（时序）/'categoricalCrossentropy'（分类）
-            metrics,     // 评估指标：['mae']（时序）或 ['accuracy']（分类）
-            optimizer,   // 优化器：从model.params.getOptimizer()获取（如Adam、SGD等）
-        });
-        console.log("模型编译成功：loss=", loss, "optimizer=", model.params.optimizer, "learningRate=", model.params.learningRate);
-    } catch (compileError) {
-        const errorMsg = `模型编译失败: ${compileError.message}`;
-        console.error(errorMsg, compileError);
-        displayError(new Error(errorMsg));
-        return;
-    }
+    model.architecture.compile({
+        loss,        // 损失函数：'meanSquaredError' 或 'meanAbsoluteError'（时序）/'categoricalCrossentropy'（分类）
+        metrics,     // 评估指标：['mae']（时序）或 ['accuracy']（分类）
+        optimizer,   // 优化器：从model.params.getOptimizer()获取（如Adam、SGD等）
+    });
     
     // ==================== 6. 训练参数设置 ====================
     const batchSize = model.params.batchSize;  // 批次大小：时序预测建议使用小批次（如8）更稳定
@@ -320,27 +277,8 @@ export async function train(): Promise<void> {
         const testPred = model.architecture.predict(testSample) as tf.Tensor;
         const testPredValue = testPred.dataSync()[0];
         console.log("Pre-training prediction sample:", testPredValue, "shape:", testPred.shape);
-        
-        // 检查预测值是否合理（不应该都是相同的值，如104）
-        // 如果预测值异常，可能是模型未正确初始化
-        if (isNaN(testPredValue) || !isFinite(testPredValue)) {
-            console.warn("警告：训练前预测值为NaN或Inf，模型可能未正确初始化");
-        }
-        
-        // 检查多个样本的预测值是否都相同（这可能表示模型未训练）
-        const testSample2 = (trainData.xs as tf.Tensor<tf.Rank.R3>).slice([1, 0, 0], [1, trainData.xs.shape[1], trainData.xs.shape[2]]);
-        const testPred2 = model.architecture.predict(testSample2) as tf.Tensor;
-        const testPredValue2 = testPred2.dataSync()[0];
-        console.log("Pre-training prediction sample 2:", testPredValue2);
-        
-        if (Math.abs(testPredValue - testPredValue2) < 1e-6) {
-            console.warn("警告：多个样本的预测值完全相同，模型可能未正确初始化或权重未更新");
-        }
-        
         testSample.dispose();
         testPred.dispose();
-        testSample2.dispose();
-        testPred2.dispose();
     }
     
     // 检查数据是否包含NaN或Inf
@@ -440,16 +378,6 @@ export async function train(): Promise<void> {
                 //     ` complete). To stop training, refresh or close page.`);
                 // 确保loss是有效数字
                 const validLoss = (typeof logs.loss === "number" && !isNaN(logs.loss) && isFinite(logs.loss) && logs.loss > 0) ? logs.loss : null;
-                
-                // 对于时序数据，检查损失值是否合理
-                if (isTimeSeries && validLoss !== null) {
-                    // 如果损失值非常大或非常小，可能是训练有问题
-                    if (validLoss > 1000) {
-                        console.warn(`警告：损失值异常大 (${validLoss})，可能是学习率过大或数据未归一化`);
-                    } else if (validLoss < 1e-10) {
-                        console.warn(`警告：损失值异常小 (${validLoss})，可能是模型已收敛或出现问题`);
-                    }
-                }
                 
                 // 对于内置指标，直接从logs中获取
                 let maeValue: number | null = null;
@@ -802,8 +730,7 @@ export async function train(): Promise<void> {
             console.log("=".repeat(60));
             
             // 生成预测结果可视化
-            const validationData = (dataset as AirPassengersData).getValidationData();
-            renderTimeSeriesPredictions(testData, validationData, dataset as AirPassengersData);
+            renderTimeSeriesPredictions(testData, (dataset as AirPassengersData).getValidationData(), dataset as AirPassengersData);
             
             // 获取验证集的最后一个epoch的指标值用于可视化
             const lastEpochMetric = trainingHistory?.epochMetrics[trainingHistory.epochMetrics.length - 1];
@@ -819,12 +746,12 @@ export async function train(): Promise<void> {
                     try {
                         const valPredictions = model.architecture.predict(validationData.xs) as tf.Tensor;
                         if (loss === "meanSquaredError") {
-                            valLoss = tf.losses.meanSquaredError(validationData.labels, valPredictions).dataSync()[0];
+                            valLoss = tf.losses.meanSquaredError(validationData.ys, valPredictions).dataSync()[0];
                         } else if (loss === "meanAbsoluteError") {
-                            valLoss = tf.losses.absoluteDifference(validationData.labels, valPredictions).dataSync()[0];
+                            valLoss = tf.losses.absoluteDifference(validationData.ys, valPredictions).dataSync()[0];
                         } else {
                             // 对于其他损失函数，使用MSE作为默认值
-                            valLoss = tf.losses.meanSquaredError(validationData.labels, valPredictions).dataSync()[0];
+                            valLoss = tf.losses.meanSquaredError(validationData.ys, valPredictions).dataSync()[0];
                         }
                         valPredictions.dispose();
                         console.log(`重新计算的验证集损失: ${valLoss.toFixed(4)}`);
@@ -849,7 +776,7 @@ export async function train(): Promise<void> {
                 console.warn("验证集MAE为无效，尝试重新计算");
                 if (validationData) {
                     const valPredictions = model.architecture.predict(validationData.xs) as tf.Tensor;
-                    valMAE = tf.losses.absoluteDifference(validationData.labels, valPredictions).dataSync()[0];
+                    valMAE = tf.losses.absoluteDifference(validationData.ys, valPredictions).dataSync()[0];
                     valPredictions.dispose();
                     // 将重新计算的验证集MAE绘制到图表中
                     if (valMAE >= 0 && isFinite(valMAE)) {
@@ -895,8 +822,7 @@ export async function train(): Promise<void> {
             console.log("=".repeat(60));
             
             // 生成预测结果可视化
-            const validationData = (dataset as AirPassengersData).getValidationData();
-            renderTimeSeriesPredictions(testData, validationData, dataset as AirPassengersData);
+            renderTimeSeriesPredictions(testData, (dataset as AirPassengersData).getValidationData(), dataset as AirPassengersData);
             
             // 获取验证集的最后一个epoch的指标值用于可视化
             const lastEpochMetric = trainingHistory?.epochMetrics[trainingHistory.epochMetrics.length - 1];
@@ -909,9 +835,9 @@ export async function train(): Promise<void> {
                 if (validationData) {
                     const valPredictions = model.architecture.predict(validationData.xs) as tf.Tensor;
                     if (loss === "meanSquaredError") {
-                        valLoss = tf.losses.meanSquaredError(validationData.labels, valPredictions).dataSync()[0];
+                        valLoss = tf.losses.meanSquaredError(validationData.ys, valPredictions).dataSync()[0];
                     } else if (loss === "meanAbsoluteError") {
-                        valLoss = tf.losses.absoluteDifference(validationData.labels, valPredictions).dataSync()[0];
+                        valLoss = tf.losses.absoluteDifference(validationData.ys, valPredictions).dataSync()[0];
                     }
                     valPredictions.dispose();
                 }
@@ -922,7 +848,7 @@ export async function train(): Promise<void> {
                 console.warn("验证集MAE为无效，尝试重新计算");
                 if (validationData) {
                     const valPredictions = model.architecture.predict(validationData.xs) as tf.Tensor;
-                    valMAE = tf.losses.absoluteDifference(validationData.labels, valPredictions).dataSync()[0];
+                    valMAE = tf.losses.absoluteDifference(validationData.ys, valPredictions).dataSync()[0];
                     valPredictions.dispose();
                 }
             }

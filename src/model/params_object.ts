@@ -11,10 +11,10 @@ export interface IHyperparameterData {
 }
 
 class NetworkParameters {
-    public learningRate: number = 0.001;  // 降低学习率以提高训练稳定性
+    public learningRate: number = 0.01;
     public batchSize: number = 64;
-    public optimizer: string = "adam";  // 使用Adam优化器，通常比SGD表现更好
-    public epochs: number = 1200;  // 参考PyTorch代码，使用1200个epochs进行训练
+    public optimizer: string = "sgd";
+    public epochs: number = 6;
     public loss: string = "categoricalCrossentropy";
     private paramNames: Set<string> = new Set(["optimizer", "loss"]);
 
@@ -34,9 +34,6 @@ class NetworkParameters {
                 return tf.train.adagrad(this.learningRate);
 
             case "adam":
-                // Adam优化器参数：learningRate, beta1, beta2, epsilon
-                // 注意：TensorFlow.js的adam函数不支持clipNorm作为直接参数
-                // 梯度裁剪可以通过模型编译时的clipNorm选项实现
                 return tf.train.adam(this.learningRate);
 
             default:

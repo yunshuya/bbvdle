@@ -1,4 +1,5 @@
 import { ActivationLayer } from "./shapes/activationlayer";
+import { CircularWire } from "./shapes/circularwire";
 import { Draggable } from "./shapes/draggable";
 import { TextBox } from "./shapes/textbox";
 import { Wire } from "./shapes/wire";
@@ -11,7 +12,7 @@ export enum Mode {
 
 class WindowProperties {
     private static instance: WindowProperties;
-    public selectedElement: Draggable | Wire;
+    public selectedElement: Draggable | Wire | CircularWire | null;
     public activationLayers: Set<ActivationLayer> = new Set();
     public mode: Mode = Mode.Move;
     public draggedElement: any;

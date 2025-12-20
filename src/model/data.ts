@@ -303,11 +303,10 @@ export class AirPassengersData {
     
     // 为了兼容现有代码，提供这些属性
     // 对于LSTM，输入形状应该是[timeSteps, features]，即[12, 1]
-    // 注意：IMAGE_HEIGHT现在是动态的，会根据timestep参数变化
-    public get IMAGE_HEIGHT(): number { return this.timeSteps; }  // 时间步数（滑动窗口大小）
+    public readonly IMAGE_HEIGHT: number = 12;  // 时间步数（滑动窗口大小）
     public readonly IMAGE_WIDTH: number = 1;   // 特征数（单变量时序）
     public readonly IMAGE_CHANNELS: number = 1; // 保持兼容性
-    public get IMAGE_SIZE(): number { return this.timeSteps; }
+    public readonly IMAGE_SIZE: number = 12;
     public readonly NUM_CLASSES: number = 1;     // 回归任务，输出1个值
     public pythonName: string = "airpassengers";
     public datasetName: string = "AirPassengers";
@@ -373,31 +372,6 @@ export class AirPassengersData {
     }
     
     /**
-     * 设置时间窗口大小（timestep）
-     * 当LSTM层的timestep参数改变时调用此方法
-     */
-    public setTimeSteps(newTimeSteps: number): void {
-        if (newTimeSteps > 0 && newTimeSteps <= 50) {
-            const oldTimeSteps = this.timeSteps;
-            this.timeSteps = newTimeSteps;
-            console.log(`时间窗口大小从 ${oldTimeSteps} 更新为 ${newTimeSteps}`);
-            // 如果数据已加载，标记为需要重新加载
-            if (this.dataLoaded) {
-                this.dataLoaded = false;
-            }
-        } else {
-            console.warn(`无效的timestep值: ${newTimeSteps}，应在1-50之间`);
-        }
-    }
-
-    /**
-     * 获取当前的时间窗口大小
-     */
-    public getTimeSteps(): number {
-        return this.timeSteps;
-    }
-    
-    /**
      * 获取原始数据（用于可视化）
      */
     public getRawData(): number[] {
@@ -406,14 +380,16 @@ export class AirPassengersData {
     
     /**
      * 获取测试集的原始索引范围（用于时间轴）
+     * 注意：现在基于序列划分，测试集的第一个序列对应的原始数据索引需要重新计算
      */
     public getTestDataTimeRange(): {start: number, end: number} {
-        // 参考PyTorch代码：split=120，测试集从索引120开始
-        const splitIndex = 120;
+        // 计算全量序列数
+        const totalSequences = this.rawData.length - this.timeSteps; // 144-12=132
+        // 计算序列划分点（前80%训练）
+        const sequenceSplitIndex = Math.floor(totalSequences * 0.8); // 132*0.8≈105
         // 测试集的第一个序列对应的原始数据索引
-        // 测试集的第一个序列使用原始数据索引[splitIndex, splitIndex+timeSteps-1]
-        // 对应的目标值是索引splitIndex+timeSteps
-        const startIndex = splitIndex + this.timeSteps; // 120+12=132
+        // 序列索引sequenceSplitIndex对应的原始数据索引是sequenceSplitIndex + timeSteps（因为序列从索引0开始，对应原始数据索引timeSteps）
+        const startIndex = sequenceSplitIndex + this.timeSteps;
         return {
             start: startIndex, // 测试集的第一个目标值对应的原始数据索引
             end: this.rawData.length - 1 // 最后一个数据点
@@ -461,23 +437,22 @@ export class AirPassengersData {
             
             console.log(`AirPassengers数据归一化参数: min=${this.minValue}, max=${this.maxValue} (基于全量${this.rawData.length}个数据点)`);
 
-            // 参考PyTorch代码：先划分原始数据（split=120），再分别创建序列
-            // 这样可以确保训练集和测试集完全分离，避免数据泄露
-            const splitIndex = 120; // 参考代码：split = 120，前120个月训练，后24个月测试
+            // 第一步：创建全量序列（基于完整rawData）
+            // 这样可以确保所有序列都使用相同的归一化参数，避免数据泄露
+            const {sequences: allSequences, targets: allTargets} = this.createSequences(this.rawData, this.timeSteps);
+            // 全量序列数：144-12=132个
             
-            // 划分原始数据
-            const trainRawData = this.rawData.slice(0, splitIndex); // 前120个月
-            const testRawData = this.rawData.slice(splitIndex);     // 后24个月
-            
-            console.log(`原始数据划分: 训练集${trainRawData.length}个月, 测试集${testRawData.length}个月`);
+            console.log(`创建了${allSequences.length}个序列（基于全量${this.rawData.length}个数据点）`);
 
-            // 分别在训练集和测试集上创建序列
-            // 训练序列：120-12=108个序列
-            const {sequences: trainSequences, targets: trainTargets} = this.createSequences(trainRawData, this.timeSteps);
-            // 测试序列：24-12=12个序列
-            const {sequences: testSequences, targets: testTargets} = this.createSequences(testRawData, this.timeSteps);
+            // 第二步：划分训练/测试序列（时序划分，前80%训练）
+            // 注意：对于时序数据，必须严格按照时间顺序划分，不能随机划分
+            const splitIndex = Math.floor(allSequences.length * 0.8); // 132*0.8≈105
+            const trainSequences = allSequences.slice(0, splitIndex);
+            const trainTargets = allTargets.slice(0, splitIndex);
+            const testSequences = allSequences.slice(splitIndex);
+            const testTargets = allTargets.slice(splitIndex);
             
-            console.log(`序列创建: 训练集${trainSequences.length}个序列, 测试集${testSequences.length}个序列`);
+            console.log(`序列划分: 训练集${trainSequences.length}个序列, 测试集${testSequences.length}个序列`);
 
             // 转换为Tensor
             // 训练数据: [samples, timeSteps, features]
@@ -566,8 +541,18 @@ export class AirPassengersData {
     }
 
     /**
-     * 获取验证数据（从训练集的末尾取15%，保持时间顺序）
-     * 这与训练时使用的验证集划分方式一致
+     * 为了兼容ImageData接口，提供这个方法（时序数据不需要）
+     */
+    public async getTestDataWithLabel(numExamples: number, _label: string): Promise<{xs: Tensor<Rank.R4>, labels: Tensor<Rank.R2>}> {
+        const {xs, labels} = this.getTestData(numExamples);
+        // 转换为4D以兼容接口（虽然时序数据是3D）
+        const xs4d = xs.reshape([xs.shape[0], 1, xs.shape[1], xs.shape[2]]) as Tensor<Rank.R4>;
+        return {xs: xs4d, labels};
+    }
+
+    /**
+     * 获取验证集数据（从训练集的末尾15%）
+     * 验证集用于在训练过程中评估模型性能
      */
     public getValidationData(): {xs: Tensor<Rank.R3>, labels: Tensor<Rank.R2>} {
         if (!this.dataLoaded || !this.trainData || !this.trainLabels) {
@@ -579,34 +564,28 @@ export class AirPassengersData {
         const trainSize = totalTrainSamples - valSize;
 
         // 验证集：从训练集的末尾取15%（保持时间顺序）
-        const valXs = (this.trainData as tf.Tensor<tf.Rank.R3>).slice(
-            [trainSize, 0, 0], 
-            [valSize, this.timeSteps, 1]
-        ) as Tensor<Rank.R3>;
-        const valLabels = (this.trainLabels as tf.Tensor<tf.Rank.R2>).slice(
-            [trainSize, 0], 
-            [valSize, 1]
-        ) as Tensor<Rank.R2>;
+        const valXs = this.trainData.slice([trainSize, 0, 0], [valSize, this.timeSteps, 1]) as Tensor<Rank.R3>;
+        const valLabels = this.trainLabels.slice([trainSize, 0], [valSize, 1]) as Tensor<Rank.R2>;
 
         return {xs: valXs, labels: valLabels};
     }
 
     /**
-     * 获取验证集的时间范围（用于可视化）
+     * 获取验证集的时间范围（原始数据索引）
      */
     public getValidationDataTimeRange(): {start: number, end: number} {
-        // 验证集来自训练集的末尾15%
-        // 训练集对应原始数据的前80%（split=120）
-        // 验证集是训练集的末尾15%，所以对应原始数据索引范围需要计算
-        const splitIndex = 120; // 训练/测试分割点
-        const fullTrainData = this.rawData.slice(0, splitIndex); // 前120个月
-        const totalTrainSequences = fullTrainData.length - this.timeSteps; // 108个序列
-        const valSize = Math.floor(totalTrainSequences * 0.15); // 约16个序列
-        const trainSize = totalTrainSequences - valSize; // 约92个序列
-        
+        // 计算全量序列数
+        const totalSequences = this.rawData.length - this.timeSteps;
+        // 计算序列划分点（前80%训练）
+        const sequenceSplitIndex = Math.floor(totalSequences * 0.8);
+        // 训练集的序列数
+        const trainSequences = sequenceSplitIndex;
+        // 验证集从训练集的末尾15%开始
+        const valStartSequenceIndex = Math.floor(trainSequences * 0.85);
         // 验证集的第一个序列对应的原始数据索引
-        const startIndex = trainSize + this.timeSteps; // 92+12=104
-        const endIndex = splitIndex - 1; // 119（训练集的最后一个数据点）
+        const startIndex = valStartSequenceIndex + this.timeSteps;
+        // 验证集的最后一个序列对应的原始数据索引
+        const endIndex = sequenceSplitIndex + this.timeSteps - 1;
         
         return {
             start: startIndex,
@@ -615,13 +594,29 @@ export class AirPassengersData {
     }
 
     /**
-     * 为了兼容ImageData接口，提供这个方法（时序数据不需要）
+     * 获取当前时间步数
      */
-    public async getTestDataWithLabel(numExamples: number, _label: string): Promise<{xs: Tensor<Rank.R4>, labels: Tensor<Rank.R2>}> {
-        const {xs, labels} = this.getTestData(numExamples);
-        // 转换为4D以兼容接口（虽然时序数据是3D）
-        const xs4d = xs.reshape([xs.shape[0], 1, xs.shape[1], xs.shape[2]]) as Tensor<Rank.R4>;
-        return {xs: xs4d, labels};
+    public getTimeSteps(): number {
+        return this.timeSteps;
+    }
+
+    /**
+     * 设置时间步数
+     * 注意：如果数据已经加载，调用者需要手动调用load()来重新加载数据以应用新的时间步数
+     */
+    public setTimeSteps(timestep: number): void {
+        if (timestep <= 0) {
+            throw new Error("时间步数必须大于0");
+        }
+        if (timestep === this.timeSteps) {
+            // 如果时间步数没有变化，不需要重新加载
+            return;
+        }
+        this.timeSteps = timestep;
+        // 如果数据已经加载，标记为未加载，需要调用者手动重新加载
+        if (this.dataLoaded) {
+            this.dataLoaded = false;
+        }
     }
 
     protected toggleLoadingOverlay(): void {
@@ -650,18 +645,12 @@ export function changeDataset(newDataset: string): void {
 
     // Set the image visualizations divs with class name identifiers
     if (dataset instanceof ImageData) {
-        const classesElement = document.getElementById("classes");
-        if (classesElement) {
-            Array.from(classesElement.getElementsByClassName("option")).forEach((element, i) => {
-                if (i !== 0) { // Skip the first since it represents 'Any' class
-                    element.innerHTML = (i - 1) + ( dataset.classStrings != null ? ` (${dataset.classStrings[i]})` : "");
-                }
-            });
-        }
+        Array.from(document.getElementById("classes").getElementsByClassName("option")).forEach((element, i) => {
+            if (i !== 0) { // Skip the first since it represents 'Any' class
+                element.innerHTML = (i - 1) + ( dataset.classStrings != null ? ` (${dataset.classStrings[i]})` : "");
+            }
+        });
     }
-    
-    // 根据数据集类型更新visualizationMenu的显示
-    updateVisualizationMenuForDataset();
     
     // 根据数据集类型建议损失函数，但不强制覆盖用户的选择
     // 对于时序数据（AirPassengers），建议使用MSE或MAE；对于分类数据，建议使用交叉熵
@@ -724,27 +713,4 @@ export function changeDataset(newDataset: string): void {
         }
     }
     // 如果用户已经选择了合适的损失函数，不做任何更改，保持用户的选择
-}
-
-/**
- * 根据dataset类型更新visualizationMenu的显示
- * 当dataset为airpassengers时，隐藏分类菜单；当为其他dataset时，显示分类菜单
- */
-function updateVisualizationMenuForDataset(): void {
-    const classesCategory = document.getElementById("classes");
-    if (!classesCategory) {
-        return;
-    }
-    
-    // 检测是否为时序数据（AirPassengers）
-    const isTimeSeries = dataset instanceof AirPassengersData;
-    
-    // 根据dataset类型显示/隐藏分类菜单
-    if (isTimeSeries) {
-        // 时序数据：隐藏分类菜单
-        classesCategory.style.display = "none";
-    } else {
-        // 分类数据：显示分类菜单
-        classesCategory.style.display = "block";
-    }
 }

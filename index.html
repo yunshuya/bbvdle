@@ -139,7 +139,9 @@
 						<div title = '将两个或多个输入（它们可以是1D或2D）连接起来'
 							 class = 'option select-option' data-optionValue = 'concatenate'> Concatenate </div>
 						<div title = '将两个或多个输入相加。'
-							 class = 'option select-option last-dropdown' data-optionValue = 'add'> Add </div>
+							 class = 'option select-option' data-optionValue = 'add'> Add </div>
+						<div title = '将两个或多个输入进行逐元素相乘。'
+							 class = 'option select-option last-dropdown' data-optionValue = 'multiply'> Multiply </div>
 					</div>
 				</div>
 			</div>
@@ -176,6 +178,8 @@
 				<div class = 'option select-option' data-optionValue = 'rnn'> 循环神经网络 </div>
 				<div class = 'option select-option' data-optionValue = 'resnet'> ResNet残差网络 </div>
 				<div class = 'option select-option' data-optionValue = 'lstm'> 长短期记忆网络 </div>
+				<div class = 'option select-option' data-optionValue = 'lstmStructure' title='LSTM结构模版（适用于AirPassengers数据集训练）'> LSTM结构模版 </div>
+				<div class = 'option select-option' data-optionValue = 'lstmInternal' title='LSTM内部结构测试模板（展示Multiply层功能）'> LSTM内部结构测试 </div>
 			</div>
 		</div>
 
@@ -271,6 +275,7 @@
 				</div>
                 <div class = 'option select-option education-option' data-optionValue = 'ResNets'>ResNets</div>
 				<div class = 'option select-option education-option' data-optionValue = 'Add'>Add</div>
+				<div class = 'option select-option education-option' data-optionValue = 'Multiply'>Multiply</div>
 				<div class = 'option select-option education-option' data-optionValue = 'BatchNorm'>Batch Norm</div>
 				<div class = 'option select-option education-option' data-optionValue = 'Concatenate'> Concatenate </div>
 				<div class = 'option select-option education-option' data-optionValue = 'Convolution'> Convolution </div>
@@ -526,13 +531,24 @@
 				</div>
 			</div>
 
-            <div id="educationAdd">
+			<div id="educationAdd">
 				<div class="educationTitle"> 相加层（Add） </div>
 
 				<div class="educationContent">
 					<p><strong>功能：</strong>将多个相同维度的输入张量进行逐元素相加。</p>
 				
-					<p><strong>作用：</strong>是构建残差网络（ResNets） 的关键。通过“快捷连接”将前一层的输出直接跳过多层加到后面层的输出上，有效解决了深层网络中的梯度消失和退化问题，使得训练非常深的网络成为可能。</p>
+					<p><strong>作用：</strong>是构建残差网络（ResNets） 的关键。通过"快捷连接"将前一层的输出直接跳过多层加到后面层的输出上，有效解决了深层网络中的梯度消失和退化问题，使得训练非常深的网络成为可能。</p>
+				</div>
+			</div>
+
+			<div id="educationMultiply">
+				<div class="educationTitle"> 相乘层（Multiply） </div>
+
+				<div class="educationContent">
+					<p><strong>功能：</strong>将多个相同维度的输入张量进行逐元素相乘。</p>
+				
+					<p><strong>作用：</strong>是构建LSTM、GRU等循环神经网络的关键组件。在LSTM中，相乘层用于实现门控机制，例如遗忘门、输入门和输出门，通过逐元素相乘来控制信息的流动和记忆的更新。这种操作允许模型选择性地保留或忘记信息，从而更好地处理长序列数据。</p>
+					<p><strong>应用场景：</strong>主要用于循环神经网络（RNN、LSTM、GRU）中的门控操作，以及注意力机制中的权重应用。</p>
 				</div>
 			</div>
 			

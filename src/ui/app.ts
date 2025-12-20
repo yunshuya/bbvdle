@@ -8,7 +8,7 @@ import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
-import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate } from "./model_templates";
+import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate, lstmInternalStructureTestTemplate, lstmStructureTemplate } from "./model_templates";
 import { Activation, Relu, Sigmoid, Softmax, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Draggable } from "./shapes/draggable";
@@ -23,6 +23,7 @@ import { Flatten } from "./shapes/layers/flatten";
 import { Input } from "./shapes/layers/input";
 import { LSTM } from "./shapes/layers/lstm";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
+import { Multiply } from "./shapes/layers/multiply";
 import { Output } from "./shapes/layers/output";
 import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
@@ -264,6 +265,8 @@ function createTemplate(template: string): void {
         case "resnet": resnetTemplate(svgData); break;
         case "rnn": rnnTemplate(svgData); break;
         case "lstm": lstmTemplate(svgData); break;
+        case "lstmInternal": lstmInternalStructureTestTemplate(svgData); break;
+        case "lstmStructure": lstmStructureTemplate(svgData); break;
 
     }
 }
@@ -282,6 +285,7 @@ function appendItem(itemType: string): void {
         flatten: Flatten,
         lstm: LSTM,
         maxPooling2D: MaxPooling2D,
+        multiply: Multiply,
         recurrent: Recurrent,
         relu: Relu,
         reshape: Reshape,

@@ -774,3 +774,6 @@ const testMetric = testResult[1].dataSync()[0];
 6. **准确率显示**: 对于时序数据，UI中显示的"准确率"实际是MAE值
 7. **损失和指标**: 如果使用MAE作为损失函数，损失值和指标值会相同（都是MAE）
 
+
+
+
