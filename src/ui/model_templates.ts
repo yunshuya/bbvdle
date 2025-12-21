@@ -15,6 +15,7 @@ import { Multiply } from "./shapes/layers/multiply";
 import { Point } from "./shapes/shape";
 import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
+import { FormulaLabel } from "./shapes/formula_label";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 import { dataset, changeDataset } from "../model/data";
@@ -43,6 +44,13 @@ export function resetWorkspace(svgData: IDraggableData): void {
 
     // Clear the current list of draggables
     svgData.draggable = [];
+    
+    // 清理公式标签
+    if ((svgData as any).formulaLabels) {
+        const formulaLabels = (svgData as any).formulaLabels as FormulaLabel[];
+        formulaLabels.forEach(label => label.remove());
+        (svgData as any).formulaLabels = undefined;
+    }
 }
 
 export function defaultTemplate(svgData: IDraggableData): void {
@@ -737,8 +745,10 @@ export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void
     // Output Multiply 需要连接 Output Gate 和 tanh(C_t)
     const outputMultPos = new Point(width * 0.80, height * 0.47);     // O_t ⊙ tanh(C_t) = H_t
     
+    // 第六层：Dropout 正则化（防止过拟合）
+    const dropoutPos = new Point(width * 0.85, height * 0.47);
+    
     // 右侧：输出
-    const denseOutputPos = new Point(width * 0.90, height * 0.47);     // 最终输出层
     const outputPos = new Point(width - 30, height * 0.47);
 
     // ========== 创建层 ==========
@@ -836,16 +846,9 @@ export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void
     // 12. Multiply层：输出门操作 O_t ⊙ tanh(C_t) = H_t
     const outputMultiply = new Multiply(outputMultPos);
     
-    // 13. 输出层（Dense层）
-    const denseOutput = new Dense(denseOutputPos);
-    if (isTimeSeries) {
-        denseOutput.parameterDefaults.units = 1;  // 回归任务
-    } else {
-        denseOutput.parameterDefaults.units = 10;  // 分类任务
-        const denseRelu: Activation = new Relu(denseOutputPos);
-        denseOutput.addActivation(denseRelu);
-        svgData.draggable.push(denseRelu);
-    }
+    // 13. Dropout 层：防止过拟合（用于实际训练）
+    const dropout = new Dropout(dropoutPos);
+    dropout.parameterDefaults.rate = 0.2;  // 与 RNN 内部结构模板的 dropout 参数一致
     
     // ========== 设置输入和输出位置（必须在连接之前）==========
     svgData.input.setPosition(inputPos);
@@ -901,9 +904,11 @@ export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void
     outputGate.addChild(outputMultiply);
     cellTanhLayer.addChild(outputMultiply);  // tanh(C_t) 和 O_t 相乘
     
-    // 输出
-    outputMultiply.addChild(denseOutput);
-    denseOutput.addChild(svgData.output);
+    // 输出：outputMultiply -> dropout -> Output
+    // Dropout 层用于防止过拟合，提高模型泛化能力
+    // Output 层会自动创建 Dense 层来匹配输出维度（时序数据：1维，分类数据：10维）
+    outputMultiply.addChild(dropout);
+    dropout.addChild(svgData.output);
     
     // ========== 添加循环连接 ==========
     // H_t 循环连接到 H_{t-1}（用于下一时刻）
@@ -932,7 +937,7 @@ export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void
     svgData.draggable.push(cellAdd);
     svgData.draggable.push(cellTanhLayer);
     svgData.draggable.push(cellTanhActivation);
-    svgData.draggable.push(denseOutput);
+    svgData.draggable.push(dropout);
     
     console.log("LSTM完整内部结构模板已创建");
     console.log("展示了所有门控机制和计算过程：");
@@ -942,9 +947,191 @@ export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void
     console.log("4. 候选记忆 C̃_t = tanh(W_C · [H_{t-1}, X_t] + b_C)");
     console.log("5. 记忆更新 C_t = F_t ⊙ C_{t-1} + I_t ⊙ C̃_t");
     console.log("6. 隐藏状态 H_t = O_t ⊙ tanh(C_t)");
+    console.log("7. Dropout 正则化：防止过拟合（rate=0.2）");
+    console.log("8. 输出层：y = Dense(H_t)（Output 层自动创建）");
     if (isTimeSeries) {
         console.log("数据集: AirPassengers (时序数据)");
         console.log("输入形状: [12, 1] (12个时间步，1个特征)");
         console.log("输出: 1个值 (回归任务)");
+        console.log("注意：此模板可用于实际训练，包含 Dropout 正则化以提高泛化能力");
     }
+}
+
+/**
+ * RNN 完整内部结构模板函数（参考 LSTM 完整内部结构模板）
+ * 展示 RNN 的所有训练流程，包括输入合并、线性变换、激活函数等
+ */
+export function rnnInternalStructureTemplate(svgData: IDraggableData): void {
+    resetWorkspace(svgData);
+
+    // 自动设置数据集为 AirPassengers
+    changeDataset("airpassengers");
+    const params = new Map<string, any>();
+    params.set("dataset", "airpassengers");
+    svgData.input.setParams(params);
+    
+    // 自动设置 epochs 和学习率
+    model.params.epochs = 100;
+    model.params.learningRate = 0.0005;
+    // 对于 RNN 完整内部结构模板，自动设置 batch_size 为 1
+    model.params.batchSize = 1;
+    const epochsInput = document.getElementById("epochs") as HTMLInputElement;
+    const lrInput = document.getElementById("learningRate") as HTMLInputElement;
+    const batchSizeInput = document.getElementById("batchSize") as HTMLInputElement;
+    if (epochsInput) { epochsInput.value = "100"; }
+    if (lrInput) { lrInput.value = "0.0005"; }
+    if (batchSizeInput) { batchSizeInput.value = "1"; }
+
+    console.log("RNN 完整内部结构模板：数据集已自动设置为 AirPassengers，batch_size 已自动设置为 1");
+
+    const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
+
+    // 获取当前数据集类型（现在应该是 airpassengers）
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+    
+    // ========== 布局定义（参考 LSTM 模板的紧凑布局）==========
+    // 左侧：输入和前一时刻的隐藏状态
+    const inputPos = new Point(width * 0.15, height * 0.5);           // X_t
+    const hiddenStatePrevPos = new Point(width * 0.15, height * 0.38);  // H_{t-1}
+    
+    // 对于时序数据，需要添加 Flatten 层将 3D [batch, timesteps, features] 转换为 2D [batch, timesteps*features]
+    const flattenPos = isTimeSeries ? new Point(width * 0.20, height * 0.5) : null;
+    
+    // 第一层：合并输入 [H_{t-1}, X_t]
+    const concatPos = new Point(width * 0.30, height * 0.44);
+    
+    // 第二层：线性变换 z_t = W · [X_t, H_{t-1}] + b
+    const denseTransformPos = new Point(width * 0.45, height * 0.44);
+    
+    // 第三层：Tanh 激活 H_t = tanh(z_t)
+    const tanhPos = new Point(width * 0.60, height * 0.44);
+    
+    // 第四层：Dropout 正则化（防止过拟合）
+    const dropoutPos = new Point(width * 0.70, height * 0.44);
+    
+    // 右侧：输出
+    const outputPos = new Point(width - 30, height * 0.44);
+
+    // ========== 创建层 ==========
+    
+    // 1. 输入层
+    svgData.input.setPosition(inputPos);
+    
+    // 2. 对于时序数据，添加 Flatten 层
+    let flattenLayer: Flatten | null = null;
+    if (isTimeSeries && flattenPos) {
+        flattenLayer = new Flatten(flattenPos);
+    }
+    
+    // 3. 前一时刻的隐藏状态（占位层，用于循环连接和拓扑排序）
+    // 注意：这是占位层，用于：
+    //   - 提供 H_{t-1} 的输入路径，使 concatInput 有两个父层（符合 RNN 语义）
+    //   - 通过拓扑排序检查（所有父层必须已被访问）
+    //   - 在可视化上表示"前一时刻的隐藏状态"
+    // 在实际训练中，循环连接由 TensorFlow.js 的 RNN 层内部处理
+    const hiddenStatePrev = new Dense(hiddenStatePrevPos);
+    // 对于时序数据，hiddenStatePrev 的输出应该与 Flatten 的输出维度匹配
+    // Flatten 输出 [batch, timesteps*features] = [batch, 12*1] = [batch, 12]
+    if (isTimeSeries) {
+        hiddenStatePrev.parameterDefaults.units = 12;  // 与 Flatten 输出匹配
+    } else {
+        hiddenStatePrev.parameterDefaults.units = 128;
+    }
+    hiddenStatePrev.parameterDefaults.activation = "linear";
+    hiddenStatePrev.layerType = "HiddenStatePrev";
+    // 注意：占位层标记在 Dense 类的 populateParamBox 中根据 layerType 自动添加
+    
+    // 4. 合并输入和隐藏状态 [H_{t-1}, X_t]
+    const concatInput = new Concatenate(concatPos);
+    
+    // 5. 线性变换：z_t = W · [X_t, H_{t-1}] + b
+    const denseTransform = new Dense(denseTransformPos);
+    denseTransform.parameterDefaults.units = 128;
+    denseTransform.parameterDefaults.activation = "linear";
+    const denseTransformParams = new Map<string, any>();
+    denseTransformParams.set("units", 128);
+    denseTransform.setParams(denseTransformParams);
+    
+    // 6. Tanh 激活：H_t = tanh(z_t)
+    const tanhActivation = new Tanh(tanhPos);
+    denseTransform.addActivation(tanhActivation);
+    
+    // 7. Dropout 层：防止过拟合（用于实际训练）
+    const dropout = new Dropout(dropoutPos);
+    dropout.parameterDefaults.rate = 0.2;  // 与标准 RNN 模板的 dropout 参数一致
+    
+    // ========== 设置输入和输出位置（必须在连接之前）==========
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    // ========== 连接关系 ==========
+    
+    // 注意：hiddenStatePrev 是可视化占位层
+    // 为了通过拓扑排序检查，我们需要让它们也能追溯到 Input
+    // 对于时序数据，Input -> Flatten -> Concat
+    // 对于非时序数据，Input -> Concat
+    if (isTimeSeries && flattenLayer) {
+        svgData.input.addChild(flattenLayer);
+        // 占位层连接到 Flatten 以通过拓扑排序
+        flattenLayer.addChild(hiddenStatePrev);
+        // concatInput 需要两个输入 [H_{t-1}, X_t]
+        // 时序数据：Flatten 输出 [batch, 12]，hiddenStatePrev 输出 [batch, 12]，可以 concat
+        flattenLayer.addChild(concatInput);
+        hiddenStatePrev.addChild(concatInput);
+    } else {
+        svgData.input.addChild(concatInput);
+        // 对于非时序数据，占位层连接到 Input 以通过拓扑排序
+        svgData.input.addChild(hiddenStatePrev);
+        // 非时序数据：Input -> concatInput, hiddenStatePrev -> concatInput
+        hiddenStatePrev.addChild(concatInput);
+    }
+    
+    // 线性变换：concatInput -> denseTransform
+    concatInput.addChild(denseTransform);
+    
+    // Tanh 激活：denseTransform -> tanhActivation（已通过 addActivation 连接）
+    // 注意：tanhActivation 是激活函数，不直接作为子层连接
+    
+    // 隐藏状态计算：denseTransform -> Dropout -> Output
+    // 由于 tanhActivation 是激活函数，数据流是 denseTransform -> Dropout -> Output
+    // Dropout 层用于防止过拟合，提高模型泛化能力
+    // Output 层会自动创建 Dense 层来匹配输出维度（时序数据：1维，分类数据：10维）
+    denseTransform.addChild(dropout);
+    dropout.addChild(svgData.output);
+    
+    // ========== 添加循环连接 ==========
+    // H_t 循环连接到 H_{t-1}（用于下一时刻）
+    // 注意：denseTransform 的输出是 H_t（经过 Tanh 激活）
+    // hiddenStatePrev 是占位层，用于拓扑排序和提供 H_{t-1} 的输入路径
+    denseTransform.addCircularConnection(hiddenStatePrev, "H_t → H_{t+1}");
+    
+    // ========== 存储所有层 ==========
+    if (flattenLayer) {
+        svgData.draggable.push(flattenLayer);
+    }
+    svgData.draggable.push(hiddenStatePrev);
+    svgData.draggable.push(concatInput);
+    svgData.draggable.push(denseTransform);
+    svgData.draggable.push(tanhActivation);
+    svgData.draggable.push(dropout);
+    
+    console.log("=".repeat(80));
+    console.log("RNN 完整内部结构模板已创建");
+    console.log("展示了所有计算步骤：");
+    console.log("1. 输入合并：[X_t, H_{t-1}]");
+    console.log("2. 线性变换：z_t = W · [X_t, H_{t-1}] + b");
+    console.log("3. Tanh 激活：H_t = tanh(z_t)");
+    console.log("4. Dropout 正则化：防止过拟合（rate=0.2）");
+    console.log("5. 输出层：y = Dense(H_t)");
+    console.log("6. 循环连接：H_t → H_{t+1}");
+    if (isTimeSeries) {
+        console.log("数据集: AirPassengers (时序数据)");
+        console.log("输入形状: [12, 1] (12个时间步，1个特征)");
+        console.log("输出: 1个值 (回归任务)");
+        console.log("注意：此模板可用于实际训练，包含 Dropout 正则化以提高泛化能力");
+    }
+    console.log("=".repeat(80));
 }

@@ -15,6 +15,8 @@ import { Input } from "../ui/shapes/layers/input";
 import { MaxPooling2D } from "../ui/shapes/layers/maxpooling";
 import { Multiply } from "../ui/shapes/layers/multiply";
 import { Output } from "../ui/shapes/layers/output";
+import { RNNCell } from "../ui/shapes/layers/rnn_cell";
+import { RNNInternal } from "../ui/shapes/layers/rnn_internal";
 import { Point } from "../ui/shapes/shape";
 import { IHyperparameterData } from "./params_object";
 
@@ -245,6 +247,10 @@ function createLayerInstanceFromName(svgData: IDraggableData, lj: ILayerJson): L
                     layer = new Add(location); break;
                 case "Multiply":
                     layer = new Multiply(location); break;
+                case "RNNCell":
+                    layer = new RNNCell(location); break;
+                case "RNNInternal":
+                    layer = new RNNInternal(location); break;
                 default:
                      displayError(new Error(`The specified layer "${lj}" was not recognized. `));
             }
