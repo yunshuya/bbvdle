@@ -98,12 +98,144 @@ function getGlobalQuestionIndex(category: string, questionIndex: number): number
 }
 
 // 更新特定题目的状态
-export function updateQuestionStatus(questionIndex: number, isCorrect: boolean): void {
+export function updateQuestionStatus(questionIndex: number, isCorrect: boolean, updateAll: boolean = false): void {
     const status = getQuestionStatus();
     
     status[questionIndex] = isCorrect ? 'correct' : 'incorrect';
     saveQuestionStatus(status);
-    updateStatusDisplay();
+    
+    if (updateAll) {
+        // 只在需要时更新所有模块的显示（比如初始化时）
+        updateStatusDisplay();
+    } else {
+        // 只更新当前题目的显示
+        updateSingleQuestionDisplay(questionIndex, isCorrect);
+    }
+}
+
+// 只更新单个题目的显示状态
+function updateSingleQuestionDisplay(questionIndex: number, isCorrect: boolean): void {
+    const statusItems = document.querySelectorAll(`.status-item[data-question="${questionIndex}"]`);
+    
+    statusItems.forEach(item => {
+        item.classList.remove("correct", "incorrect", "unanswered");
+        item.classList.add(isCorrect ? 'correct' : 'incorrect');
+    });
+    
+    // 更新当前题目所属模块的统计
+    updateModuleStatsForQuestion(questionIndex, isCorrect);
+    
+    // 更新总进度显示
+    updateOverallProgress();
+}
+
+// 更新单个题目所属模块的统计
+function updateModuleStatsForQuestion(questionIndex: number, isCorrect: boolean): void {
+    // 确定题目所属的模块
+    let moduleKey = '';
+    if (questionIndex >= 1 && questionIndex <= 30) {
+        moduleKey = 'neural_layers';
+    } else if (questionIndex >= 31 && questionIndex <= 50) {
+        moduleKey = 'activations';
+    } else if (questionIndex >= 51 && questionIndex <= 60) {
+        moduleKey = 'perceptron';
+    } else if (questionIndex >= 61 && questionIndex <= 75) {
+        moduleKey = 'cnn';
+    } else if (questionIndex >= 76 && questionIndex <= 90) {
+        moduleKey = 'rnn';
+    } else if (questionIndex >= 91 && questionIndex <= 100) {
+        moduleKey = 'transformer';
+    } else if (questionIndex >= 101 && questionIndex <= 120) {
+        moduleKey = 'arch_selection';
+    } else if (questionIndex >= 121 && questionIndex <= 135) {
+        moduleKey = 'problem_diagnosis';
+    } else if (questionIndex >= 136 && questionIndex <= 155) {
+        moduleKey = 'advanced';
+    }
+    
+    if (!moduleKey) return;
+    
+    // 重新统计该模块的所有题目状态
+    const status = getQuestionStatus();
+    const moduleStats = { unanswered: 0, correct: 0, incorrect: 0 };
+    
+    // 确定该模块的题目范围
+    let startIndex = 0, endIndex = 0;
+    switch(moduleKey) {
+        case 'neural_layers':
+            startIndex = 1; endIndex = 30; break;
+        case 'activations':
+            startIndex = 31; endIndex = 50; break;
+        case 'perceptron':
+            startIndex = 51; endIndex = 60; break;
+        case 'cnn':
+            startIndex = 61; endIndex = 75; break;
+        case 'rnn':
+            startIndex = 76; endIndex = 90; break;
+        case 'transformer':
+            startIndex = 91; endIndex = 100; break;
+        case 'arch_selection':
+            startIndex = 101; endIndex = 120; break;
+        case 'problem_diagnosis':
+            startIndex = 121; endIndex = 135; break;
+        case 'advanced':
+            startIndex = 136; endIndex = 155; break;
+    }
+    
+    // 统计该模块的所有题目（注意：localStorage的键可能是字符串）
+    for (let i = startIndex; i <= endIndex; i++) {
+        const questionStatus = status[String(i)] || status[i];
+        if (questionStatus === 'correct') {
+            moduleStats.correct++;
+        } else if (questionStatus === 'incorrect') {
+            moduleStats.incorrect++;
+        } else {
+            moduleStats.unanswered++;
+        }
+    }
+    
+    // 更新该模块的统计显示
+    const subcategories = document.querySelectorAll('.status-subcategory');
+    subcategories.forEach(subcategory => {
+        const firstItem = subcategory.querySelector('.status-item[data-question]');
+        if (!firstItem) return;
+        
+        const firstQuestion = parseInt(firstItem.getAttribute('data-question') || '0', 10);
+        let subcategoryModuleKey = '';
+        
+        if (firstQuestion >= 1 && firstQuestion <= 30) {
+            subcategoryModuleKey = 'neural_layers';
+        } else if (firstQuestion >= 31 && firstQuestion <= 50) {
+            subcategoryModuleKey = 'activations';
+        } else if (firstQuestion >= 51 && firstQuestion <= 60) {
+            subcategoryModuleKey = 'perceptron';
+        } else if (firstQuestion >= 61 && firstQuestion <= 75) {
+            subcategoryModuleKey = 'cnn';
+        } else if (firstQuestion >= 76 && firstQuestion <= 90) {
+            subcategoryModuleKey = 'rnn';
+        } else if (firstQuestion >= 91 && firstQuestion <= 100) {
+            subcategoryModuleKey = 'transformer';
+        } else if (firstQuestion >= 101 && firstQuestion <= 120) {
+            subcategoryModuleKey = 'arch_selection';
+        } else if (firstQuestion >= 121 && firstQuestion <= 135) {
+            subcategoryModuleKey = 'problem_diagnosis';
+        } else if (firstQuestion >= 136 && firstQuestion <= 155) {
+            subcategoryModuleKey = 'advanced';
+        }
+        
+        if (subcategoryModuleKey === moduleKey) {
+            const moduleStatsDiv = subcategory.querySelector('.module-stats');
+            if (moduleStatsDiv) {
+                const unansweredSpan = moduleStatsDiv.querySelector('.unanswered-count');
+                const correctSpan = moduleStatsDiv.querySelector('.correct-count');
+                const incorrectSpan = moduleStatsDiv.querySelector('.incorrect-count');
+                
+                if (unansweredSpan) unansweredSpan.textContent = `未答: ${moduleStats.unanswered}`;
+                if (correctSpan) correctSpan.textContent = `正确: ${moduleStats.correct}`;
+                if (incorrectSpan) incorrectSpan.textContent = `错误: ${moduleStats.incorrect}`;
+            }
+        }
+    });
 }
 
 // 初始化状态显示
@@ -115,6 +247,10 @@ export function initializeStatusDisplay(): void {
 function updateStatusDisplay(): void {
     const status = getQuestionStatus();
     const statusItems = document.querySelectorAll(".status-item");
+    
+    // 用于统计每个模块的数据（使用 Set 来去重，避免重复统计）
+    const moduleStats: { [key: string]: { unanswered: number; correct: number; incorrect: number } } = {};
+    const processedQuestions = new Set<number>(); // 用于记录已处理的题目编号
     
     statusItems.forEach(item => {
         const question = item.getAttribute("data-question");
@@ -134,6 +270,126 @@ function updateStatusDisplay(): void {
             } else {
                 item.classList.add("unanswered");
             }
+            
+            // 只统计一次（避免页面上有重复的 status-item 导致重复统计）
+            if (!processedQuestions.has(questionIndex)) { 
+                processedQuestions.add(questionIndex);
+                
+                // 确定题目所属的模块
+                let moduleKey = '';
+                if (questionIndex >= 1 && questionIndex <= 30) {
+                    moduleKey = 'neural_layers';
+                } else if (questionIndex >= 31 && questionIndex <= 50) {
+                    moduleKey = 'activations';
+                } else if (questionIndex >= 51 && questionIndex <= 60) {
+                    moduleKey = 'perceptron';
+                } else if (questionIndex >= 61 && questionIndex <= 75) {
+                    moduleKey = 'cnn';
+                } else if (questionIndex >= 76 && questionIndex <= 90) {
+                    moduleKey = 'rnn';
+                } else if (questionIndex >= 91 && questionIndex <= 100) {
+                    moduleKey = 'transformer';
+                } else if (questionIndex >= 101 && questionIndex <= 120) {
+                    moduleKey = 'arch_selection';
+                } else if (questionIndex >= 121 && questionIndex <= 135) {
+                    moduleKey = 'problem_diagnosis';
+                } else if (questionIndex >= 136 && questionIndex <= 155) {
+                    moduleKey = 'advanced';
+                }
+                
+                // 初始化模块统计
+                if (moduleKey && !moduleStats[moduleKey]) {
+                    moduleStats[moduleKey] = { unanswered: 0, correct: 0, incorrect: 0 };
+                }
+                
+                // 累加统计
+                if (moduleKey) {
+                    if (questionStatus === 'correct') {
+                        moduleStats[moduleKey].correct++;
+                    } else if (questionStatus === 'incorrect') {
+                        moduleStats[moduleKey].incorrect++;
+                    } else {
+                        moduleStats[moduleKey].unanswered++;
+                    }
+                }
+            }
+        }
+    });
+    
+    // 更新每个模块的统计显示
+    updateModuleStats(moduleStats);
+    
+    // 更新总进度显示（当前进度：已答题数/总题数）
+    updateOverallProgress();
+}
+
+// 更新总进度显示
+function updateOverallProgress(): void {
+    const status = getQuestionStatus();
+    let totalAnswered = 0;
+    const totalQuestions = 155; // 总题数固定为155
+    
+    // 统计所有已答题目（1-155题）
+    for (let i = 1; i <= totalQuestions; i++) {
+        const questionStatus = status[String(i)] || status[i];
+        if (questionStatus === 'correct' || questionStatus === 'incorrect') {
+            totalAnswered++;
+        }
+    }
+    
+    // 更新所有"当前进度"显示
+    const progressNumbers = document.querySelectorAll('.progress-number');
+    progressNumbers.forEach(element => {
+        element.textContent = `${totalAnswered}/${totalQuestions}`;
+    });
+}
+
+// 更新模块统计数字
+function updateModuleStats(moduleStats: { [key: string]: { unanswered: number; correct: number; incorrect: number } }): void {
+    // 获取所有的状态子类别容器
+    const subcategories = document.querySelectorAll('.status-subcategory');
+    
+    subcategories.forEach(subcategory => {
+        // 根据题目范围确定模块
+        const firstItem = subcategory.querySelector('.status-item[data-question]');
+        if (!firstItem) return;
+        
+        const firstQuestion = parseInt(firstItem.getAttribute('data-question') || '0', 10);
+        let moduleKey = '';
+        
+        if (firstQuestion >= 1 && firstQuestion <= 30) {
+            moduleKey = 'neural_layers';
+        } else if (firstQuestion >= 31 && firstQuestion <= 50) {
+            moduleKey = 'activations';
+        } else if (firstQuestion >= 51 && firstQuestion <= 60) {
+            moduleKey = 'perceptron';
+        } else if (firstQuestion >= 61 && firstQuestion <= 75) {
+            moduleKey = 'cnn';
+        } else if (firstQuestion >= 76 && firstQuestion <= 90) {
+            moduleKey = 'rnn';
+        } else if (firstQuestion >= 91 && firstQuestion <= 100) {
+            moduleKey = 'transformer';
+        } else if (firstQuestion >= 101 && firstQuestion <= 120) {
+            moduleKey = 'arch_selection';
+        } else if (firstQuestion >= 121 && firstQuestion <= 135) {
+            moduleKey = 'problem_diagnosis';
+        } else if (firstQuestion >= 136 && firstQuestion <= 155) {
+            moduleKey = 'advanced';
+        }
+        
+        if (moduleKey && moduleStats[moduleKey]) {
+            const stats = moduleStats[moduleKey];
+            const moduleStatsDiv = subcategory.querySelector('.module-stats');
+            
+            if (moduleStatsDiv) {
+                const unansweredSpan = moduleStatsDiv.querySelector('.unanswered-count');
+                const correctSpan = moduleStatsDiv.querySelector('.correct-count');
+                const incorrectSpan = moduleStatsDiv.querySelector('.incorrect-count');
+                
+                if (unansweredSpan) unansweredSpan.textContent = `未答: ${stats.unanswered}`;
+                if (correctSpan) correctSpan.textContent = `正确: ${stats.correct}`;
+                if (incorrectSpan) incorrectSpan.textContent = `错误: ${stats.incorrect}`;
+            }
         }
     });
 }
@@ -141,6 +397,61 @@ function updateStatusDisplay(): void {
 export function initializeExerciseSystem(): void {
     // 初始化状态显示
     initializeStatusDisplay();
+    
+    // 为左侧菜单添加点击事件监听器
+    const menuItems = document.querySelectorAll(".nav-subcategory");
+    menuItems.forEach(item => {
+        item.addEventListener("click", function() {
+            const subcategory = this.getAttribute("data-subcategory");
+            if (subcategory) {
+                // 隐藏所有卡片区域
+                const allCardAreas = document.querySelectorAll(".exercise-questions-tab > div");
+                allCardAreas.forEach(area => {
+                    area.style.display = "none";
+                });
+                
+                // 根据子类别显示对应的卡片区域
+                let targetId = "";
+                switch (subcategory) {
+                    case "neural-layers":
+                        targetId = "exerciseNeuralLayers";
+                        break;
+                    case "activations":
+                        targetId = "exerciseActivations";
+                        break;
+                    case "perceptron":
+                        targetId = "exercisePerceptron";
+                        break;
+                    case "cnn":
+                        targetId = "exerciseCNN";
+                        break;
+                    case "rnn":
+                        targetId = "exerciseRNN";
+                        break;
+                    case "transformer":
+                        targetId = "exerciseTransformer";
+                        break;
+                    case "arch-selection":
+                        targetId = "exerciseArchSelection";
+                        break;
+                    case "problem-diagnosis":
+                        targetId = "exerciseProblemDiagnosis";
+                        break;
+                    case "advanced":
+                        targetId = "exerciseAdvanced";
+                        break;
+                }
+                
+                // 显示目标卡片区域
+                const targetArea = document.getElementById(targetId);
+                if (targetArea) {
+                    targetArea.style.display = "block";
+                    // 滚动到顶部
+                    targetArea.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }
+        });
+    });
     
     // 为开始练习按钮添加事件监听器
     const startButtons = document.querySelectorAll(".start-exercise-btn");
@@ -311,6 +622,54 @@ export function submitQuizAnswers(category: string): void {
         return;
     }
 
+    // 第一步：检查是否所有题目都已回答
+    const unansweredQuestions: number[] = [];
+    questions.forEach((qEl, index) => {
+        let selected: HTMLInputElement | null = null;
+        const allInputs = qEl.querySelectorAll('input[type="radio"]');
+        for (const input of allInputs) {
+            if ((input as HTMLInputElement).checked) {
+                selected = input as HTMLInputElement;
+                break;
+            }
+        }
+        if (!selected) {
+            unansweredQuestions.push(index + 1);
+        }
+    });
+
+    // 如果有未回答的题目，只显示提示，不显示正确答案，并阻止提交
+    if (unansweredQuestions.length > 0) {
+        questions.forEach((qEl, index) => {
+            const questionIndex = index + 1;
+            let selected: HTMLInputElement | null = null;
+            const allInputs = qEl.querySelectorAll('input[type="radio"]');
+            for (const input of allInputs) {
+                if ((input as HTMLInputElement).checked) {
+                    selected = input as HTMLInputElement;
+                    break;
+                }
+            }
+
+            const existingFeedback = qEl.querySelector(".answer-feedback");
+            if (existingFeedback) existingFeedback.remove();
+
+            // 只对未回答的题目显示提示（不显示正确答案）
+            if (!selected) {
+                const feedback = document.createElement("div");
+                feedback.classList.add("answer-feedback");
+                feedback.classList.add("incorrect");
+                feedback.textContent = `⚠ 请先选择一个选项。`;
+                qEl.appendChild(feedback);
+            }
+        });
+        
+        // 显示总体提示
+        alert(`请先完成所有题目！还有 ${unansweredQuestions.length} 道题未回答。`);
+        return; // 阻止提交
+    }
+
+    // 第二步：所有题目都已回答，执行提交逻辑并显示正确答案
     const answers = quizAnswers[category] || {};
     let score = 0;
 
@@ -351,10 +710,6 @@ export function submitQuizAnswers(category: string): void {
                 feedback.classList.add("incorrect");
                 feedback.textContent = `✗ 回答错误。正确答案：${correct}`;
             }
-        } else {
-            isCorrect = false;
-            feedback.classList.add("incorrect");
-            feedback.textContent = `⚠ 请先选择一个选项。`;
         }
         
         // 更新右侧做题状态
@@ -461,10 +816,66 @@ function displayDetailedStats(card: HTMLElement, category: string): void {
         }
     }
     
-    // 计算总体正确率
-    const overallAccuracy = categoryHistory.attempts > 0 
-        ? Math.round((categoryHistory.correctAttempts / categoryHistory.attempts) * 100) 
+    // 直接从card中获取题目数量（更可靠）
+    const questionsContainer = card.querySelector(".card-questions");
+    const questions = questionsContainer ? questionsContainer.querySelectorAll(".question") : [];
+    const totalQuestions = questions.length;
+    
+    // 根据category确定题目范围（用于统计正确率）
+    let startIndex = 0;
+    let endIndex = 0;
+    switch(category) {
+        case 'neural_layers_quiz':
+            startIndex = 1; endIndex = 30; break;
+        case 'activations_quiz':
+            startIndex = 31; endIndex = 50; break;
+        case 'perceptron_quiz':
+            startIndex = 51; endIndex = 60; break;
+        case 'cnn_quiz':
+            startIndex = 61; endIndex = 75; break;
+        case 'rnn_quiz':
+            startIndex = 76; endIndex = 90; break;
+        case 'transformer_quiz':
+            startIndex = 91; endIndex = 100; break;
+        case 'arch_selection_quiz':
+            startIndex = 101; endIndex = 120; break;
+        case 'problem_diagnosis_quiz':
+            startIndex = 121; endIndex = 135; break;
+        case 'advanced_quiz':
+            startIndex = 136; endIndex = 155; break;
+        default:
+            // 如果category不匹配，使用题目数量
+            if (totalQuestions > 0) {
+                endIndex = totalQuestions;
+                startIndex = 1;
+            }
+    }
+    
+    // 计算总体正确率：基于该模块所有已答题目的正确率
+    const status = getQuestionStatus();
+    let correctCount = 0;
+    let incorrectCount = 0;
+    
+    // 统计该模块的已答题目（注意：localStorage的键可能是字符串）
+    for (let i = startIndex; i <= endIndex; i++) {
+        // localStorage 存储时会把数字键转为字符串，所以优先尝试字符串键
+        const questionStatus = status[String(i)] || status[i];
+        if (questionStatus === 'correct') {
+            correctCount++;
+        } else if (questionStatus === 'incorrect') {
+            incorrectCount++;
+        }
+    }
+    
+    // 计算正确率（取整，不显示小数）
+    // 只计算已答题目的正确率：正确数 / (正确数 + 错误数)
+    const totalAnswered = correctCount + incorrectCount;
+    const overallAccuracy = totalAnswered > 0 
+        ? Math.round((correctCount / totalAnswered) * 100) 
         : 0;
+    
+    // 调试信息（可以在控制台查看）
+    console.log(`[${category}] 统计范围: ${startIndex}-${endIndex}, 正确: ${correctCount}, 错误: ${incorrectCount}, 正确率: ${overallAccuracy}%`);
     
     // 更新统计信息内容
     statsContainer.innerHTML = `
@@ -476,7 +887,7 @@ function displayDetailedStats(card: HTMLElement, category: string): void {
             </div>
             <div style="flex: 1; min-width: 120px; padding: 8px; background: white; border-radius: 5px;">
                 <div style="font-size: 12px; color: #666;">最佳成绩</div>
-                <div style="font-size: 18px; font-weight: bold;">${categoryHistory.bestScore}/3</div>
+                <div style="font-size: 18px; font-weight: bold;">${categoryHistory.bestScore}/${totalQuestions}</div>
             </div>
             <div style="flex: 1; min-width: 120px; padding: 8px; background: white; border-radius: 5px;">
                 <div style="font-size: 12px; color: #666;">总体正确率</div>
