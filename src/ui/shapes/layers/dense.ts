@@ -37,6 +37,21 @@ export class Dense extends ActivationLayer {
         line.appendChild(value);
         //将 line（包含标签和输入框）添加到 paramBox 中
         this.paramBox.append(line);
+        
+        // 如果是占位层（HiddenStatePrev），添加占位层标记
+        if (this.layerType === "HiddenStatePrev") {
+            const info = document.createElement("div");
+            info.className = "paramline";
+            info.style.color = "#999";
+            info.style.fontSize = "11px";
+            info.style.fontStyle = "italic";
+            info.style.marginTop = "5px";
+            info.style.paddingTop = "5px";
+            info.style.borderTop = "1px solid #ddd";
+            info.innerHTML = "⚠️ 占位层（用于拓扑排序和循环连接可视化）";
+            this.paramBox.appendChild(info);
+        }
+        
         this.focusing();
     }
 

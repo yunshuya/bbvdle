@@ -526,8 +526,11 @@ export abstract class Layer extends Draggable {
 
     protected focusing(): void {
         for (const line of this.paramBox.children) {
-            ( line.children[1] as HTMLInputElement).onfocus = this.toggleFocus.bind(line.children[1]);
-            ( line.children[1] as HTMLInputElement).onblur = this.toggleFocus.bind(line.children[1]);
+            const inputElement = line.children[1] as HTMLInputElement;
+            if (inputElement && inputElement instanceof HTMLInputElement) {
+                inputElement.onfocus = this.toggleFocus.bind(inputElement);
+                inputElement.onblur = this.toggleFocus.bind(inputElement);
+            }
         }
     }
 
