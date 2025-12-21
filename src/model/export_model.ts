@@ -13,6 +13,7 @@ import { Dropout } from "../ui/shapes/layers/dropout";
 import { Flatten } from "../ui/shapes/layers/flatten";
 import { Input } from "../ui/shapes/layers/input";
 import { MaxPooling2D } from "../ui/shapes/layers/maxpooling";
+import { Multiply } from "../ui/shapes/layers/multiply";
 import { Output } from "../ui/shapes/layers/output";
 import { Point } from "../ui/shapes/shape";
 import { IHyperparameterData } from "./params_object";
@@ -242,6 +243,8 @@ function createLayerInstanceFromName(svgData: IDraggableData, lj: ILayerJson): L
                     layer = new Dropout(location); break;
                 case "Add":
                     layer = new Add(location); break;
+                case "Multiply":
+                    layer = new Multiply(location); break;
                 default:
                      displayError(new Error(`The specified layer "${lj}" was not recognized. `));
             }

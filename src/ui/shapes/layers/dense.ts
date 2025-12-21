@@ -64,6 +64,33 @@ export class Dense extends ActivationLayer {
     }
 
     public generateTfjsLayer(): void {
+        // 检查是否为可视化占位层（HiddenStatePrev 或 CellStatePrev）
+        // 这些层不应该参与实际的模型构建，它们只是用于可视化循环连接
+        if (this.layerType === "HiddenStatePrev" || this.layerType === "CellStatePrev") {
+            // 对于占位层，我们需要创建一个占位符张量，但不影响实际训练
+            // 方法：使用父层的输出作为占位符（如果存在）
+            // 如果没有父层，创建一个零张量
+            let parent: Layer = null;
+            for (const p of this.parents) { 
+                parent = p; 
+                break; 
+            }
+            
+            if (parent) {
+                // 使用父层的输出作为占位符，但确保形状正确
+                const parentLayer = parent.getTfjsLayer();
+                // 创建一个与父层输出形状相同的占位符
+                // 对于时序数据，如果父层是 Flatten，输出是 [batch, timesteps*features]
+                // 我们需要创建一个 [batch, units] 的占位符
+                this.tfjsLayer = this.tfjsEmptyLayer({units: this.parameterDefaults.units}).apply(parentLayer);
+            } else {
+                // 如果没有父层，创建一个零张量占位符
+                // 这种情况不应该发生，但为了安全起见
+                throw new Error(`占位层 ${this.layerType} 必须有一个父层`);
+            }
+            return;
+        }
+        
         // 检测是否为时序数据（回归任务）
         const isTimeSeries = dataset instanceof AirPassengersData;
         
@@ -72,8 +99,24 @@ export class Dense extends ActivationLayer {
         const userParams = this.getParams();
         
         // 将用户配置的参数合并到默认参数中
+        // 注意：如果 userParams 中的值为空字符串或未定义，则使用 parameterDefaults 中的值
         for (const param of Object.keys(userParams)) {
-            parameters[param] = userParams[param];
+            if (userParams[param] !== undefined && userParams[param] !== null && userParams[param] !== "") {
+                // 对于 units 参数，确保使用正确的类型（整数）
+                if (param === "units") {
+                    const unitsValue = parseInt(userParams[param], 10);
+                    if (!isNaN(unitsValue) && unitsValue > 0) {
+                        parameters[param] = unitsValue;
+                    }
+                } else {
+                    parameters[param] = userParams[param];
+                }
+            }
+        }
+        
+        // 确保 units 有值（优先使用 parameterDefaults，如果 userParams 中没有有效值）
+        if (!parameters.units || parameters.units === "" || isNaN(parseInt(parameters.units, 10))) {
+            parameters.units = this.parameterDefaults.units || 32;
         }
         
         // 检查是否连接到 Output 层
@@ -85,8 +128,9 @@ export class Dense extends ActivationLayer {
             }
         }
         
-        // 对于时序数据，强制设置units=1（回归任务）
-        if (isTimeSeries) {
+        // 对于时序数据，只有在连接到 Output 层时才强制设置units=1（回归任务）
+        // 注意：不是所有时序数据的 Dense 层都应该设置为 1，只有输出层才需要
+        if (isTimeSeries && isConnectedToOutput) {
             parameters.units = 1;
         } else if (isConnectedToOutput) {
             // 如果连接到 Output 层且不是时序数据，根据数据集设置正确的类别数

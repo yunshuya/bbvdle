@@ -1,5 +1,5 @@
 import { IDraggableData } from "./app";
-import { Activation, Relu, Tanh } from "./shapes/activation";
+import { Activation, Relu, Sigmoid, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Layer } from "./shapes/layer";
 import { Add } from "./shapes/layers/add";
@@ -11,6 +11,7 @@ import { Dropout } from "./shapes/layers/dropout";
 import { Flatten } from "./shapes/layers/flatten";
 import { LSTM } from "./shapes/layers/lstm";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
+import { Multiply } from "./shapes/layers/multiply";
 import { Point } from "./shapes/shape";
 import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
@@ -28,9 +29,11 @@ export function resetWorkspace(svgData: IDraggableData): void {
     if (svgData.input != null) {
         svgData.input.setPosition(svgData.input.defaultLocation);
         svgData.input.wires.forEach((w) => w.delete());
+        svgData.input.deleteCircularWires();  // 清理循环连接
     }
     if (svgData.output != null) {
         svgData.output.setPosition(svgData.output.defaultLocation);
+        svgData.output.deleteCircularWires();  // 清理循环连接
     }
 
     // Remove all other layers
@@ -613,4 +616,410 @@ export function lstmTemplate(svgData: IDraggableData): void {
         svgData.draggable.push(lstmRelu);
     }
     svgData.draggable.push(dense);
+}
+
+/**
+ * LSTM结构模板 - 用于训练AirPassengers数据集
+ * 展示LSTM内部结构的关键组件，同时使用实际的LSTM层进行训练
+ * 前端显示名称：LSTM结构模版
+ * 
+ * 设计思路：
+ * 1. 使用实际的LSTM层进行训练（确保能正确工作）
+ * 2. 添加可视化组件展示LSTM内部结构概念
+ * 3. 使用循环连接展示时间步之间的数据流
+ * 4. 确保能正确处理AirPassengers数据集（时序数据）
+ */
+export function lstmStructureTemplate(svgData: IDraggableData): void {
+    resetWorkspace(svgData);
+
+    const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
+
+    // 获取当前数据集类型
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+
+    // ========== 布局定义 ==========
+    // 左侧：输入
+    const inputPos = new Point(width * 0.1, height * 0.5);
+    
+    // 中间左侧：循环连接占位层（用于可视化）
+    const hiddenStatePrevPos = new Point(width * 0.25, height * 0.35);  // H_{t-1} 占位层
+    const cellStatePrevPos = new Point(width * 0.25, height * 0.65);     // C_{t-1} 占位层
+    
+    // 中间：LSTM层（实际训练层）
+    const lstmPos = new Point(width * 0.5, height * 0.5);
+    
+    // 右侧：输出层
+    const densePos = new Point(width * 0.75, height * 0.5);
+    const outputPos = new Point(width - 50, height * 0.5);
+
+    // ========== 创建实际训练层 ==========
+    
+    // 1. 输入层
+    svgData.input.setPosition(inputPos);
+    
+    // 2. LSTM层（实际训练层）
+    const lstm1: ActivationLayer = new LSTM(lstmPos);
+    lstm1.parameterDefaults.units = 64;  // 64个隐藏单元
+    lstm1.parameterDefaults.returnSequences = false;  // 只返回最后一个时间步的输出
+    lstm1.parameterDefaults.dropout = 0;  // 不使用dropout
+    if (isTimeSeries) {
+        lstm1.parameterDefaults.timestep = 12;  // AirPassengers默认使用12个时间步
+    }
+    
+    // 3. 输出层（Dense层）
+    const dense: ActivationLayer = new Dense(densePos);
+    if (isTimeSeries) {
+        // 时序预测任务：输出1个值（回归任务）
+        dense.parameterDefaults.units = 1;
+        // 回归任务不需要激活函数
+    } else {
+        // 分类任务：输出10个类别
+        dense.parameterDefaults.units = 10;
+        const denseRelu: Activation = new Relu(densePos);
+        dense.addActivation(denseRelu);
+        svgData.draggable.push(denseRelu);
+    }
+
+    // ========== 创建可视化组件（展示LSTM内部结构概念）==========
+    
+    // 前一时刻的状态占位层（用于可视化循环连接）
+    const hiddenStatePrev = new Dense(hiddenStatePrevPos);
+    hiddenStatePrev.parameterDefaults.units = 64;
+    hiddenStatePrev.layerType = "HiddenStatePrev";  // 标记为可视化层
+    
+    const cellStatePrev = new Dense(cellStatePrevPos);
+    cellStatePrev.parameterDefaults.units = 64;
+    cellStatePrev.layerType = "CellStatePrev";  // 标记为可视化层
+    
+    // ========== 连接实际训练流程 ==========
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    // 实际训练流程：Input -> LSTM -> Dense -> Output
+    svgData.input.addChild(lstm1);
+    lstm1.addChild(dense);
+    dense.addChild(svgData.output);
+    
+    // ========== 添加循环连接可视化 ==========
+    // 注意：这些循环连接仅用于可视化，不参与实际训练
+    // 从LSTM层循环连接到隐藏状态占位层（展示循环概念）
+    // 使用循环连接来展示 H_t 和 C_t 如何传递到下一时刻
+    lstm1.addCircularConnection(hiddenStatePrev, "H_t → H_{t+1}");
+    lstm1.addCircularConnection(cellStatePrev, "C_t → C_{t+1}");
+    
+    // 注意：
+    // 1. 实际的循环连接在LSTM层内部处理，这里只是可视化展示
+    // 2. 占位层（hiddenStatePrev, cellStatePrev）不在训练路径上，不会参与模型构建
+    // 3. 拓扑排序只会包含 Input -> LSTM -> Dense -> Output 路径
+    
+    // ========== 存储所有层 ==========
+    // 存储实际训练层
+    svgData.draggable.push(lstm1);
+    svgData.draggable.push(dense);
+    
+    // 存储可视化层（仅用于展示循环连接）
+    svgData.draggable.push(hiddenStatePrev);
+    svgData.draggable.push(cellStatePrev);
+    
+    console.log("LSTM结构模板已创建，适用于AirPassengers数据集训练");
+    console.log("训练流程: Input -> LSTM(64 units) -> Dense(1) -> Output");
+    if (isTimeSeries) {
+        console.log("数据集: AirPassengers (时序数据)");
+        console.log("输入形状: [12, 1] (12个时间步，1个特征)");
+        console.log("输出: 1个值 (回归任务)");
+    }
+}
+
+/**
+ * LSTM完整内部结构模板 - 完全展开LSTM的所有计算过程
+ * 展示遗忘门、输入门、输出门、候选记忆、记忆更新、隐藏状态更新等所有步骤
+ * 前端显示名称：LSTM完整内部结构
+ * 
+ * LSTM计算公式：
+ * 1. f_t = σ(W_f · [h_{t-1}, x_t] + b_f)  // 遗忘门
+ * 2. i_t = σ(W_i · [h_{t-1}, x_t] + b_i)  // 输入门
+ * 3. o_t = σ(W_o · [h_{t-1}, x_t] + b_o)  // 输出门
+ * 4. C̃_t = tanh(W_C · [h_{t-1}, x_t] + b_C)  // 候选记忆
+ * 5. C_t = f_t ⊙ C_{t-1} + i_t ⊙ C̃_t  // 记忆更新
+ * 6. h_t = o_t ⊙ tanh(C_t)  // 隐藏状态更新
+ */
+export function lstmFullInternalStructureTemplate(svgData: IDraggableData): void {
+    resetWorkspace(svgData);
+
+    // 自动设置数据集为 AirPassengers（用于时序数据训练）
+    // 先更新全局数据集
+    changeDataset("airpassengers");
+    
+    // 注意：populateParamBox 已经在 Layer 构造函数中调用过了
+    // 所以不需要再次调用，直接使用 setParams 更新参数即可
+    // setParams 方法会自动更新 paramBox 中的 select 元素
+    const params = new Map<string, any>();
+    params.set("dataset", "airpassengers");
+    svgData.input.setParams(params);
+
+    const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
+
+    // 获取当前数据集类型（现在应该是 airpassengers）
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+    
+    // 对于 LSTM 完整内部结构模板，自动设置 batch_size 为 1
+    // 这对于时序数据训练很重要，因为 batch_size=1 可以确保每个时间步都独立处理
+    model.params.batchSize = 1;
+    // 同时更新 HTML 输入框的值，确保 UI 显示一致
+    const batchSizeInput = document.getElementById("batchSize") as HTMLInputElement;
+    if (batchSizeInput) {
+        batchSizeInput.value = "1";
+    }
+    
+    console.log("LSTM完整内部结构模板：数据集已自动设置为 AirPassengers，batch_size 已自动设置为 1");
+
+    // ========== 布局定义（参考 ResNet 模板的紧凑布局，减少线条交叉）==========
+    // 左侧：输入和前一时刻的状态（紧凑垂直排列）
+    const inputPos = new Point(width * 0.15, height * 0.5);           // X_t
+    const hiddenStatePrevPos = new Point(width * 0.15, height * 0.38);  // H_{t-1}
+    const cellStatePrevPos = new Point(width * 0.15, height * 0.62);    // C_{t-1}
+    
+    // 对于时序数据，需要添加 Flatten 层将 3D [batch, timesteps, features] 转换为 2D [batch, timesteps*features]
+    // 对于非时序数据，不需要 Flatten
+    const flattenPos = isTimeSeries ? new Point(width * 0.20, height * 0.5) : null;
+    
+    // 第一层：合并输入（居中，连接 X_t 和 H_{t-1}）
+    const concatPos = new Point(width * 0.26, height * 0.44);          // [H_{t-1}, X_t]
+    
+    // 第二层：门控层（紧凑垂直排列，间距更小，参考 ResNet 风格）
+    const forgetGatePos = new Point(width * 0.38, height * 0.35);      // 遗忘门 F_t
+    const inputGatePos = new Point(width * 0.38, height * 0.44);      // 输入门 I_t
+    const outputGatePos = new Point(width * 0.38, height * 0.53);     // 输出门 O_t
+    const candidatePos = new Point(width * 0.38, height * 0.62);       // 候选记忆 C̃_t
+    
+    // 第三层：乘法操作（紧凑排列，与门控层对齐，减少交叉）
+    // Forget Multiply 需要连接 Forget Gate 和 C_{t-1}
+    const forgetMultPos = new Point(width * 0.50, height * 0.48);      // F_t ⊙ C_{t-1}
+    // Input Multiply 需要连接 Input Gate 和 Candidate
+    const inputMultPos = new Point(width * 0.50, height * 0.53);      // I_t ⊙ C̃_t
+    
+    // 第四层：记忆更新（居中，连接两个 Multiply）
+    const cellAddPos = new Point(width * 0.60, height * 0.50);         // C_t = F_t⊙C_{t-1} + I_t⊙C̃_t
+    
+    // 第五层：隐藏状态计算（紧凑排列，减少交叉）
+    const cellTanhPos = new Point(width * 0.70, height * 0.50);        // tanh(C_t)
+    // Output Multiply 需要连接 Output Gate 和 tanh(C_t)
+    const outputMultPos = new Point(width * 0.80, height * 0.47);     // O_t ⊙ tanh(C_t) = H_t
+    
+    // 右侧：输出
+    const denseOutputPos = new Point(width * 0.90, height * 0.47);     // 最终输出层
+    const outputPos = new Point(width - 30, height * 0.47);
+
+    // ========== 创建层 ==========
+    
+    // 1. 输入层
+    svgData.input.setPosition(inputPos);
+    
+    // 2. 对于时序数据，添加 Flatten 层（将 [batch, timesteps, features] 转换为 [batch, timesteps*features]）
+    let flattenLayer: Flatten | null = null;
+    if (isTimeSeries && flattenPos) {
+        flattenLayer = new Flatten(flattenPos);
+    }
+    
+    // 3. 前一时刻的状态（用于循环连接）
+    // 注意：这些是占位层，用于可视化。在实际训练中，它们不应该参与计算
+    // 但为了通过拓扑排序，我们需要让它们连接到 Input
+    const hiddenStatePrev = new Dense(hiddenStatePrevPos);
+    // 对于时序数据，hiddenStatePrev 的输出应该与 Flatten 的输出维度匹配
+    // Flatten 输出 [batch, timesteps*features] = [batch, 12*1] = [batch, 12]
+    // 所以 hiddenStatePrev 的 units 应该设置为 12（与 Flatten 输出匹配）
+    if (isTimeSeries) {
+        hiddenStatePrev.parameterDefaults.units = 12;  // 与 Flatten 输出匹配
+    } else {
+        hiddenStatePrev.parameterDefaults.units = 64;
+    }
+    hiddenStatePrev.layerType = "HiddenStatePrev";
+    
+    const cellStatePrev = new Dense(cellStatePrevPos);
+    // cellStatePrev 用于 forgetMultiply，需要与 C_{t-1} 的维度匹配
+    // 在 LSTM 中，C_t 的维度是 units（64），所以这里保持 64
+    cellStatePrev.parameterDefaults.units = 64;
+    cellStatePrev.layerType = "CellStatePrev";
+    
+    // 4. 合并输入和隐藏状态 [H_{t-1}, X_t]
+    const concatInput = new Concatenate(concatPos);
+    
+    // 4. 遗忘门：F_t = σ(W_f · [H_{t-1}, X_t] + b_f)
+    const forgetGate = new Dense(forgetGatePos);
+    forgetGate.parameterDefaults.units = 64;
+    // 更新 UI 中的 units 输入框值
+    const forgetGateParams = new Map<string, any>();
+    forgetGateParams.set("units", 64);
+    forgetGate.setParams(forgetGateParams);
+    const forgetSigmoid = new Sigmoid(forgetGatePos);
+    forgetGate.addActivation(forgetSigmoid);
+    
+    // 5. 输入门：I_t = σ(W_i · [H_{t-1}, X_t] + b_i)
+    const inputGate = new Dense(inputGatePos);
+    inputGate.parameterDefaults.units = 64;
+    const inputGateParams = new Map<string, any>();
+    inputGateParams.set("units", 64);
+    inputGate.setParams(inputGateParams);
+    const inputSigmoid = new Sigmoid(inputGatePos);
+    inputGate.addActivation(inputSigmoid);
+    
+    // 6. 输出门：O_t = σ(W_o · [H_{t-1}, X_t] + b_o)
+    const outputGate = new Dense(outputGatePos);
+    outputGate.parameterDefaults.units = 64;
+    const outputGateParams = new Map<string, any>();
+    outputGateParams.set("units", 64);
+    outputGate.setParams(outputGateParams);
+    const outputSigmoid = new Sigmoid(outputGatePos);
+    outputGate.addActivation(outputSigmoid);
+    
+    // 7. 候选记忆：C̃_t = tanh(W_C · [H_{t-1}, X_t] + b_C)
+    const candidateGate = new Dense(candidatePos);
+    candidateGate.parameterDefaults.units = 64;
+    const candidateGateParams = new Map<string, any>();
+    candidateGateParams.set("units", 64);
+    candidateGate.setParams(candidateGateParams);
+    const candidateTanh = new Tanh(candidatePos);
+    candidateGate.addActivation(candidateTanh);
+    
+    // 8. Multiply层：遗忘门操作 F_t ⊙ C_{t-1}
+    const forgetMultiply = new Multiply(forgetMultPos);
+    
+    // 9. Multiply层：输入门操作 I_t ⊙ C̃_t
+    const inputMultiply = new Multiply(inputMultPos);
+    
+    // 10. Add层：记忆更新 C_t = F_t ⊙ C_{t-1} + I_t ⊙ C̃_t
+    const cellAdd = new Add(cellAddPos);
+    
+    // 11. Tanh激活：tanh(C_t)
+    // 注意：在数学上，tanh(C_t) 是对 C_t 的每个元素应用 tanh 函数
+    // 这里使用 Dense 层 + Tanh 激活来近似表示（units 与 C_t 维度相同）
+    // 在实际训练中，这个 Dense 层会学习到合适的权重
+    const cellTanhLayer = new Dense(cellTanhPos);
+    cellTanhLayer.parameterDefaults.units = 64;  // 与 C_t 维度相同
+    const cellTanhParams = new Map<string, any>();
+    cellTanhParams.set("units", 64);
+    cellTanhLayer.setParams(cellTanhParams);
+    const cellTanhActivation = new Tanh(cellTanhPos);
+    cellTanhLayer.addActivation(cellTanhActivation);
+    
+    // 12. Multiply层：输出门操作 O_t ⊙ tanh(C_t) = H_t
+    const outputMultiply = new Multiply(outputMultPos);
+    
+    // 13. 输出层（Dense层）
+    const denseOutput = new Dense(denseOutputPos);
+    if (isTimeSeries) {
+        denseOutput.parameterDefaults.units = 1;  // 回归任务
+    } else {
+        denseOutput.parameterDefaults.units = 10;  // 分类任务
+        const denseRelu: Activation = new Relu(denseOutputPos);
+        denseOutput.addActivation(denseRelu);
+        svgData.draggable.push(denseRelu);
+    }
+    
+    // ========== 设置输入和输出位置（必须在连接之前）==========
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    // ========== 连接关系 ==========
+    
+    // 注意：hiddenStatePrev 和 cellStatePrev 是可视化占位层
+    // 为了通过拓扑排序检查，我们需要让它们也能追溯到 Input
+    // 但为了避免形状不匹配问题，我们让它们不参与实际的数据流
+    // 方法：让它们连接到 Input（或 Flatten），但不连接到 concatInput
+    
+    // 对于时序数据，Input -> Flatten -> Concat
+    // 对于非时序数据，Input -> Concat
+    if (isTimeSeries && flattenLayer) {
+        svgData.input.addChild(flattenLayer);
+        // 占位层连接到 Flatten 以通过拓扑排序
+        flattenLayer.addChild(hiddenStatePrev);
+        flattenLayer.addChild(cellStatePrev);
+        // concatInput 需要两个输入 [H_{t-1}, X_t]
+        // 时序数据：Flatten 输出 [batch, 12]，hiddenStatePrev 输出 [batch, 12]，可以 concat
+        flattenLayer.addChild(concatInput);
+        hiddenStatePrev.addChild(concatInput);
+    } else {
+        svgData.input.addChild(concatInput);
+        // 对于非时序数据，占位层连接到 Input 以通过拓扑排序
+        svgData.input.addChild(hiddenStatePrev);
+        svgData.input.addChild(cellStatePrev);
+        // 非时序数据：Input -> concatInput, hiddenStatePrev -> concatInput
+        hiddenStatePrev.addChild(concatInput);
+    }
+    
+    // 所有门控层都从合并输入接收数据
+    concatInput.addChild(forgetGate);
+    concatInput.addChild(inputGate);
+    concatInput.addChild(outputGate);
+    concatInput.addChild(candidateGate);
+    
+    // 遗忘门操作：F_t ⊙ C_{t-1}
+    forgetGate.addChild(forgetMultiply);
+    cellStatePrev.addChild(forgetMultiply);
+    
+    // 输入门操作：I_t ⊙ C̃_t
+    inputGate.addChild(inputMultiply);
+    candidateGate.addChild(inputMultiply);
+    
+    // 记忆更新：C_t = F_t⊙C_{t-1} + I_t⊙C̃_t
+    forgetMultiply.addChild(cellAdd);
+    inputMultiply.addChild(cellAdd);
+    
+    // 隐藏状态计算：H_t = O_t ⊙ tanh(C_t)
+    cellAdd.addChild(cellTanhLayer);  // C_t -> tanh(C_t)
+    outputGate.addChild(outputMultiply);
+    cellTanhLayer.addChild(outputMultiply);  // tanh(C_t) 和 O_t 相乘
+    
+    // 输出
+    outputMultiply.addChild(denseOutput);
+    denseOutput.addChild(svgData.output);
+    
+    // ========== 添加循环连接 ==========
+    // H_t 循环连接到 H_{t-1}（用于下一时刻）
+    outputMultiply.addCircularConnection(hiddenStatePrev, "H_t → H_{t+1}");
+    // C_t 循环连接到 C_{t-1}（用于下一时刻）
+    cellAdd.addCircularConnection(cellStatePrev, "C_t → C_{t+1}");
+    
+    // ========== 存储所有层 ==========
+    if (flattenLayer) {
+        svgData.draggable.push(flattenLayer);
+    }
+    svgData.draggable.push(hiddenStatePrev);
+    svgData.draggable.push(cellStatePrev);
+    svgData.draggable.push(concatInput);
+    svgData.draggable.push(forgetGate);
+    svgData.draggable.push(forgetSigmoid);
+    svgData.draggable.push(inputGate);
+    svgData.draggable.push(inputSigmoid);
+    svgData.draggable.push(outputGate);
+    svgData.draggable.push(outputSigmoid);
+    svgData.draggable.push(candidateGate);
+    svgData.draggable.push(candidateTanh);
+    svgData.draggable.push(forgetMultiply);
+    svgData.draggable.push(inputMultiply);
+    svgData.draggable.push(outputMultiply);
+    svgData.draggable.push(cellAdd);
+    svgData.draggable.push(cellTanhLayer);
+    svgData.draggable.push(cellTanhActivation);
+    svgData.draggable.push(denseOutput);
+    
+    console.log("LSTM完整内部结构模板已创建");
+    console.log("展示了所有门控机制和计算过程：");
+    console.log("1. 遗忘门 F_t = σ(W_f · [H_{t-1}, X_t] + b_f)");
+    console.log("2. 输入门 I_t = σ(W_i · [H_{t-1}, X_t] + b_i)");
+    console.log("3. 输出门 O_t = σ(W_o · [H_{t-1}, X_t] + b_o)");
+    console.log("4. 候选记忆 C̃_t = tanh(W_C · [H_{t-1}, X_t] + b_C)");
+    console.log("5. 记忆更新 C_t = F_t ⊙ C_{t-1} + I_t ⊙ C̃_t");
+    console.log("6. 隐藏状态 H_t = O_t ⊙ tanh(C_t)");
+    if (isTimeSeries) {
+        console.log("数据集: AirPassengers (时序数据)");
+        console.log("输入形状: [12, 1] (12个时间步，1个特征)");
+        console.log("输出: 1个值 (回归任务)");
+    }
 }

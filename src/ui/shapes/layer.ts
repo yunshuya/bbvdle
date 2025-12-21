@@ -9,6 +9,7 @@ import { windowProperties } from "../window";
 import { Draggable } from "./draggable";
 import { Point, Shape } from "./shape";
 import { Wire } from "./wire";
+import { CircularWire } from "./circularwire";
 
 
 export interface ILayerJson {
@@ -37,6 +38,7 @@ export abstract class Layer extends Draggable {
     public children: Set<Layer> = new Set();  // Predecessors (closer to the input layer)
     public parents: Set<Layer> = new Set();  // Successors (closer to the output layer)
     public wires: Set<Wire> = new Set();  // The line objects connecting this layer to other layers
+    public circularWires: Set<CircularWire> = new Set();  // The circular wire objects for recurrent connections
     public uid: number;  // Each layer gets a unique ID
     public shape: number[];  // The shape/dimensions of the layer.
 
@@ -184,6 +186,24 @@ export abstract class Layer extends Draggable {
         for (const wire of this.wires) {
             wire.updatePosition();
         }
+        
+        // 更新所有循环连接的位置
+        for (const cw of this.circularWires) {
+            cw.updatePosition();
+        }
+        
+        // 更新所有指向此层的循环连接
+        // 通过 svgData 访问所有层
+        for (const draggable of svgData.draggable) {
+            if (draggable instanceof Layer) {
+                for (const cw of draggable.circularWires) {
+                    // 检查循环连接的目标是否是当前层
+                    if (cw.dest === this) {
+                        cw.updatePosition();
+                    }
+                }
+            }
+        }
 
         if (windowProperties.selectedElement === this) {
             windowProperties.shapeTextBox.setPosition(this.getPosition());
@@ -193,6 +213,7 @@ export abstract class Layer extends Draggable {
 
     public raise(): void {
         this.wires.forEach((w) => w.raiseGroup());
+        this.circularWires.forEach((cw) => cw.raiseGroup());
         this.parents.forEach((p) => p.raiseGroup());
         this.children.forEach((c) => c.raiseGroup());
         this.raiseGroup();
@@ -262,9 +283,36 @@ export abstract class Layer extends Draggable {
        
     }
 
+    /**
+     * 添加循环连接（用于LSTM等循环结构）
+     * @param target 目标层（通常是同一层或前一时刻的层）
+     * @param labelText 可选的标签文本（如 "t+1"）
+     */
+    public addCircularConnection(target: Layer, labelText?: string): void {
+        // 检查是否已存在相同的循环连接
+        for (const cw of this.circularWires) {
+            if (cw.dest === target) {
+                return;  // 已存在，不重复添加
+            }
+        }
+
+        const circularWire = new CircularWire(this, target, labelText);
+        this.circularWires.add(circularWire);
+        target.circularWires.add(circularWire);
+    }
+
+    /**
+     * 删除所有循环连接
+     */
+    public deleteCircularWires(): void {
+        this.circularWires.forEach((cw) => cw.delete());
+        this.circularWires.clear();
+    }
+
     public delete(): void {
         super.delete();
         this.wires.forEach((w) => w.delete()); // deleting wires should delete layer connection sets
+        this.deleteCircularWires();  // 删除循环连接
     }
 
     public toJson(): ILayerJson {
