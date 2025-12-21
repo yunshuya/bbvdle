@@ -45,29 +45,29 @@ export function resetWorkspace(svgData: IDraggableData): void {
 export function defaultTemplate(svgData: IDraggableData): void {
     resetWorkspace(svgData);
 
+    // 默认模板应该使用 MNIST 数据集（图像分类任务）
+    // 如果之前其他模板（如 RNN/LSTM）设置了 airpassengers，需要重置为 MNIST
+    changeDataset("mnist");
+    const params = new Map<string, any>();
+    params.set("dataset", "mnist");
+    svgData.input.setParams(params);
+
     // Initialize each of the layers and activations
     const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
+    const width = canvasBoundingBox.width;
+    const height = canvasBoundingBox.height;
     
-    // 获取当前数据集类型
+    // 显式设置 Input 和 Output 层的位置
+    const inputPos = new Point(100, height / 2);
+    const outputPos = new Point(width - 100, height / 2);
+    svgData.input.setPosition(inputPos);
+    svgData.output.setPosition(outputPos);
+    
+    // 获取当前数据集类型（现在应该是 mnist）
     const currentDataset = svgData.input.getParams().dataset;
     console.log("defaultTemplate - 当前数据集类型:", currentDataset);
-    const isTimeSeries = currentDataset === "airpassengers";
     const isCifar10 = currentDataset === "cifar";  // 注意：Input层中CIFAR-10的值是"cifar"，不是"cifar10"
-    console.log("defaultTemplate - isCifar10:", isCifar10, "isTimeSeries:", isTimeSeries);
-    
-    // 根据数据集类型调整网络结构
-    if (isTimeSeries) {
-        // 时序数据：回归任务，输出1个值
-        // 注意：时序数据不应该使用 defaultTemplate，但为了兼容性保留此逻辑
-        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
-        const dense: ActivationLayer = new Dense(denseStartingPosition);
-        dense.parameterDefaults.units = 1;
-        
-        svgData.input.addChild(dense);
-        dense.addChild(svgData.output);
-        svgData.draggable.push(dense);
-        return;
-    }
+    console.log("defaultTemplate - isCifar10:", isCifar10);
     
     // 图像分类任务：根据数据集类型选择不同的网络结构
     if (isCifar10) {
@@ -83,11 +83,11 @@ export function defaultTemplate(svgData: IDraggableData): void {
             console.log("CIFAR-10 默认模板：学习率已自动设置为 0.005");
         }
         
-        const conv1StartingPosition = new Point(canvasBoundingBox.width / 5, canvasBoundingBox.height / 2.5);
-        const maxpoolStartingPosition = new Point(canvasBoundingBox.width / 2.8, canvasBoundingBox.height / 2.5);
-        const conv2StartingPosition = new Point(canvasBoundingBox.width / 2.8, canvasBoundingBox.height / 1.8);
-        const flatStartingPosition = new Point(canvasBoundingBox.width / 1.75, canvasBoundingBox.height / 2.5);
-        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
+        const conv1StartingPosition = new Point(width / 5, height / 2.5);
+        const maxpoolStartingPosition = new Point(width / 2.8, height / 2.5);
+        const conv2StartingPosition = new Point(width / 2.8, height / 1.8);
+        const flatStartingPosition = new Point(width / 1.75, height / 2.5);
+        const denseStartingPosition = new Point(width * 5 / 6.5, height / 2.5);
         
         const conv1: ActivationLayer = new Conv2D(conv1StartingPosition);
         const conv1Relu: Activation = new Relu(conv1StartingPosition);
@@ -132,9 +132,9 @@ export function defaultTemplate(svgData: IDraggableData): void {
     } else {
         // MNIST: 使用简单的网络结构（1个Conv2D + Flatten + Dense）
         // MNIST 是灰度图像，相对简单，一个卷积层就足够了
-        const convStartingPosition = new Point(canvasBoundingBox.width / 4, canvasBoundingBox.height / 2.5);
-        const flatStartingPosition = new Point(canvasBoundingBox.width / 1.75, canvasBoundingBox.height / 2.5);
-        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
+        const convStartingPosition = new Point(width / 4, height / 2.5);
+        const flatStartingPosition = new Point(width / 1.75, height / 2.5);
+        const denseStartingPosition = new Point(width * 5 / 6.5, height / 2.5);
         
         const conv: ActivationLayer = new Conv2D(convStartingPosition);
         const convRelu: Activation = new Relu(convStartingPosition);
@@ -393,22 +393,77 @@ export function rnnTemplate(svgData: IDraggableData): void {
         console.log("RNN 模板训练 AirPassengers：epochs 已自动设置为 100，学习率已自动设置为 0.0005");
     }
 
-    const inputPos = new Point(width / 5, height / 3);
-    const rnn1Pos = isTimeSeries ? new Point(width / 2.5, height / 2) : new Point(width / 2.5, height / 2);
-    const dropoutPos = isTimeSeries ? new Point(width / 1.8, height / 2) : new Point(width / 1.2, height / 2);
-    const densePos = new Point(width / 1.5, height / 2);
-    const outputPos = new Point(width - 100, height / 2);
-
-    // 对于时序数据（AirPassengers），数据已经是3D格式[12, 1]，不需要Reshape层
-    // 对于图像数据（MNIST/CIFAR），需要Reshape层
-    let reshape: Layer | null = null;
-    let dropout: Layer | null = null;
-    
-    if (!isTimeSeries) {
+    if (isTimeSeries) {
+        // ==================== 时序数据：RNN 结构（类似 ResNet 风格）====================
+        // 对于 AirPassengers 数据集，Input 层的输出是 [12, 1]（timeSteps, features）
+        // RNN 层可以直接处理这种格式，不需要 Reshape 层
+        // 创建一个简洁但清晰的网络结构，展示 RNN 的计算流程
+        
+        // 输入层位置（左侧）
+        const inputPos = new Point(width * 0.15, height * 0.5);
+        
+        // RNN 层位置（中间）
+        const rnn1Pos = new Point(width * 0.5, height * 0.5);
+        
+        // 最终输出层（右侧）
+        const finalDensePos = new Point(width * 0.75, height * 0.5);
+        const outputPos = new Point(width * 0.9, height * 0.5);
+        
+        // 创建真正的 RNN 层（核心，可以运行）- 处理整个序列
+        // RNN 层会自动处理 [12, 1] 格式的输入，无需 Reshape
+        const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
+        rnn1.parameterDefaults.units = 128;  // 增加容量以提高预测性能
+        rnn1.parameterDefaults.dropout = 0.2;  // 输入 dropout
+        rnn1.parameterDefaults.recurrentDropout = 0.1;  // 循环 dropout
+        // 添加 Tanh 激活函数积木块（用于可视化展示）
+        // 注意：TensorFlow.js 的 SimpleRNN 默认使用 tanh，添加外部 tanh 会覆盖默认值
+        // 这里添加是为了在前端可视化中展示 RNN 使用了 tanh 激活函数
+        const rnnTanh: Activation = new Tanh(rnn1Pos);
+        rnn1.addActivation(rnnTanh);
+        
+        // 最终输出层
+        const finalDense: ActivationLayer = new Dense(finalDensePos);
+        finalDense.parameterDefaults.units = 1;  // 回归任务，输出1个值
+        
+        // 构建网络结构：Input -> RNN -> Dense(1) -> Output
+        // Input 层输出 [12, 1]，RNN 层直接处理，无需 Reshape
+        svgData.input.setPosition(inputPos);
+        svgData.input.addChild(rnn1);  // RNN 层直接处理 [12, 1] 格式的输入
+        rnn1.addChild(finalDense);
+        finalDense.addChild(svgData.output);
+        svgData.output.setPosition(outputPos);
+        
+        // Store the new network
+        svgData.draggable.push(rnn1);
+        svgData.draggable.push(rnnTanh);
+        svgData.draggable.push(finalDense);
+        
+        console.log("=".repeat(80));
+        console.log("RNN 模板已创建（AirPassengers 数据集）");
+        console.log("网络结构：Input([12, 1]) -> RNN(128, dropout=0.2, recurrentDropout=0.1) -> Dense(1) -> Output");
+        console.log("\nRNN 内部计算流程（自动展开）：");
+        console.log("  时间步 0: h_0 = tanh(W_x·x_0 + W_h·h_{-1} + b)");
+        console.log("  时间步 1: h_1 = tanh(W_x·x_1 + W_h·h_0 + b)");
+        console.log("  ...");
+        console.log("  时间步 11: h_11 = tanh(W_x·x_11 + W_h·h_10 + b)");
+        console.log("  最终输出: y = Dense(h_11)");
+        console.log("\n注意：");
+        console.log("  - Input 层输出 [12, 1] 格式（timeSteps, features）");
+        console.log("  - RNN 层可以直接处理这种格式，无需 Reshape 层");
+        console.log("  - RNN 层会自动处理整个序列（12个时间步），权重在时间步间共享");
+        console.log("  - 类似 ResNet 的残差连接，RNN 通过循环连接传递隐藏状态");
+        console.log("=".repeat(80));
+    } else {
+        // 图像数据：Input -> Reshape -> RNN -> Dropout -> Dense(10) -> Output
+        const inputPos = new Point(width / 5, height / 3);
         const reshapePos = new Point(width / 4, height / 2);
+        const rnn1Pos = new Point(width / 2.5, height / 2);
+        const dropoutPos = new Point(width / 1.2, height / 2);
+        const densePos = new Point(width / 1.5, height / 2);
+        const outputPos = new Point(width - 100, height / 2);
         
         // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
-        reshape = new Reshape(reshapePos);
+        const reshape = new Reshape(reshapePos);
         if (currentDataset === "cifar") {
             // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
             reshape.parameterDefaults.targetShape1 = 32;
@@ -419,68 +474,20 @@ export function rnnTemplate(svgData: IDraggableData): void {
             reshape.parameterDefaults.targetShape2 = 28;
         }
         
-        dropout = new Dropout(dropoutPos);
-        // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
+        const dropout = new Dropout(dropoutPos);
         dropout.parameterDefaults.rate = 0.2;
-    } else {
-        // 对于图像数据，添加 Dropout 层
-        dropout = new Dropout(dropoutPos);
-        // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
-        dropout.parameterDefaults.rate = 0.2;
-    }
-    
-    const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
-    // 对于时序数据，增加 RNN units 以提高模型容量（从 64 增加到 128）
-    if (isTimeSeries) {
-        rnn1.parameterDefaults.units = 128;  // 增加容量以提高预测性能
-        // 对于时序数据，调整 RNN 层内部的 dropout 参数，而不是添加外部 Dropout 层
-        // dropout: 在输入到 RNN 单元时应用（每个时间步的外部输入）
-        // recurrentDropout: 在 RNN 的循环连接上应用（前一时间步的隐藏状态）
-        // 注意：RNN 层内部的 dropout 已经提供了足够的正则化，不需要额外的 Dropout 层
-        rnn1.parameterDefaults.dropout = 0.2;  // 增加输入 dropout 以提高泛化能力
-        rnn1.parameterDefaults.recurrentDropout = 0.1;  // 保持较小的循环 dropout，避免梯度问题
-    } else {
-        rnn1.parameterDefaults.units = 64;  // 图像分类任务保持 64
-        // 图像分类任务保持默认的 dropout 设置
-    }
-    // 为RNN层添加tanh激活函数（RNN的默认激活函数，比ReLU更适合序列数据）
-    const rnnTanh: Activation = new Tanh(rnn1Pos);
-    
-    const dense: ActivationLayer = new Dense(densePos);
-    if (isTimeSeries) {
-        // 时序数据：回归任务，输出1个值
-        dense.parameterDefaults.units = 1;
-    } else {
-        // 图像数据：分类任务，输出10个类别
-        dense.parameterDefaults.units = 10;
-    }
-    // 注意：Dense层不使用激活函数，因为Output层会自动应用softmax（分类任务）
-    // 对于回归任务（时序数据），Output层不会应用softmax
-
-    // Add activations
-    rnn1.addActivation(rnnTanh);
-    // Dense层不添加激活函数，让Output层处理softmax（分类任务）
-
-    // Add relationships among layers
-    svgData.input.setPosition(inputPos);
-    svgData.output.setPosition(outputPos);
-    
-    if (isTimeSeries) {
-        // 时序数据：Input -> RNN(128, dropout=0.2, recurrentDropout=0.1) -> Dense(1) -> Output
-        // 注意：RNN 层内部的 dropout 参数已经提供了足够的正则化
-        // - dropout: 在输入到 RNN 单元时应用（每个时间步的外部输入）
-        // - recurrentDropout: 在 RNN 的循环连接上应用（前一时间步的隐藏状态）
-        // 不需要额外的 Dropout 层，避免过度正则化
-        svgData.input.addChild(rnn1);
-        rnn1.addChild(dense);
-        dense.addChild(svgData.output);
         
-        // Store the new network
-        svgData.draggable.push(rnn1);
-        svgData.draggable.push(rnnTanh);
-        svgData.draggable.push(dense);
-    } else {
-        // 图像数据：Input -> Reshape -> RNN -> Dropout -> Dense(10) -> Output
+        const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
+        rnn1.parameterDefaults.units = 64;  // 图像分类任务保持 64
+        const rnnTanh: Activation = new Tanh(rnn1Pos);
+        rnn1.addActivation(rnnTanh);
+        
+        const dense: ActivationLayer = new Dense(densePos);
+        dense.parameterDefaults.units = 10;  // 图像数据：分类任务，输出10个类别
+        
+        // Add relationships among layers
+        svgData.input.setPosition(inputPos);
+        svgData.output.setPosition(outputPos);
         svgData.input.addChild(reshape);
         reshape.addChild(rnn1);
         rnn1.addChild(dropout);

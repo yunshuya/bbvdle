@@ -227,45 +227,81 @@ export class MnistData extends ImageData {
         const img = new Image();
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        const imgRequest = new Promise<Float32Array>((resolve, _) => {
+        const imgRequest = new Promise<Float32Array>((resolve, reject) => {
             img.crossOrigin = "";
             img.onload = () => {
-                img.width = img.naturalWidth;
-                img.height = img.naturalHeight;
+                try {
+                    img.width = img.naturalWidth;
+                    img.height = img.naturalHeight;
 
-                const datasetBytesBuffer = new ArrayBuffer(NUM_DATASET_ELEMENTS * this.IMAGE_SIZE * 4);
+                    const datasetBytesBuffer = new ArrayBuffer(NUM_DATASET_ELEMENTS * this.IMAGE_SIZE * 4);
 
-                const chunkSize = 5000;
-                canvas.width = img.width;
-                canvas.height = chunkSize;
+                    const chunkSize = 5000;
+                    canvas.width = img.width;
+                    canvas.height = chunkSize;
 
-                for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
-                    const datasetBytesView = new Float32Array(
-                        datasetBytesBuffer, i * this.IMAGE_SIZE * chunkSize * 4,
-                        this.IMAGE_SIZE * chunkSize);
-                    ctx.drawImage(
-                        img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width,
-                        chunkSize);
+                    for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
+                        const datasetBytesView = new Float32Array(
+                            datasetBytesBuffer, i * this.IMAGE_SIZE * chunkSize * 4,
+                            this.IMAGE_SIZE * chunkSize);
+                        ctx.drawImage(
+                            img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width,
+                            chunkSize);
 
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-                    for (let j = 0; j < imageData.data.length / 4; j++) {
-                        // All channels hold an equal value since the image is grayscale, so
-                        // just read the red channel.
-                        datasetBytesView[j] = imageData.data[j * 4] / 255;
+                        for (let j = 0; j < imageData.data.length / 4; j++) {
+                            // All channels hold an equal value since the image is grayscale, so
+                            // just read the red channel.
+                            datasetBytesView[j] = imageData.data[j * 4] / 255;
+                        }
                     }
-                }
-                const dataImages = new Float32Array(datasetBytesBuffer);
+                    const dataImages = new Float32Array(datasetBytesBuffer);
 
-                resolve(dataImages);
+                    resolve(dataImages);
+                } catch (error) {
+                    console.error("MNIST 图片处理错误:", error);
+                    reject(new Error(`MNIST 图片处理失败: ${error.message}`));
+                }
             };
+            img.onerror = (error) => {
+                console.error("MNIST 图片加载失败:", error);
+                reject(new Error(`无法加载 MNIST 图片: ${MNIST_IMAGES_SPRITE_PATH}`));
+            };
+            // 设置超时，防止无限等待
+            setTimeout(() => {
+                if (!img.complete) {
+                    reject(new Error(`MNIST 图片加载超时: ${MNIST_IMAGES_SPRITE_PATH}`));
+                }
+            }, 60000); // 60秒超时
             img.src = MNIST_IMAGES_SPRITE_PATH;
         });
 
-        const labelsRequest = fetch(MNIST_LABELS_PATH);
-        const [datasetImages, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
+        const labelsRequest = fetch(MNIST_LABELS_PATH).catch((error) => {
+            console.error("MNIST 标签加载失败:", error);
+            throw new Error(`无法加载 MNIST 标签: ${MNIST_LABELS_PATH}`);
+        });
+        
+        let datasetImages: Float32Array;
+        let labelsResponse: Response;
+        try {
+            [datasetImages, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
+        } catch (error) {
+            console.error("MNIST 数据加载失败:", error);
+            document.getElementById("loadingDataTab").style.display = "none";
+            this.dataLoaded = false; // 重置加载状态，允许重试
+            throw error;
+        }
 
-        const datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+        let datasetLabels: Uint8Array;
+        try {
+            datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+        } catch (error) {
+            console.error("MNIST 标签解析失败:", error);
+            document.getElementById("loadingDataTab").style.display = "none";
+            this.dataLoaded = false; // 重置加载状态，允许重试
+            throw new Error(`无法解析 MNIST 标签: ${error.message}`);
+        }
 
         // Slice the the images and labels into train and test sets.
         const trainImages = datasetImages.slice(0, this.IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
@@ -655,9 +691,21 @@ export function changeDataset(newDataset: string): void {
     }
     
     switch (newDataset) {
-        case "mnist": dataset = MnistData.Instance; break;
-        case "cifar": dataset = Cifar10Data.Instance; break;
-        case "airpassengers": dataset = AirPassengersData.Instance; break;
+        case "mnist": 
+            dataset = MnistData.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
+        case "cifar": 
+            dataset = Cifar10Data.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
+        case "airpassengers": 
+            dataset = AirPassengersData.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
     }
 
     // Set the image visualizations divs with class name identifiers
