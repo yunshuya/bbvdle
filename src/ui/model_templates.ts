@@ -17,6 +17,7 @@ import { Reshape } from "./shapes/layers/reshape";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 import { dataset } from "../model/data";
+import { model } from "../model/params_object";
 
 export function resetWorkspace(svgData: IDraggableData): void {
     // Deselect current element
@@ -46,48 +47,122 @@ export function defaultTemplate(svgData: IDraggableData): void {
 
     // Initialize each of the layers and activations
     const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
-    const convStartingPosition = new Point(canvasBoundingBox.width / 4, canvasBoundingBox.height / 2.5);
-    const flatStartingPosition = new Point(canvasBoundingBox.width / 1.75, canvasBoundingBox.height / 2.5);
-    const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
-    const conv: ActivationLayer = new Conv2D(convStartingPosition);
-    const convRelu: Activation = new Relu(convStartingPosition);
-
-    const flat: Layer = new Flatten(flatStartingPosition);
-    const dense: ActivationLayer = new Dense(denseStartingPosition);
-    const denseRelu: Activation = new Relu(denseStartingPosition);
-
-    // 获取当前数据集类型，设置正确的输出单元数
-    // 注意：defaultTemplate 主要用于图像分类任务（MNIST/CIFAR-10）
-    const currentDataset = svgData.input.getParams().dataset;
-    const isTimeSeries = currentDataset === "airpassengers";
     
+    // 获取当前数据集类型
+    const currentDataset = svgData.input.getParams().dataset;
+    console.log("defaultTemplate - 当前数据集类型:", currentDataset);
+    const isTimeSeries = currentDataset === "airpassengers";
+    const isCifar10 = currentDataset === "cifar";  // 注意：Input层中CIFAR-10的值是"cifar"，不是"cifar10"
+    console.log("defaultTemplate - isCifar10:", isCifar10, "isTimeSeries:", isTimeSeries);
+    
+    // 根据数据集类型调整网络结构
     if (isTimeSeries) {
         // 时序数据：回归任务，输出1个值
+        // 注意：时序数据不应该使用 defaultTemplate，但为了兼容性保留此逻辑
+        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
+        const dense: ActivationLayer = new Dense(denseStartingPosition);
         dense.parameterDefaults.units = 1;
-    } else {
-        // 图像数据：分类任务，根据数据集设置类别数
-        // 使用 dataset 的 NUM_CLASSES（MNIST 和 CIFAR-10 都是 10）
-        // 如果 dataset 尚未加载，使用默认值 10
-        const numClasses = (dataset && 'NUM_CLASSES' in dataset) ? dataset.NUM_CLASSES : 10;
-        dense.parameterDefaults.units = numClasses;
+        
+        svgData.input.addChild(dense);
+        dense.addChild(svgData.output);
+        svgData.draggable.push(dense);
+        return;
     }
-
-    // Add relationships among layers and activations
-    svgData.input.addChild(conv);
-    conv.addChild(flat);
-    conv.addActivation(convRelu);
-
-    flat.addChild(dense);
-
-    dense.addChild(svgData.output);
-    dense.addActivation(denseRelu);
-
-    // Store the new network
-    svgData.draggable.push(conv);
-    svgData.draggable.push(dense);
-    svgData.draggable.push(flat);
-    svgData.draggable.push(convRelu);
-    svgData.draggable.push(denseRelu);
+    
+    // 图像分类任务：根据数据集类型选择不同的网络结构
+    if (isCifar10) {
+        // CIFAR-10: 使用更深的网络结构（2个Conv2D + MaxPooling + Flatten + Dense）
+        // CIFAR-10 比 MNIST 更难，需要更强的特征提取能力
+        
+        // 自动设置学习率为 0.005（CIFAR-10 需要较小的学习率以获得更好的训练效果）
+        model.params.learningRate = 0.005;
+        // 同时更新 HTML 输入框的值，确保 UI 显示一致
+        const learningRateInput = document.getElementById("learningRate") as HTMLInputElement;
+        if (learningRateInput) {
+            learningRateInput.value = "0.005";
+            console.log("CIFAR-10 默认模板：学习率已自动设置为 0.005");
+        }
+        
+        const conv1StartingPosition = new Point(canvasBoundingBox.width / 5, canvasBoundingBox.height / 2.5);
+        const maxpoolStartingPosition = new Point(canvasBoundingBox.width / 2.8, canvasBoundingBox.height / 2.5);
+        const conv2StartingPosition = new Point(canvasBoundingBox.width / 2.8, canvasBoundingBox.height / 1.8);
+        const flatStartingPosition = new Point(canvasBoundingBox.width / 1.75, canvasBoundingBox.height / 2.5);
+        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
+        
+        const conv1: ActivationLayer = new Conv2D(conv1StartingPosition);
+        const conv1Relu: Activation = new Relu(conv1StartingPosition);
+        // CIFAR-10 使用更多的 filters 来提取彩色图像的特征
+        conv1.parameterDefaults.filters = 32;
+        
+        const maxpool: Layer = new MaxPooling2D(maxpoolStartingPosition);
+        
+        const conv2: ActivationLayer = new Conv2D(conv2StartingPosition);
+        const conv2Relu: Activation = new Relu(conv2StartingPosition);
+        conv2.parameterDefaults.filters = 64;
+        
+        const flat: Layer = new Flatten(flatStartingPosition);
+        const dense: ActivationLayer = new Dense(denseStartingPosition);
+        const denseRelu: Activation = new Relu(denseStartingPosition);
+        
+        // CIFAR-10 有 10 个类别
+        dense.parameterDefaults.units = 10;
+        
+        // Add relationships among layers and activations
+        svgData.input.addChild(conv1);
+        conv1.addChild(maxpool);
+        conv1.addActivation(conv1Relu);
+        
+        maxpool.addChild(conv2);
+        conv2.addActivation(conv2Relu);
+        
+        conv2.addChild(flat);
+        flat.addChild(dense);
+        dense.addChild(svgData.output);
+        dense.addActivation(denseRelu);
+        
+        // Store the new network
+        svgData.draggable.push(conv1);
+        svgData.draggable.push(conv2);
+        svgData.draggable.push(maxpool);
+        svgData.draggable.push(flat);
+        svgData.draggable.push(dense);
+        svgData.draggable.push(conv1Relu);
+        svgData.draggable.push(conv2Relu);
+        svgData.draggable.push(denseRelu);
+    } else {
+        // MNIST: 使用简单的网络结构（1个Conv2D + Flatten + Dense）
+        // MNIST 是灰度图像，相对简单，一个卷积层就足够了
+        const convStartingPosition = new Point(canvasBoundingBox.width / 4, canvasBoundingBox.height / 2.5);
+        const flatStartingPosition = new Point(canvasBoundingBox.width / 1.75, canvasBoundingBox.height / 2.5);
+        const denseStartingPosition = new Point(canvasBoundingBox.width * 5 / 6.5, canvasBoundingBox.height / 2.5);
+        
+        const conv: ActivationLayer = new Conv2D(convStartingPosition);
+        const convRelu: Activation = new Relu(convStartingPosition);
+        // MNIST 使用默认的 16 个 filters
+        
+        const flat: Layer = new Flatten(flatStartingPosition);
+        const dense: ActivationLayer = new Dense(denseStartingPosition);
+        const denseRelu: Activation = new Relu(denseStartingPosition);
+        
+        // MNIST 有 10 个类别
+        dense.parameterDefaults.units = 10;
+        
+        // Add relationships among layers and activations
+        svgData.input.addChild(conv);
+        conv.addChild(flat);
+        conv.addActivation(convRelu);
+        
+        flat.addChild(dense);
+        dense.addChild(svgData.output);
+        dense.addActivation(denseRelu);
+        
+        // Store the new network
+        svgData.draggable.push(conv);
+        svgData.draggable.push(dense);
+        svgData.draggable.push(flat);
+        svgData.draggable.push(convRelu);
+        svgData.draggable.push(denseRelu);
+    }
 }
 
 export function blankTemplate(svgData: IDraggableData): void {
