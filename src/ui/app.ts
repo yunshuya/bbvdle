@@ -2,11 +2,11 @@ import * as d3 from "d3";
 import { buildNetworkDAG, topologicalSort } from "../model/build_network";
 import { generateJulia, generatePython } from "../model/code_generation";
 import { changeDataset, dataset, AirPassengersData } from "../model/data";
-import { download, graphToJson } from "../model/export_model";
+import { download } from "../model/export_model";
 import { setupPlots, setupTestResults, showPredictions } from "../model/graphs";
 import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from "../model/mnist_model";
 import { model } from "../model/params_object";
-import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
+import { loadStateIfPossible } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
 import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate, lstmFullInternalStructureTemplate } from "./model_templates";
 import { Activation, Relu, Sigmoid, Softmax, Tanh } from "./shapes/activation";
@@ -30,7 +30,7 @@ import { Reshape } from "./shapes/layers/reshape";
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { Point } from "./shapes/shape";
-import { copyTextToClipboard, getSvgOriginalBoundingBox } from "./utils";
+import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
 import { switchTask, toggleTaskSteps,verifyStepCompletion,isTaskAlready, getCurrentTask } from './taskModule';
 import { appendMessage, fetchAiResponse } from './ai_assistant';
@@ -492,21 +492,93 @@ function setupIndividualOnClicks(): void {
         }
     });
 
-    document.getElementById("copyModel").addEventListener("click", () => {
-        changeDataset(svgData.input.getParams().dataset); // TODO change dataset should happen when the dataset changes
-        const state = graphToJson(svgData);
-        const baseUrl: string = window.location.href;
-        const urlParam: string = storeNetworkInUrl(state);
-        copyTextToClipboard(baseUrl + "#" + urlParam);
-    });
-
+    // 设置导出训练数据下拉菜单
+    const exportTrainingDataParent = document.getElementById("exportTrainingDataParent");
+    const exportTrainingDataMenu = document.getElementById("exportTrainingDataMenu");
+    
+    console.log("设置导出训练数据菜单:", { exportTrainingDataParent, exportTrainingDataMenu });
+    
+    if (exportTrainingDataParent && exportTrainingDataMenu) {
+        // 确保初始状态是隐藏的
+        exportTrainingDataMenu.style.display = "none";
+        
+        let hideTimeout: number | null = null;
+        
+        // 显示菜单
+        const showMenu = () => {
+            console.log("显示菜单");
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            exportTrainingDataMenu.style.display = "block";
+        };
+        
+        // 隐藏菜单（带延迟，避免鼠标移动时闪烁）
+        const hideMenu = () => {
+            hideTimeout = window.setTimeout(() => {
+                console.log("隐藏菜单");
+                exportTrainingDataMenu.style.display = "none";
+                hideTimeout = null;
+            }, 100); // 100ms 延迟，给鼠标移动到菜单的时间
+        };
+        
+        // 父元素鼠标进入时显示菜单
+        exportTrainingDataParent.addEventListener("mouseenter", () => {
+            console.log("鼠标进入父元素");
+            showMenu();
+        });
+        // 父元素鼠标离开时延迟隐藏菜单
+        exportTrainingDataParent.addEventListener("mouseleave", () => {
+            console.log("鼠标离开父元素");
+            hideMenu();
+        });
+        
+        // 下拉菜单鼠标进入时取消隐藏并保持显示
+        exportTrainingDataMenu.addEventListener("mouseenter", () => {
+            console.log("鼠标进入下拉菜单");
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            exportTrainingDataMenu.style.display = "block";
+        });
+        // 下拉菜单鼠标离开时隐藏
+        exportTrainingDataMenu.addEventListener("mouseleave", () => {
+            console.log("鼠标离开下拉菜单");
+            hideMenu();
+        });
+    } else {
+        console.error("无法找到导出训练数据菜单元素:", { exportTrainingDataParent, exportTrainingDataMenu });
+    }
+    
     const exportTrainingJsonBtn = document.getElementById("exportTrainingHistoryJson");
     if (exportTrainingJsonBtn) {
-        exportTrainingJsonBtn.addEventListener("click", () => exportTrainingHistory("json"));
+        exportTrainingJsonBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("导出 JSON 被点击");
+            exportTrainingHistory("json");
+            if (exportTrainingDataMenu) {
+                exportTrainingDataMenu.style.display = "none";
+            }
+        });
+    } else {
+        console.warn("未找到 exportTrainingHistoryJson 按钮");
     }
     const exportTrainingCsvBtn = document.getElementById("exportTrainingHistoryCsv");
     if (exportTrainingCsvBtn) {
-        exportTrainingCsvBtn.addEventListener("click", () => exportTrainingHistory("csv"));
+        exportTrainingCsvBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("导出 CSV 被点击");
+            exportTrainingHistory("csv");
+            if (exportTrainingDataMenu) {
+                exportTrainingDataMenu.style.display = "none";
+            }
+        });
+    } else {
+        console.warn("未找到 exportTrainingHistoryCsv 按钮");
     }
     const exportTrainingChartsBtn = document.getElementById("exportTrainingCharts");
     if (exportTrainingChartsBtn) {

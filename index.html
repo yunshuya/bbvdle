@@ -3740,7 +3740,14 @@
 			</div>
 			<div id="exportPython" class="select-option right-option">导出 Python</div>
 			<div id="exportJulia" class="select-option right-option">导出 Julia</div>
-			<div id="copyModel" class="select-option right-option">模型链接</div>
+			<div class="select-option right-option" id="exportTrainingDataParent" style="position: relative; cursor: pointer;">
+				<span>导出训练数据</span>
+				<div class="dropdown-content" id="exportTrainingDataMenu" style="position: absolute !important; right: 0 !important; top: 100% !important; margin-top: 5px; float: none !important; z-index: 1000 !important; pointer-events: auto; display: none; min-width: 150px;">
+					<div id="exportTrainingHistoryJson" class="select-option right-option" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(128, 128, 128, 0.3); pointer-events: auto;">导出 JSON</div>
+					<div id="exportTrainingHistoryCsv" class="select-option right-option" style="padding: 8px 12px; cursor: pointer; pointer-events: auto;">导出 CSV</div>
+				</div>
+			</div>
+			<div id="exportTrainingCharts" class="select-option right-option">导出训练图表</div>
 		</div>
 		<div id = 'networkParamshell'>
 

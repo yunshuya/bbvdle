@@ -268,7 +268,7 @@ function updateProgressUI(completionRate: number): void {
         // 创建进度文本
         progressText = document.createElement('div');
         progressText.id = 'taskProgressText';
-        progressText.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 5px;';
+        progressText.style.cssText = 'font-size: 12px; color: #4caf50; margin-bottom: 5px;';
         
         // 创建进度条
         progressBar = document.createElement('div');

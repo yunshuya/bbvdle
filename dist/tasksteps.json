@@ -18,7 +18,7 @@
     { "step": "连接‘测试模型’积木块，查看模型在测试集上的准确率，并通过图表积木块显示训练过程中的损失和准确率变化。", "requiredBlock": "None", "completed": false }
   ],
   "RNN": [
-    { "step": "模板中自动生成'Input'层和'Output'层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集MNIST。", "requiredBlock": "input", "completed": false },
+    { "step": "模板中自动生成'Input'层和'Output'层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集AirPassengers。", "requiredBlock": "input", "completed": false },
     { "step": "找到'Reshape'积木块，将其拖动并放置在'Input'块之后，设置Target Shape 1为28，Target Shape 2为28，将图像数据转换为序列格式。", "requiredBlock": "reshape", "completed": false },
     { "step": "找到'Recurrent'积木块，将其拖动并放置在'Reshape'块之后，设置单元数量为64，激活函数为tanh。", "requiredBlock": "recurrent", "completed": false, "parentLayer": "reshape" },
     { "step": "选择'Dropout'积木块，将其连接到'Recurrent'层之后，并设置dropout比例为0.2以防止过拟合。", "requiredBlock": "dropout", "completed": false },
