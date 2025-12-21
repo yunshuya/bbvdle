@@ -71,7 +71,11 @@ export class CircularWire {
         // 计算控制点，使曲线形成一个弧形
         // 控制点的x坐标在源和目标之间，y坐标向上偏移形成弧形
         const controlPointX = (sourceCenter.x + destCenter.x) / 2;
-        const controlPointY = Math.min(sourceCenter.y, destCenter.y) - 80;  // 向上偏移80像素形成弧形
+        // 根据标签判断是否是 H_t -> H_{t+1} 连接，如果是则使用更大的弧度
+        const isHiddenStateConnection = this.label && this.label.text() && 
+                                       (this.label.text().includes("H_t") || this.label.text().includes("H_{t+1}"));
+        const offsetY = isHiddenStateConnection ? 150 : 80;  // H_t -> H_{t+1} 使用更大的弧度（150像素）
+        const controlPointY = Math.min(sourceCenter.y, destCenter.y) - offsetY;
 
         // 计算起点和终点（从源层右侧，到目标层左侧）
         const startX = sourceCenter.x + 30;  // 源层右侧
@@ -99,7 +103,11 @@ export class CircularWire {
 
         // 计算角度：从控制点到终点的角度
         const controlPointX = (sourceCenter.x + destCenter.x) / 2;
-        const controlPointY = Math.min(sourceCenter.y, destCenter.y) - 80;
+        // 使用与 calculateCurvePath 相同的偏移量
+        const isHiddenStateConnection = this.label && this.label.text() && 
+                                       (this.label.text().includes("H_t") || this.label.text().includes("H_{t+1}"));
+        const offsetY = isHiddenStateConnection ? 150 : 80;
+        const controlPointY = Math.min(sourceCenter.y, destCenter.y) - offsetY;
         
         // 计算曲线在终点处的切线角度
         // 对于二次贝塞尔曲线，终点处的切线方向是从控制点到终点的方向
@@ -170,9 +178,15 @@ export class CircularWire {
             const sourceCenter = this.source.getPosition().add(this.source.center());
             const destCenter = this.dest.getPosition().add(this.dest.center());
             const controlPointX = (sourceCenter.x + destCenter.x) / 2;
-            const controlPointY = Math.min(sourceCenter.y, destCenter.y) - 80;
+            // 使用与 calculateCurvePath 相同的偏移量
+            const isHiddenStateConnection = this.label && this.label.text() && 
+                                           (this.label.text().includes("H_t") || this.label.text().includes("H_{t+1}"));
+            const offsetY = isHiddenStateConnection ? 150 : 80;
+            const controlPointY = Math.min(sourceCenter.y, destCenter.y) - offsetY;
+            // H_t -> H_{t+1} 标签更靠近曲线（减少偏移量）
+            const labelOffsetY = isHiddenStateConnection ? 5 : 10;  // H_t -> H_{t+1} 只偏移5像素，其他保持10像素
             this.label.attr("x", controlPointX)
-                      .attr("y", controlPointY - 10)
+                      .attr("y", controlPointY - labelOffsetY)
                       .attr("text-anchor", "middle");
         }
     }

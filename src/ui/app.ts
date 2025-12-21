@@ -8,7 +8,7 @@ import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
-import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate, lstmStructureTemplate, lstmFullInternalStructureTemplate } from "./model_templates";
+import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate, lstmFullInternalStructureTemplate } from "./model_templates";
 import { Activation, Relu, Sigmoid, Softmax, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Draggable } from "./shapes/draggable";
@@ -411,7 +411,6 @@ function createTemplate(template: string): void {
         case "resnet": resnetTemplate(svgData); break;
         case "rnn": rnnTemplate(svgData); break;
         case "lstm": lstmTemplate(svgData); break;
-        case "lstmStructure": lstmStructureTemplate(svgData); break;
         case "lstmFullInternal": lstmFullInternalStructureTemplate(svgData); break;
 
     }
