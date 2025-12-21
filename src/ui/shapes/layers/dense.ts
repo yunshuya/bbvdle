@@ -76,9 +76,27 @@ export class Dense extends ActivationLayer {
             parameters[param] = userParams[param];
         }
         
+        // 检查是否连接到 Output 层
+        let isConnectedToOutput = false;
+        for (const child of this.children) {
+            if (child.layerType === "Output") {
+                isConnectedToOutput = true;
+                break;
+            }
+        }
+        
         // 对于时序数据，强制设置units=1（回归任务）
         if (isTimeSeries) {
             parameters.units = 1;
+        } else if (isConnectedToOutput) {
+            // 如果连接到 Output 层且不是时序数据，根据数据集设置正确的类别数
+            // 这确保分类任务的输出层有正确的单元数
+            if (dataset && 'NUM_CLASSES' in dataset) {
+                parameters.units = dataset.NUM_CLASSES;
+            } else {
+                // 如果数据集尚未加载，使用默认值 10（MNIST 和 CIFAR-10 都是 10）
+                parameters.units = 10;
+            }
         }
         
         // 确保units是整数

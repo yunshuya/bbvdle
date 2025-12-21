@@ -68,9 +68,38 @@ export class Output extends ActivationLayer {
     }
 
     public generateTfjsLayer(): void {
-        // Output层仅作为模型输出标记，直接复用父层（通常是Dense层）的输出
-        // 不需要创建新的Dense层，因为Dense层已经在模型结构中独立定义
+        // Output层需要创建一个新的Dense层，根据数据集类型设置正确的输出单元数
+        // 检测是否为时序数据（回归任务）
+        const isTimeSeries = dataset instanceof AirPassengersData;
+        
+        // 使用parameterDefaults作为基础
+        const parameters = { ...this.parameterDefaults };
+        
+        // 根据数据集类型设置正确的units
+        if (isTimeSeries) {
+            // 时序数据：回归任务，输出1个值
+            parameters.units = 1;
+            // 回归任务不需要softmax激活函数
+            parameters.activation = undefined;
+        } else {
+            // 分类任务：根据数据集设置类别数
+            if (dataset && 'NUM_CLASSES' in dataset) {
+                parameters.units = dataset.NUM_CLASSES;
+            } else {
+                // 如果数据集尚未加载，使用默认值 10（MNIST 和 CIFAR-10 都是 10）
+                parameters.units = 10;
+            }
+            // 分类任务使用softmax激活函数
+            parameters.activation = "softmax";
+        }
+        
+        // 确保units是整数
+        parameters.units = parseInt(parameters.units, 10);
+
         let parent: Layer = null;
+        if (this.parents.size > 1) {
+            displayError(new Error("Output层不能有多个父层"));
+        }
         for (const p of this.parents) { 
             parent = p; 
             break; 
@@ -80,7 +109,7 @@ export class Output extends ActivationLayer {
             throw new Error("Output层必须有一个父层");
         }
 
-        // 直接复用父层的输出，无需重新创建Dense层
-        this.tfjsLayer = parent.getTfjsLayer();
+        // 创建新的Dense层，根据数据集类型设置正确的输出单元数和激活函数
+        this.tfjsLayer = this.tfjsEmptyLayer(parameters).apply(parent.getTfjsLayer());
     }
 }

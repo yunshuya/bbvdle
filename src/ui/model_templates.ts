@@ -16,6 +16,7 @@ import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
+import { dataset } from "../model/data";
 
 export function resetWorkspace(svgData: IDraggableData): void {
     // Deselect current element
@@ -54,6 +55,22 @@ export function defaultTemplate(svgData: IDraggableData): void {
     const flat: Layer = new Flatten(flatStartingPosition);
     const dense: ActivationLayer = new Dense(denseStartingPosition);
     const denseRelu: Activation = new Relu(denseStartingPosition);
+
+    // 获取当前数据集类型，设置正确的输出单元数
+    // 注意：defaultTemplate 主要用于图像分类任务（MNIST/CIFAR-10）
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+    
+    if (isTimeSeries) {
+        // 时序数据：回归任务，输出1个值
+        dense.parameterDefaults.units = 1;
+    } else {
+        // 图像数据：分类任务，根据数据集设置类别数
+        // 使用 dataset 的 NUM_CLASSES（MNIST 和 CIFAR-10 都是 10）
+        // 如果 dataset 尚未加载，使用默认值 10
+        const numClasses = (dataset && 'NUM_CLASSES' in dataset) ? dataset.NUM_CLASSES : 10;
+        dense.parameterDefaults.units = numClasses;
+    }
 
     // Add relationships among layers and activations
     svgData.input.addChild(conv);
@@ -111,6 +128,22 @@ export function resnetTemplate(svgData: IDraggableData): void {
     const dense: ActivationLayer = new Dense(densePos);
     const denseRelu: Activation = new Relu(densePos);
     const dropout: Layer = new Dropout(dropoutPos);
+
+    // 获取当前数据集类型，设置正确的输出单元数
+    // 注意：resnetTemplate 用于图像分类任务（MNIST/CIFAR-10）
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+    
+    if (isTimeSeries) {
+        // 时序数据：回归任务，输出1个值
+        dense.parameterDefaults.units = 1;
+    } else {
+        // 图像数据：分类任务，根据数据集设置类别数
+        // 使用 dataset 的 NUM_CLASSES（MNIST 和 CIFAR-10 都是 10）
+        // 如果 dataset 尚未加载，使用默认值 10
+        const numClasses = (dataset && 'NUM_CLASSES' in dataset) ? dataset.NUM_CLASSES : 10;
+        dense.parameterDefaults.units = numClasses;
+    }
 
     // Add activations to layers
     conv1.addActivation(conv1Relu);
@@ -184,6 +217,22 @@ export function complexTemplate(svgData: IDraggableData): void {
     const batchRelu2: Activation = new Relu(batchStartingPosition);
     const flat1: Flatten = new Flatten(flat1StartingPosition);
     const flat2: Flatten = new Flatten(flat2StartingPosition);
+
+    // 获取当前数据集类型，设置正确的输出单元数
+    // 注意：complexTemplate 用于图像分类任务（MNIST/CIFAR-10）
+    const currentDataset = svgData.input.getParams().dataset;
+    const isTimeSeries = currentDataset === "airpassengers";
+    
+    if (isTimeSeries) {
+        // 时序数据：回归任务，输出1个值
+        dense.parameterDefaults.units = 1;
+    } else {
+        // 图像数据：分类任务，根据数据集设置类别数
+        // 使用 dataset 的 NUM_CLASSES（MNIST 和 CIFAR-10 都是 10）
+        // 如果 dataset 尚未加载，使用默认值 10
+        const numClasses = (dataset && 'NUM_CLASSES' in dataset) ? dataset.NUM_CLASSES : 10;
+        dense.parameterDefaults.units = numClasses;
+    }
 
     // Add relationships among layers and activations
     // in -> conv, in -> conv2
