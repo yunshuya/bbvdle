@@ -65,7 +65,7 @@ function saveQuestionStatus(status: Record<number, 'correct' | 'incorrect' | 'un
 }
 
 // 获取题目状态
-function getQuestionStatus(): Record<number, 'correct' | 'incorrect' | 'unanswered'> {
+function getQuestionStatus(): Record<string | number, 'correct' | 'incorrect' | 'unanswered'> {
     const statusStr = localStorage.getItem('question_status');
     return statusStr ? JSON.parse(statusStr) : {};
 }
@@ -130,7 +130,7 @@ function updateSingleQuestionDisplay(questionIndex: number, isCorrect: boolean):
 }
 
 // 更新单个题目所属模块的统计
-function updateModuleStatsForQuestion(questionIndex: number, isCorrect: boolean): void {
+function updateModuleStatsForQuestion(questionIndex: number, _isCorrect: boolean): void {
     // 确定题目所属的模块
     let moduleKey = '';
     if (questionIndex >= 1 && questionIndex <= 30) {
@@ -407,7 +407,7 @@ export function initializeExerciseSystem(): void {
                 // 隐藏所有卡片区域
                 const allCardAreas = document.querySelectorAll(".exercise-questions-tab > div");
                 allCardAreas.forEach(area => {
-                    area.style.display = "none";
+                    (area as HTMLElement).style.display = "none";
                 });
                 
                 // 根据子类别显示对应的卡片区域
@@ -640,8 +640,7 @@ export function submitQuizAnswers(category: string): void {
 
     // 如果有未回答的题目，只显示提示，不显示正确答案，并阻止提交
     if (unansweredQuestions.length > 0) {
-        questions.forEach((qEl, index) => {
-            const questionIndex = index + 1;
+        questions.forEach((qEl) => {
             let selected: HTMLInputElement | null = null;
             const allInputs = qEl.querySelectorAll('input[type="radio"]');
             for (const input of allInputs) {
@@ -818,7 +817,7 @@ function displayDetailedStats(card: HTMLElement, category: string): void {
     
     // 直接从card中获取题目数量（更可靠）
     const questionsContainer = card.querySelector(".card-questions");
-    const questions = questionsContainer ? questionsContainer.querySelectorAll(".question") : [];
+    const questions: NodeListOf<Element> = questionsContainer ? questionsContainer.querySelectorAll(".question") : ([] as any);
     const totalQuestions = questions.length;
     
     // 根据category确定题目范围（用于统计正确率）
