@@ -203,14 +203,9 @@ export function renderLossPlot(): void {
   // 确定y轴标签
   let yLabel: string;
   if (isTimeSeries) {
-    // 对于时序数据，根据损失函数类型显示对应的标签
-    const lossFunction = model.params.loss;
-    if (lossFunction === "meanAbsoluteError") {
-      yLabel = "MAE (损失)";
-    } else {
-      // 默认使用MSE
-      yLabel = "MSE";
-    }
+    // 对于时序数据，显示"损失"而不是"MSE"或"MAE"
+    // 因为用户希望看到训练和验证损失曲线，而不是指标曲线
+    yLabel = "损失 (Loss)";
   } else {
     // 对于分类数据，显示通用的"Loss"
     yLabel = "Loss";
@@ -295,16 +290,21 @@ function canvasHeight(): number {
 
 export function setupPlots(): void {
   renderLossPlot();
-  renderAccuracyPlot();
   
   // 检测是否为时序数据
   const isTimeSeries = dataset instanceof AirPassengersData;
   if (!isTimeSeries) {
-    // 分类数据：显示混淆矩阵
+    // 分类数据：显示准确率图表和混淆矩阵
+    renderAccuracyPlot();
     renderConfusionMatrix();
     const confusionMatrixElement = document.getElementById("confusion-matrix-canvas");
     if (confusionMatrixElement) {
       confusionMatrixElement.style.display = "block";
+    }
+    // 显示准确率图表
+    const accuracyContainer = document.getElementById("accuracy-canvas");
+    if (accuracyContainer) {
+      accuracyContainer.style.display = "block";
     }
     // 隐藏验证集和测试集指标图表
     const metricsCanvas = document.getElementById("validation-test-metrics-canvas");
@@ -312,7 +312,13 @@ export function setupPlots(): void {
       metricsCanvas.style.display = "none";
     }
   } else {
-    // 时序数据：隐藏混淆矩阵，显示验证集和测试集指标图表（训练完成后会显示）
+    // 时序数据：只显示损失曲线，隐藏准确率图表（不再显示MAE曲线）
+    // 隐藏准确率图表容器
+    const accuracyContainer = document.getElementById("accuracy-canvas");
+    if (accuracyContainer) {
+      accuracyContainer.style.display = "none";
+    }
+    // 隐藏混淆矩阵
     const confusionMatrixElement = document.getElementById("confusion-matrix-canvas");
     if (confusionMatrixElement) {
       confusionMatrixElement.style.display = "none";
@@ -594,8 +600,10 @@ export function renderTimeSeriesPredictions(
         
         // 准备完整序列数据（训练集+验证集+测试集）
         // 注意：验证集是训练集的一部分，需要包含在完整序列中
-        // 但是，验证集的最后一个目标值索引是119，测试集的第一个目标值索引是132
-        // 中间120-131的数据是测试集第一个序列的输入数据，不是目标值
+        // 根据新的序列划分方式（前80%训练，后20%测试）：
+        // - 验证集的最后一个目标值索引应该是连续的
+        // - 测试集的第一个目标值索引应该紧接着验证集
+        // 如果存在间隙，说明是测试集第一个序列的输入数据，不是目标值
         // 为了完整显示，我们需要检查是否有间隙，如果有，需要填充原始数据
         
         // 检查验证集和测试集之间是否有间隙
@@ -621,6 +629,8 @@ export function renderTimeSeriesPredictions(
                 }
             }
             console.log(`检测到数据间隙: ${gapStart}-${gapEnd}，填充了${gapActualValues.length}个原始数据点`);
+            console.log(`间隙时间索引:`, gapTimeIndices);
+            console.log(`间隙真实值:`, gapActualValues);
         }
         
         // 合并所有数据：训练集 + 验证集 + 间隙原始数据 + 测试集
@@ -628,30 +638,64 @@ export function renderTimeSeriesPredictions(
         const fullPred = [...trainPredValues, ...valPredValues, ...gapPredValues, ...testPredValues];
         const fullTimeIndices = [...trainTimeIndices, ...valTimeIndices, ...gapTimeIndices, ...testTimeIndices];
         
-        // 过滤掉NaN值（对于可视化，我们可以保留NaN，但图表库可能不支持）
-        // 或者我们可以用前一个值或线性插值来填充
+        // 准备可视化数据
+        // 对于真实值：包含所有数据点（包括间隙）
         const fullActualData = fullTimeIndices.map((t, i) => ({x: t, y: fullActual[i]}));
+        
+        // 对于预测值：使用线性插值连接验证集的最后一个预测值和测试集的第一个预测值
+        // 这样可以避免显示错误的默认值，同时保持图表的连续性
         const fullPredData = fullTimeIndices.map((t, i) => {
-            // 如果预测值是NaN，使用前一个非NaN值（如果有）
             let predValue = fullPred[i];
+            
+            // 如果预测值是NaN（间隙部分），使用线性插值
             if (isNaN(predValue)) {
-                // 向前查找最近的非NaN值
+                // 找到前一个非NaN值（验证集的最后一个预测值）
+                let prevValue: number | null = null;
+                let prevIndex: number | null = null;
                 for (let j = i - 1; j >= 0; j--) {
                     if (!isNaN(fullPred[j])) {
-                        predValue = fullPred[j];
+                        prevValue = fullPred[j];
+                        prevIndex = j;
                         break;
                     }
                 }
-                // 如果找不到，向后查找
-                if (isNaN(predValue)) {
-                    for (let j = i + 1; j < fullPred.length; j++) {
-                        if (!isNaN(fullPred[j])) {
-                            predValue = fullPred[j];
-                            break;
-                        }
+                
+                // 找到后一个非NaN值（测试集的第一个预测值）
+                let nextValue: number | null = null;
+                let nextIndex: number | null = null;
+                for (let j = i + 1; j < fullPred.length; j++) {
+                    if (!isNaN(fullPred[j])) {
+                        nextValue = fullPred[j];
+                        nextIndex = j;
+                        break;
                     }
                 }
+                
+                // 如果前后都有值，使用线性插值
+                if (prevValue !== null && nextValue !== null && prevIndex !== null && nextIndex !== null) {
+                    const t1 = fullTimeIndices[prevIndex];
+                    const t2 = fullTimeIndices[nextIndex];
+                    const tCurrent = fullTimeIndices[i];
+                    
+                    // 线性插值：y = y1 + (y2 - y1) * (t - t1) / (t2 - t1)
+                    if (t2 !== t1) {
+                        predValue = prevValue + (nextValue - prevValue) * (tCurrent - t1) / (t2 - t1);
+                    } else {
+                        predValue = prevValue; // 如果时间相同，使用前一个值
+                    }
+                } else if (prevValue !== null) {
+                    // 如果只有前一个值，使用前一个值
+                    predValue = prevValue;
+                } else if (nextValue !== null) {
+                    // 如果只有后一个值，使用后一个值
+                    predValue = nextValue;
+                } else {
+                    // 如果都没有，使用0（不应该发生）
+                    predValue = 0;
+                    console.warn(`无法为时间点 ${t} 插值预测值`);
+                }
             }
+            
             return {x: t, y: predValue};
         });
         
@@ -666,12 +710,16 @@ export function renderTimeSeriesPredictions(
         console.log("  真实值范围:", Math.min(...valTrueValues).toFixed(2), "-", Math.max(...valTrueValues).toFixed(2));
         console.log("  预测值范围:", Math.min(...valPredValues).toFixed(2), "-", Math.max(...valPredValues).toFixed(2));
         console.log("  数据点数量:", valTrueData.length);
+        console.log("  验证集最后5个时间索引:", valTimeIndices.slice(-5));
+        console.log("  验证集最后5个预测值:", valPredValues.slice(-5));
         
         console.log("测试集数据准备完成:");
         console.log("  时间范围:", testTimeIndices[0], "-", testTimeIndices[testTimeIndices.length - 1]);
         console.log("  真实值范围:", Math.min(...testTrueValues).toFixed(2), "-", Math.max(...testTrueValues).toFixed(2));
         console.log("  预测值范围:", Math.min(...testPredValues).toFixed(2), "-", Math.max(...testPredValues).toFixed(2));
         console.log("  数据点数量:", testTrueData.length);
+        console.log("  测试集前5个时间索引:", testTimeIndices.slice(0, 5));
+        console.log("  测试集前5个预测值:", testPredValues.slice(0, 5));
         
         console.log("完整序列数据准备完成:");
         console.log("  时间范围:", fullTimeIndices[0], "-", fullTimeIndices[fullTimeIndices.length - 1]);

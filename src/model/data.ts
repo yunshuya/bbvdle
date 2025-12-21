@@ -227,45 +227,81 @@ export class MnistData extends ImageData {
         const img = new Image();
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        const imgRequest = new Promise<Float32Array>((resolve, _) => {
+        const imgRequest = new Promise<Float32Array>((resolve, reject) => {
             img.crossOrigin = "";
             img.onload = () => {
-                img.width = img.naturalWidth;
-                img.height = img.naturalHeight;
+                try {
+                    img.width = img.naturalWidth;
+                    img.height = img.naturalHeight;
 
-                const datasetBytesBuffer = new ArrayBuffer(NUM_DATASET_ELEMENTS * this.IMAGE_SIZE * 4);
+                    const datasetBytesBuffer = new ArrayBuffer(NUM_DATASET_ELEMENTS * this.IMAGE_SIZE * 4);
 
-                const chunkSize = 5000;
-                canvas.width = img.width;
-                canvas.height = chunkSize;
+                    const chunkSize = 5000;
+                    canvas.width = img.width;
+                    canvas.height = chunkSize;
 
-                for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
-                    const datasetBytesView = new Float32Array(
-                        datasetBytesBuffer, i * this.IMAGE_SIZE * chunkSize * 4,
-                        this.IMAGE_SIZE * chunkSize);
-                    ctx.drawImage(
-                        img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width,
-                        chunkSize);
+                    for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
+                        const datasetBytesView = new Float32Array(
+                            datasetBytesBuffer, i * this.IMAGE_SIZE * chunkSize * 4,
+                            this.IMAGE_SIZE * chunkSize);
+                        ctx.drawImage(
+                            img, 0, i * chunkSize, img.width, chunkSize, 0, 0, img.width,
+                            chunkSize);
 
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-                    for (let j = 0; j < imageData.data.length / 4; j++) {
-                        // All channels hold an equal value since the image is grayscale, so
-                        // just read the red channel.
-                        datasetBytesView[j] = imageData.data[j * 4] / 255;
+                        for (let j = 0; j < imageData.data.length / 4; j++) {
+                            // All channels hold an equal value since the image is grayscale, so
+                            // just read the red channel.
+                            datasetBytesView[j] = imageData.data[j * 4] / 255;
+                        }
                     }
-                }
-                const dataImages = new Float32Array(datasetBytesBuffer);
+                    const dataImages = new Float32Array(datasetBytesBuffer);
 
-                resolve(dataImages);
+                    resolve(dataImages);
+                } catch (error) {
+                    console.error("MNIST 图片处理错误:", error);
+                    reject(new Error(`MNIST 图片处理失败: ${error.message}`));
+                }
             };
+            img.onerror = (error) => {
+                console.error("MNIST 图片加载失败:", error);
+                reject(new Error(`无法加载 MNIST 图片: ${MNIST_IMAGES_SPRITE_PATH}`));
+            };
+            // 设置超时，防止无限等待
+            setTimeout(() => {
+                if (!img.complete) {
+                    reject(new Error(`MNIST 图片加载超时: ${MNIST_IMAGES_SPRITE_PATH}`));
+                }
+            }, 60000); // 60秒超时
             img.src = MNIST_IMAGES_SPRITE_PATH;
         });
 
-        const labelsRequest = fetch(MNIST_LABELS_PATH);
-        const [datasetImages, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
+        const labelsRequest = fetch(MNIST_LABELS_PATH).catch((error) => {
+            console.error("MNIST 标签加载失败:", error);
+            throw new Error(`无法加载 MNIST 标签: ${MNIST_LABELS_PATH}`);
+        });
+        
+        let datasetImages: Float32Array;
+        let labelsResponse: Response;
+        try {
+            [datasetImages, labelsResponse] = await Promise.all([imgRequest, labelsRequest]);
+        } catch (error) {
+            console.error("MNIST 数据加载失败:", error);
+            document.getElementById("loadingDataTab").style.display = "none";
+            this.dataLoaded = false; // 重置加载状态，允许重试
+            throw error;
+        }
 
-        const datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+        let datasetLabels: Uint8Array;
+        try {
+            datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
+        } catch (error) {
+            console.error("MNIST 标签解析失败:", error);
+            document.getElementById("loadingDataTab").style.display = "none";
+            this.dataLoaded = false; // 重置加载状态，允许重试
+            throw new Error(`无法解析 MNIST 标签: ${error.message}`);
+        }
 
         // Slice the the images and labels into train and test sets.
         const trainImages = datasetImages.slice(0, this.IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
@@ -303,11 +339,10 @@ export class AirPassengersData {
     
     // 为了兼容现有代码，提供这些属性
     // 对于LSTM，输入形状应该是[timeSteps, features]，即[12, 1]
-    // 注意：IMAGE_HEIGHT现在是动态的，会根据timestep参数变化
-    public get IMAGE_HEIGHT(): number { return this.timeSteps; }  // 时间步数（滑动窗口大小）
+    public readonly IMAGE_HEIGHT: number = 12;  // 时间步数（滑动窗口大小）
     public readonly IMAGE_WIDTH: number = 1;   // 特征数（单变量时序）
     public readonly IMAGE_CHANNELS: number = 1; // 保持兼容性
-    public get IMAGE_SIZE(): number { return this.timeSteps; }
+    public readonly IMAGE_SIZE: number = 12;
     public readonly NUM_CLASSES: number = 1;     // 回归任务，输出1个值
     public pythonName: string = "airpassengers";
     public datasetName: string = "AirPassengers";
@@ -373,25 +408,30 @@ export class AirPassengersData {
     }
     
     /**
-     * 设置时间窗口大小（timestep）
-     * 当LSTM层的timestep参数改变时调用此方法
+     * 设置时间步数（滑动窗口大小）
+     * 如果数据已经加载，需要重新加载数据以应用新的时间步数
      */
-    public setTimeSteps(newTimeSteps: number): void {
-        if (newTimeSteps > 0 && newTimeSteps <= 50) {
-            const oldTimeSteps = this.timeSteps;
-            this.timeSteps = newTimeSteps;
-            console.log(`时间窗口大小从 ${oldTimeSteps} 更新为 ${newTimeSteps}`);
-            // 如果数据已加载，标记为需要重新加载
-            if (this.dataLoaded) {
-                this.dataLoaded = false;
-            }
-        } else {
-            console.warn(`无效的timestep值: ${newTimeSteps}，应在1-50之间`);
+    public setTimeSteps(timeSteps: number): void {
+        if (timeSteps <= 0) {
+            throw new Error("时间步数必须大于0");
+        }
+        if (timeSteps >= this.rawData.length) {
+            throw new Error(`时间步数(${timeSteps})不能大于等于数据长度(${this.rawData.length})`);
+        }
+        
+        const wasLoaded = this.dataLoaded;
+        this.timeSteps = timeSteps;
+        
+        // 如果数据已经加载，需要重新加载以应用新的时间步数
+        if (wasLoaded) {
+            this.dispose();
+            // 注意：这里不自动调用load()，因为load()是异步的
+            // 调用者需要手动重新调用load()如果需要立即加载数据
         }
     }
-
+    
     /**
-     * 获取当前的时间窗口大小
+     * 获取当前时间步数
      */
     public getTimeSteps(): number {
         return this.timeSteps;
@@ -406,14 +446,16 @@ export class AirPassengersData {
     
     /**
      * 获取测试集的原始索引范围（用于时间轴）
+     * 注意：现在基于序列划分，测试集的第一个序列对应的原始数据索引需要重新计算
      */
     public getTestDataTimeRange(): {start: number, end: number} {
-        // 参考PyTorch代码：split=120，测试集从索引120开始
-        const splitIndex = 120;
+        // 计算全量序列数
+        const totalSequences = this.rawData.length - this.timeSteps; // 144-12=132
+        // 计算序列划分点（前80%训练）
+        const sequenceSplitIndex = Math.floor(totalSequences * 0.8); // 132*0.8≈105
         // 测试集的第一个序列对应的原始数据索引
-        // 测试集的第一个序列使用原始数据索引[splitIndex, splitIndex+timeSteps-1]
-        // 对应的目标值是索引splitIndex+timeSteps
-        const startIndex = splitIndex + this.timeSteps; // 120+12=132
+        // 序列索引sequenceSplitIndex对应的原始数据索引是sequenceSplitIndex + timeSteps（因为序列从索引0开始，对应原始数据索引timeSteps）
+        const startIndex = sequenceSplitIndex + this.timeSteps;
         return {
             start: startIndex, // 测试集的第一个目标值对应的原始数据索引
             end: this.rawData.length - 1 // 最后一个数据点
@@ -461,23 +503,22 @@ export class AirPassengersData {
             
             console.log(`AirPassengers数据归一化参数: min=${this.minValue}, max=${this.maxValue} (基于全量${this.rawData.length}个数据点)`);
 
-            // 参考PyTorch代码：先划分原始数据（split=120），再分别创建序列
-            // 这样可以确保训练集和测试集完全分离，避免数据泄露
-            const splitIndex = 120; // 参考代码：split = 120，前120个月训练，后24个月测试
+            // 第一步：创建全量序列（基于完整rawData）
+            // 这样可以确保所有序列都使用相同的归一化参数，避免数据泄露
+            const {sequences: allSequences, targets: allTargets} = this.createSequences(this.rawData, this.timeSteps);
+            // 全量序列数：144-12=132个
             
-            // 划分原始数据
-            const trainRawData = this.rawData.slice(0, splitIndex); // 前120个月
-            const testRawData = this.rawData.slice(splitIndex);     // 后24个月
-            
-            console.log(`原始数据划分: 训练集${trainRawData.length}个月, 测试集${testRawData.length}个月`);
+            console.log(`创建了${allSequences.length}个序列（基于全量${this.rawData.length}个数据点）`);
 
-            // 分别在训练集和测试集上创建序列
-            // 训练序列：120-12=108个序列
-            const {sequences: trainSequences, targets: trainTargets} = this.createSequences(trainRawData, this.timeSteps);
-            // 测试序列：24-12=12个序列
-            const {sequences: testSequences, targets: testTargets} = this.createSequences(testRawData, this.timeSteps);
+            // 第二步：划分训练/测试序列（时序划分，前80%训练）
+            // 注意：对于时序数据，必须严格按照时间顺序划分，不能随机划分
+            const splitIndex = Math.floor(allSequences.length * 0.8); // 132*0.8≈105
+            const trainSequences = allSequences.slice(0, splitIndex);
+            const trainTargets = allTargets.slice(0, splitIndex);
+            const testSequences = allSequences.slice(splitIndex);
+            const testTargets = allTargets.slice(splitIndex);
             
-            console.log(`序列创建: 训练集${trainSequences.length}个序列, 测试集${testSequences.length}个序列`);
+            console.log(`序列划分: 训练集${trainSequences.length}个序列, 测试集${testSequences.length}个序列`);
 
             // 转换为Tensor
             // 训练数据: [samples, timeSteps, features]
@@ -593,20 +634,27 @@ export class AirPassengersData {
 
     /**
      * 获取验证集的时间范围（用于可视化）
+     * 注意：现在基于序列划分，验证集来自训练集的末尾15%
      */
     public getValidationDataTimeRange(): {start: number, end: number} {
-        // 验证集来自训练集的末尾15%
-        // 训练集对应原始数据的前80%（split=120）
-        // 验证集是训练集的末尾15%，所以对应原始数据索引范围需要计算
-        const splitIndex = 120; // 训练/测试分割点
-        const fullTrainData = this.rawData.slice(0, splitIndex); // 前120个月
-        const totalTrainSequences = fullTrainData.length - this.timeSteps; // 108个序列
-        const valSize = Math.floor(totalTrainSequences * 0.15); // 约16个序列
-        const trainSize = totalTrainSequences - valSize; // 约92个序列
+        // 计算全量序列数
+        const totalSequences = this.rawData.length - this.timeSteps; // 144-12=132
+        // 计算序列划分点（前80%训练）
+        const sequenceSplitIndex = Math.floor(totalSequences * 0.8); // 132*0.8≈105
+        
+        // 训练集序列数（不包括验证集）
+        const totalTrainSequences = sequenceSplitIndex; // 105个序列
+        // 验证集序列数（训练集的末尾15%）
+        const valSize = Math.floor(totalTrainSequences * 0.15); // 约15个序列
+        // 实际训练序列数（不包括验证集）
+        const trainSize = totalTrainSequences - valSize; // 约90个序列
         
         // 验证集的第一个序列对应的原始数据索引
-        const startIndex = trainSize + this.timeSteps; // 92+12=104
-        const endIndex = splitIndex - 1; // 119（训练集的最后一个数据点）
+        // 序列索引trainSize对应的原始数据索引是trainSize + timeSteps
+        const startIndex = trainSize + this.timeSteps; // 90+12=102
+        // 验证集的最后一个目标值对应的原始数据索引
+        // 序列索引(sequenceSplitIndex-1)对应的原始数据索引是(sequenceSplitIndex-1) + timeSteps
+        const endIndex = (sequenceSplitIndex - 1) + this.timeSteps; // 104+12=116
         
         return {
             start: startIndex,
@@ -643,9 +691,21 @@ export function changeDataset(newDataset: string): void {
     }
     
     switch (newDataset) {
-        case "mnist": dataset = MnistData.Instance; break;
-        case "cifar": dataset = Cifar10Data.Instance; break;
-        case "airpassengers": dataset = AirPassengersData.Instance; break;
+        case "mnist": 
+            dataset = MnistData.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
+        case "cifar": 
+            dataset = Cifar10Data.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
+        case "airpassengers": 
+            dataset = AirPassengersData.Instance;
+            // 重置数据加载状态，确保重新加载数据
+            dataset.dataLoaded = false;
+            break;
     }
 
     // Set the image visualizations divs with class name identifiers
@@ -725,7 +785,6 @@ export function changeDataset(newDataset: string): void {
     }
     // 如果用户已经选择了合适的损失函数，不做任何更改，保持用户的选择
 }
-
 /**
  * 根据dataset类型更新visualizationMenu的显示
  * 当dataset为airpassengers时，隐藏分类菜单；当为其他dataset时，显示分类菜单
@@ -748,3 +807,4 @@ function updateVisualizationMenuForDataset(): void {
         classesCategory.style.display = "block";
     }
 }
+

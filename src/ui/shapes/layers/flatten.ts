@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
+import { displayError } from "../../error";
 import { ActivationLayer } from "../activationlayer";
 import { Layer } from "../layer";
 import { PathShape, Point } from "../shape";
@@ -26,5 +27,24 @@ export class Flatten extends Layer {
 
     public clone(): Flatten {
         return new Flatten();
+    }
+
+    public generateTfjsLayer(): void {
+        // Flatten 层将输入展平为 2D [batch, features]
+        let parent: Layer = null;
+        if (this.parents.size > 1) {
+            displayError(new Error("Flatten layer cannot have multiple parents"));
+        }
+        for (const p of this.parents) { 
+            parent = p; 
+            break; 
+        }
+        
+        if (!parent) {
+            throw new Error("Flatten layer must have a parent");
+        }
+        
+        const parentLayer = parent.getTfjsLayer();
+        this.tfjsLayer = this.tfjsEmptyLayer().apply(parentLayer);
     }
 }

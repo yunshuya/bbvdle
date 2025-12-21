@@ -1,5 +1,4 @@
-{
-    "compilerOptions": {
+{    "compilerOptions": {
         "outDir": "./built",
         "allowJs": false,
         "target": "es6",
@@ -10,6 +9,7 @@
         "noImplicitReturns": true,
         "noImplicitAny": true,
 	    "moduleResolution": "node",
+        "skipLibCheck": true,
     },
     "include": [
         "./src/**/*",

@@ -8,7 +8,7 @@ import { train, getTrainingHistory, stopTrainingHandler, resetTrainingFlag} from
 import { model } from "../model/params_object";
 import { loadStateIfPossible, storeNetworkInUrl } from "../model/save_state_url";
 import { clearError, displayError } from "./error";
-import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate } from "./model_templates";
+import { blankTemplate, defaultTemplate, resnetTemplate, rnnTemplate, lstmTemplate, lstmFullInternalStructureTemplate } from "./model_templates";
 import { Activation, Relu, Sigmoid, Softmax, Tanh } from "./shapes/activation";
 import { ActivationLayer } from "./shapes/activationlayer";
 import { Draggable } from "./shapes/draggable";
@@ -23,6 +23,7 @@ import { Flatten } from "./shapes/layers/flatten";
 import { Input } from "./shapes/layers/input";
 import { LSTM } from "./shapes/layers/lstm";
 import { MaxPooling2D } from "./shapes/layers/maxpooling";
+import { Multiply } from "./shapes/layers/multiply";
 import { Output } from "./shapes/layers/output";
 import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
@@ -37,6 +38,7 @@ import { authService } from './auth/authService';
 import { authDialog } from './auth/authDialog';
 import { loginPage } from './auth/loginPage';
 import { noteManager } from './noteManager';
+import { initializeExerciseSystem } from "./exercises";
 
 
 export interface IDraggableData {
@@ -236,6 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // AI 对话框不需要拖拽和调整大小功能，保持居中固定
     setupEducationSelectionWatcher();
     setupNoteFeature();
+    // 初始化教学模块做题系统
+    initializeExerciseSystem();
 });
 
 function getOrCreateCurrentConversation(): IConversation {
@@ -321,19 +325,14 @@ function appendMessageToCurrentConversation(sender: "user" | "assistant", conten
 }
 
 function addOnClickToOptions(categoryId: string, func: (optionValue: string, element: HTMLElement) => void): void {
-    console.log("addOnClickToOptions called for categoryId:", categoryId);
     const container = document.getElementById(categoryId);
     if (!container) {
-        console.error("Container not found for categoryId:", categoryId);
         return;
     }
     const elements = container.getElementsByClassName("option");
-    console.log("Found elements:", elements.length);
     for (const element of elements) {
-        console.log("Adding click listener to element with data-optionValue:", element.getAttribute("data-optionValue"));
         element.addEventListener("click", () => {
             const optionValue = element.getAttribute("data-optionValue");
-            console.log("Element clicked with optionValue:", optionValue);
             func(optionValue, element as HTMLElement);
         });
     }
@@ -412,6 +411,7 @@ function createTemplate(template: string): void {
         case "resnet": resnetTemplate(svgData); break;
         case "rnn": rnnTemplate(svgData); break;
         case "lstm": lstmTemplate(svgData); break;
+        case "lstmFullInternal": lstmFullInternalStructureTemplate(svgData); break;
 
     }
 }
@@ -430,6 +430,7 @@ function appendItem(itemType: string): void {
         flatten: Flatten,
         lstm: LSTM,
         maxPooling2D: MaxPooling2D,
+        multiply: Multiply,
         recurrent: Recurrent,
         relu: Relu,
         reshape: Reshape,
@@ -884,6 +885,7 @@ function switchTab(tabType: string): void {
     document.getElementById("progressTab").style.display = "none";
     document.getElementById("visualizationTab").style.display = "none";
     document.getElementById("educationTab").style.display = "none";
+    document.getElementById("exerciseTab").style.display = "none";
     
     // 隐藏笔记栏（除非切换到education标签）
     const noteSidebar = document.getElementById("educationNoteSidebar");
@@ -897,12 +899,22 @@ function switchTab(tabType: string): void {
             noteShowBtn.style.display = "none";
         }
     }
+    
+    // Ensure exerciseTab is completely hidden by removing any inline styles that might show it
+    const exerciseTab = document.getElementById("exerciseTab");
+    if (exerciseTab) {
+        exerciseTab.style.display = "none";
+        exerciseTab.style.visibility = "hidden"; // Add visibility: hidden as an extra precaution
+        exerciseTab.style.height = "0";
+        exerciseTab.style.overflow = "hidden";
+    }
 
     // Hide all menus
     document.getElementById("networkMenu").style.display = "none";
     document.getElementById("progressMenu").style.display = "none";
     document.getElementById("visualizationMenu").style.display = "none";
     document.getElementById("educationMenu").style.display = "none";
+    document.getElementById("exerciseMenu").style.display = "none";
 
     // Hide all paramshells
     document.getElementById("networkParamshell").style.display = "none";
@@ -921,16 +933,55 @@ function switchTab(tabType: string): void {
     document.getElementById("progress").classList.remove("tab-selected");
     document.getElementById("visualization").classList.remove("tab-selected");
     document.getElementById("education").classList.remove("tab-selected");
+    document.getElementById("exercise").classList.remove("tab-selected");
 
     // Display only the selected tab
-    document.getElementById(tabType + "Tab").style.display = null;
+    const selectedTab = document.getElementById(tabType + "Tab");
+    selectedTab.style.display = null;
+    
+    // For exercise tab, ensure it's properly displayed
+    if (tabType === "exercise") {
+        const exerciseTab = document.getElementById("exerciseTab");
+        if (exerciseTab) {
+            exerciseTab.style.display = "block";
+            exerciseTab.style.visibility = "visible";
+            exerciseTab.style.height = "auto";
+            exerciseTab.style.overflow = "visible";
+        }
+    }
+    
     document.getElementById(tabType).classList.add("tab-selected");
-    document.getElementById(tabType + "Menu").style.display = null;
-    document.getElementById(tabType + "Paramshell").style.display = null;
-    document.getElementById("paramshell").style.display = null;
-    document.getElementById("menu").style.display = null;
-    // document.getElementById("menu_expander").style.display = null;
-
+    
+    // Display the appropriate menu
+    if (tabType === "exercise") {
+        const exerciseMenu = document.getElementById("exerciseMenu");
+        if (exerciseMenu) {
+            exerciseMenu.style.display = "block";
+            exerciseMenu.style.float = "right";
+            exerciseMenu.style.width = "450px";
+            exerciseMenu.style.height = "100%";
+            exerciseMenu.style.position = "relative";
+            exerciseMenu.style.zIndex = "10";
+        }
+        document.getElementById("menu").style.display = "none"; // 隐藏原来的导航栏
+    } else {
+        const exerciseMenu = document.getElementById("exerciseMenu");
+        if (exerciseMenu) {
+            exerciseMenu.style.display = "none";
+            exerciseMenu.style.float = "none";
+            exerciseMenu.style.width = "0";
+            exerciseMenu.style.height = "0";
+        }
+        document.getElementById(tabType + "Menu").style.display = null;
+        document.getElementById("menu").style.display = null; // 显示原来的导航栏
+    }
+    
+    // Check if paramshell exists before trying to display it
+    const paramshell = document.getElementById(tabType + "Paramshell");
+    if (paramshell) {
+        paramshell.style.display = null;
+    }
+    
     // Show taskSteps only for "network" tab
     if (tabType === "network" && taskSteps) {
         taskSteps.style.display = "block";
@@ -1019,6 +1070,99 @@ function switchTab(tabType: string): void {
                 setupNoteMarkClickHandlers();
             }, 100);
             break;
+        case "exercise":
+            // 练习标签页隐藏paramshell，显示exerciseMenu
+            const exerciseParamshell = document.getElementById("paramshell");
+            const exerciseMiddle = document.getElementById("middle");
+            if (exerciseParamshell) {
+                exerciseParamshell.style.display = "none";
+                exerciseParamshell.style.width = "0";
+                exerciseParamshell.style.padding = "0";
+                exerciseParamshell.style.margin = "0";
+            }
+            // 确保exerciseMenu显示并定位在右侧（在设置middle宽度之前）
+            const exerciseMenuEl = document.getElementById("exerciseMenu");
+            if (exerciseMenuEl) {
+                exerciseMenuEl.style.display = "block";
+                exerciseMenuEl.style.float = "right";
+                exerciseMenuEl.style.width = "450px";
+                exerciseMenuEl.style.height = "100%";
+                exerciseMenuEl.style.position = "relative";
+                exerciseMenuEl.style.zIndex = "10";
+            }
+            if (exerciseMiddle) {
+                // 练习页面：左侧菜单250px，右侧exerciseMenu浮动占据450px
+                // middle宽度 = 100% - 250px (left menu)，exerciseMenu浮动在右侧
+                exerciseMiddle.style.width = "calc(100% - 250px)";
+                exerciseMiddle.style.float = "left";
+                exerciseMiddle.style.marginRight = "0";
+            }
+            // 确保笔记栏隐藏
+            const exerciseNoteSidebar = document.getElementById("educationNoteSidebar");
+            const exerciseNoteShowBtn = document.getElementById("noteSidebarShowBtn");
+            if (exerciseNoteSidebar) {
+                exerciseNoteSidebar.classList.add("hidden");
+                exerciseNoteSidebar.style.removeProperty('display');
+            }
+            if (exerciseNoteShowBtn) {
+                exerciseNoteShowBtn.style.display = "none";
+            }
+            break;
+    }
+    
+    // 根据不同标签页设置布局
+    const middle = document.getElementById("middle");
+    const mainParamshell = document.getElementById("paramshell");
+    
+    if (tabType === "network" || tabType === "progress" || tabType === "visualization") {
+        // 这些标签页显示paramshell
+        if (mainParamshell) {
+            mainParamshell.style.display = "block";
+            mainParamshell.style.float = "right";
+            mainParamshell.style.width = "180px";
+            mainParamshell.style.paddingLeft = "10px";
+            mainParamshell.style.paddingRight = "10px";
+        }
+        if (middle) {
+            middle.style.width = "calc(100% - 430px)";
+            middle.style.float = "left";
+        }
+    } else if (tabType === "education") {
+        // 教学标签页隐藏paramshell
+        if (mainParamshell) {
+            mainParamshell.style.display = "none";
+            mainParamshell.style.width = "0";
+        }
+        if (middle) {
+            middle.style.width = "calc(100% - 250px)";
+            middle.style.float = "left";
+        }
+    } else if (tabType === "exercise") {
+        // 练习标签页：确保paramshell完全隐藏且不占用空间
+        if (mainParamshell) {
+            mainParamshell.style.display = "none";
+            mainParamshell.style.width = "0";
+            mainParamshell.style.padding = "0";
+            mainParamshell.style.margin = "0";
+            mainParamshell.style.float = "none";
+        }
+        // 确保exerciseMenu显示并定位在右侧（在设置middle宽度之前）
+        const exerciseMenuEl = document.getElementById("exerciseMenu");
+        if (exerciseMenuEl) {
+            exerciseMenuEl.style.display = "block";
+            exerciseMenuEl.style.float = "right";
+            exerciseMenuEl.style.width = "450px";
+            exerciseMenuEl.style.height = "100%";
+            exerciseMenuEl.style.position = "relative";
+            exerciseMenuEl.style.zIndex = "10";
+        }
+        if (middle) {
+            // 练习页面：左侧菜单250px，右侧exerciseMenu浮动占据450px
+            // middle宽度 = 100% - 250px (left menu)，exerciseMenu浮动在右侧
+            middle.style.width = "calc(100% - 250px)";
+            middle.style.float = "left";
+            middle.style.marginRight = "0";
+        }
     }
 
     // Give border radius to top and bottom neighbors
@@ -1030,7 +1174,7 @@ function switchTab(tabType: string): void {
     }
 
     const tabMapping = ["blanktab", "network", "progress", "visualization",
-        "middleblanktab", "education", "bottomblanktab"];
+        "middleblanktab", "education", "exercise", "bottomblanktab"];
     const index = tabMapping.indexOf(tabType);
 
     document.getElementById(tabMapping[index - 1]).classList.add("top_neighbor_tab-selected");
@@ -2203,3 +2347,4 @@ function setupAuthSystem(): void {
     
  
         
+
