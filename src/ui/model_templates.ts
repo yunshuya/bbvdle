@@ -14,7 +14,7 @@ import { MaxPooling2D } from "./shapes/layers/maxpooling";
 import { Multiply } from "./shapes/layers/multiply";
 import { Point } from "./shapes/shape";
 import { Recurrent } from "./shapes/layers/rnn";
-import { Reshape } from "./shapes/layers/reshape";
+// Reshape 层已从前端移除
 import { FormulaLabel } from "./shapes/formula_label";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
@@ -505,52 +505,43 @@ export function rnnTemplate(svgData: IDraggableData): void {
         console.log("  - 类似 ResNet 的残差连接，RNN 通过循环连接传递隐藏状态");
         console.log("=".repeat(80));
     } else {
-        // 图像数据：Input -> Reshape -> RNN -> Dropout -> Dense(10) -> Output
+        // 图像数据：Input -> Flatten -> Dense -> Dropout -> Dense(10) -> Output
+        // 注意：Reshape 层已从前端移除，对于图像数据使用 Flatten + Dense 替代
         const inputPos = new Point(width / 5, height / 3);
-        const reshapePos = new Point(width / 4, height / 2);
-        const rnn1Pos = new Point(width / 2.5, height / 2);
+        const flattenPos = new Point(width / 4, height / 2);
+        const dense1Pos = new Point(width / 2.5, height / 2);
         const dropoutPos = new Point(width / 1.2, height / 2);
-        const densePos = new Point(width / 1.5, height / 2);
+        const dense2Pos = new Point(width / 1.5, height / 2);
         const outputPos = new Point(width - 100, height / 2);
         
-        // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
-        const reshape = new Reshape(reshapePos);
-        if (currentDataset === "cifar") {
-            // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
-            reshape.parameterDefaults.targetShape1 = 32;
-            reshape.parameterDefaults.targetShape2 = 96;
-        } else {
-            // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
-            reshape.parameterDefaults.targetShape1 = 28;
-            reshape.parameterDefaults.targetShape2 = 28;
-        }
+        const flatten = new Flatten(flattenPos);
         
         const dropout = new Dropout(dropoutPos);
         dropout.parameterDefaults.rate = 0.2;
         
-        const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
-        rnn1.parameterDefaults.units = 64;  // 图像分类任务保持 64
-        const rnnTanh: Activation = new Tanh(rnn1Pos);
-        rnn1.addActivation(rnnTanh);
+        const dense1: ActivationLayer = new Dense(dense1Pos);
+        dense1.parameterDefaults.units = 64;
+        const dense1Relu: Activation = new Relu(dense1Pos);
+        dense1.addActivation(dense1Relu);
         
-        const dense: ActivationLayer = new Dense(densePos);
-        dense.parameterDefaults.units = 10;  // 图像数据：分类任务，输出10个类别
+        const dense2: ActivationLayer = new Dense(dense2Pos);
+        dense2.parameterDefaults.units = 10;  // 图像数据：分类任务，输出10个类别
         
         // Add relationships among layers
         svgData.input.setPosition(inputPos);
         svgData.output.setPosition(outputPos);
-        svgData.input.addChild(reshape);
-        reshape.addChild(rnn1);
-        rnn1.addChild(dropout);
-        dropout.addChild(dense);
-        dense.addChild(svgData.output);
+        svgData.input.addChild(flatten);
+        flatten.addChild(dense1);
+        dense1.addChild(dropout);
+        dropout.addChild(dense2);
+        dense2.addChild(svgData.output);
         
         // Store the new network
-        svgData.draggable.push(reshape);
-        svgData.draggable.push(rnn1);
-        svgData.draggable.push(rnnTanh);
+        svgData.draggable.push(flatten);
+        svgData.draggable.push(dense1);
+        svgData.draggable.push(dense1Relu);
         svgData.draggable.push(dropout);
-        svgData.draggable.push(dense);
+        svgData.draggable.push(dense2);
     }
     // 注意：Output层会自动应用softmax（分类任务），所以Dense层不需要激活函数
 }
@@ -597,20 +588,19 @@ export function lstmTemplate(svgData: IDraggableData): void {
     const outputPos = new Point(width - 100, height / 2);
 
     // 对于时序数据（AirPassengers），数据已经是3D格式[12, 1]，不需要Reshape层
-    // 对于图像数据（MNIST/CIFAR），需要Reshape层
-    let reshape: Layer | null = null;
+    // 对于图像数据（MNIST/CIFAR），使用 Flatten + Dense 替代 Reshape
+    let flatten: Flatten | null = null;
+    let dense1: ActivationLayer | null = null;
     if (!isTimeSeries) {
-        const reshapePos = new Point(width / 4, height / 2);
-        reshape = new Reshape(reshapePos);
-        if (currentDataset === "cifar") {
-            // CIFAR-10: (32, 32, 3) -> (32, 96) 其中32是时间步，96是特征（32*3）
-            reshape.parameterDefaults.targetShape1 = 32;
-            reshape.parameterDefaults.targetShape2 = 96;
-        } else {
-            // MNIST: (28, 28, 1) -> (28, 28) 其中28是时间步，28是特征
-            reshape.parameterDefaults.targetShape1 = 28;
-            reshape.parameterDefaults.targetShape2 = 28;
-        }
+        const flattenPos = new Point(width / 4, height / 2);
+        flatten = new Flatten(flattenPos);
+        
+        const dense1Pos = new Point(width / 3, height / 2);
+        dense1 = new Dense(dense1Pos);
+        dense1.parameterDefaults.units = 64;
+        const dense1Relu: Activation = new Relu(dense1Pos);
+        dense1.addActivation(dense1Relu);
+        svgData.draggable.push(dense1Relu);
     }
     
     const lstm1: ActivationLayer = new LSTM(lstm1Pos);
@@ -648,16 +638,20 @@ export function lstmTemplate(svgData: IDraggableData): void {
         lstm1.addChild(dense);
         dense.addChild(svgData.output);
     } else {
-        // 图像数据：Input -> Reshape -> LSTM -> Dense -> Output
-        svgData.input.addChild(reshape!);
-        reshape!.addChild(lstm1);
+        // 图像数据：Input -> Flatten -> Dense -> LSTM -> Dense -> Output
+        svgData.input.addChild(flatten!);
+        flatten!.addChild(dense1!);
+        dense1!.addChild(lstm1);
         lstm1.addChild(dense);
         dense.addChild(svgData.output);
     }
 
     // Store the new network
-    if (reshape) {
-        svgData.draggable.push(reshape);
+    if (flatten) {
+        svgData.draggable.push(flatten);
+    }
+    if (dense1) {
+        svgData.draggable.push(dense1);
     }
     svgData.draggable.push(lstm1);
     if (lstmRelu) {
@@ -992,28 +986,33 @@ export function rnnInternalStructureTemplate(svgData: IDraggableData): void {
     const currentDataset = svgData.input.getParams().dataset;
     const isTimeSeries = currentDataset === "airpassengers";
     
-    // ========== 布局定义（参考 LSTM 模板的紧凑布局）==========
-    // 左侧：输入和前一时刻的隐藏状态
-    const inputPos = new Point(width * 0.15, height * 0.5);           // X_t
-    const hiddenStatePrevPos = new Point(width * 0.15, height * 0.38);  // H_{t-1}
+    // ========== 布局定义（优化后的清晰布局，主要数据流在同一水平线）==========
+    // 主数据流水平线：height * 0.5（所有主要层都在这一条线上）
+    const mainDataFlowY = height * 0.5;
+    
+    // 左侧：输入（主数据流起点）
+    const inputPos = new Point(width * 0.10, mainDataFlowY);           // X_t（当前输入）
+    
+    // 前一时刻的隐藏状态（占位层，位于上方，不参与主数据流）
+    const hiddenStatePrevPos = new Point(width * 0.10, height * 0.30);  // H_{t-1}（前一时刻隐藏状态）
     
     // 对于时序数据，需要添加 Flatten 层将 3D [batch, timesteps, features] 转换为 2D [batch, timesteps*features]
-    const flattenPos = isTimeSeries ? new Point(width * 0.20, height * 0.5) : null;
+    const flattenPos = isTimeSeries ? new Point(width * 0.22, mainDataFlowY) : null;
     
-    // 第一层：合并输入 [H_{t-1}, X_t]
-    const concatPos = new Point(width * 0.30, height * 0.44);
+    // 第一层：合并输入 [H_{t-1}, X_t]（主数据流上）
+    const concatPos = new Point(width * 0.35, mainDataFlowY);
     
-    // 第二层：线性变换 z_t = W · [X_t, H_{t-1}] + b
-    const denseTransformPos = new Point(width * 0.45, height * 0.44);
+    // 第二层：线性变换 z_t = W · [X_t, H_{t-1}] + b（主数据流上）
+    const denseTransformPos = new Point(width * 0.50, mainDataFlowY);
     
-    // 第三层：Tanh 激活 H_t = tanh(z_t)
-    const tanhPos = new Point(width * 0.60, height * 0.44);
+    // 第三层：Tanh 激活 H_t = tanh(z_t)（与 Dense 层位置相同，作为激活函数）
+    const tanhPos = new Point(width * 0.50, mainDataFlowY);  // Tanh 激活函数与 Dense 层位置相同
     
-    // 第四层：Dropout 正则化（防止过拟合）
-    const dropoutPos = new Point(width * 0.70, height * 0.44);
+    // 第四层：Dropout 正则化（主数据流上）
+    const dropoutPos = new Point(width * 0.65, mainDataFlowY);
     
-    // 右侧：输出
-    const outputPos = new Point(width - 30, height * 0.44);
+    // 右侧：输出（主数据流终点）
+    const outputPos = new Point(width - 60, mainDataFlowY);
 
     // ========== 创建层 ==========
     

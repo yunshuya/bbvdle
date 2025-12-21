@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { generateTfjsModel, topologicalSort } from "../../model/build_network";
 import { changeDataset } from "../../model/data";
 import { svgData, sendLayerContextToAi } from "../app";
-import { displayError } from "../error";
+import { displayError, clearError } from "../error";
 import { parseString } from "../utils";
 import { windowProperties } from "../window";
 import { Draggable } from "./draggable";
@@ -220,6 +220,150 @@ export abstract class Layer extends Draggable {
     }
 
     public select(): void {
+        // 检查是否处于循环连接选择模式（新的实现：不依赖 CircularConnection 积木块）
+        const selectMode = (window as any).circularConnectionSelectMode;
+        console.log("Layer.select() 被调用，selectMode:", selectMode, "layerType:", this.layerType);
+        
+        if (selectMode && selectMode.step) {
+            console.log("检测到循环连接选择模式，当前步骤:", selectMode.step);
+            
+            if (selectMode.step === "source") {
+                // 选择源层
+                // 检查是否已经选择了源层（防止重复点击）
+                if (selectMode.sourceLayer === this) {
+                    console.log("源层已经选择，请点击目标层");
+                    return;  // 已经选择了这个层作为源层，不执行任何操作
+                }
+                
+                selectMode.sourceLayer = this;
+                selectMode.step = "target";
+                console.log(`✓ 源层已选择: ${this.layerType}，请点击目标层`);
+                // 显示提示信息（不抛出错误，只显示消息）
+                const errorElement = document.getElementById("error");
+                const errorMessageElement = document.getElementById("errorMessage");
+                if (errorElement && errorMessageElement) {
+                    errorElement.style.display = null;
+                    errorMessageElement.innerHTML = `源层已选择: ${this.layerType}，请点击目标层`;
+                    errorElement.title = `源层已选择: ${this.layerType}，请点击目标层`;
+                    // 3秒后自动清除
+                    setTimeout(() => {
+                        clearError();
+                    }, 3000);
+                }
+                // 不执行正常的 select 逻辑，但也不阻止用户看到选中效果
+                // 让用户知道源层已被选中
+                this.svgComponent.selectAll("path").style("stroke", "#4169E1").style("stroke-width", "3");
+                this.svgComponent.selectAll(".outerShape").style("stroke", "#4169E1").style("stroke-width", "3");
+                this.svgComponent.classed("layer-selected", true);
+                windowProperties.selectedElement = this;
+                return;
+            } else if (selectMode.step === "target") {
+                // 选择目标层，自动创建循环连接
+                const sourceLayer = selectMode.sourceLayer;
+                
+                // 检查源层是否已选择
+                if (!sourceLayer) {
+                    console.error("错误：源层未选择，无法创建循环连接");
+                    // 重置选择模式
+                    (window as any).circularConnectionSelectMode = null;
+                    return;
+                }
+                
+                // 检查是否点击了源层本身（自循环）
+                if (sourceLayer === this) {
+                    console.log("警告：不能选择源层本身作为目标层，请选择不同的层");
+                    // 显示提示信息
+                    const errorElement = document.getElementById("error");
+                    const errorMessageElement = document.getElementById("errorMessage");
+                    if (errorElement && errorMessageElement) {
+                        errorElement.style.display = null;
+                        errorMessageElement.innerHTML = "不能选择源层本身作为目标层，请选择不同的层";
+                        errorElement.title = "不能选择源层本身作为目标层，请选择不同的层";
+                        setTimeout(() => {
+                            clearError();
+                        }, 3000);
+                    }
+                    return;  // 不创建循环连接
+                }
+                
+                selectMode.targetLayer = this;
+                const targetLayer = selectMode.targetLayer;
+                const labelText = selectMode.labelText || undefined;
+                
+                console.log("准备创建循环连接，源层:", sourceLayer?.layerType, "目标层:", targetLayer?.layerType);
+                
+                if (sourceLayer && targetLayer) {
+                    try {
+                        // 创建循环连接（蓝色虚线箭头）
+                        sourceLayer.addCircularConnection(targetLayer, labelText);
+                        console.log(`✓ 循环连接已创建（蓝色虚线箭头）: ${sourceLayer.layerType} → ${targetLayer.layerType}`);
+                        
+                        // 确保循环连接正确显示（强制更新位置）
+                        // 延迟更新，确保 DOM 已更新
+                        setTimeout(() => {
+                            for (const cw of sourceLayer.circularWires) {
+                                if (cw.dest === targetLayer) {
+                                    cw.updatePosition();
+                                    const pathString = cw.path.attr("d");
+                                    console.log("循环连接位置已更新，路径:", pathString);
+                                    if (!pathString || pathString === "null" || pathString === "") {
+                                        console.warn("警告：循环连接路径为空，重新计算");
+                                        cw.updatePosition();
+                                    }
+                                    break;
+                                }
+                            }
+                        }, 10);
+                        
+                        // 触发任务验证（异步导入避免循环依赖）
+                        setTimeout(() => {
+                            import("../taskModule").then(module => {
+                                module.verifyCircularConnectionStep();
+                            }).catch(err => {
+                                console.warn("无法导入任务验证模块:", err);
+                            });
+                        }, 0);
+                        
+                        // 清除选择模式，恢复正常的 select 逻辑
+                        (window as any).circularConnectionSelectMode = null;
+                        clearError();
+                        console.log("循环连接选择模式已清除");
+                        
+                        // 恢复目标层的正常选中状态（显示黄色边框）
+                        this.svgComponent.selectAll("path").style("stroke", "yellow").style("stroke-width", "2");
+                        this.svgComponent.selectAll(".outerShape").style("stroke", "yellow").style("stroke-width", "2");
+                        this.svgComponent.classed("layer-selected", true);
+                        windowProperties.selectedElement = this;
+                        
+                        // 重要：阻止创建普通的 Wire 连接
+                        // 因为循环连接不应该创建父子关系，所以需要阻止 addChild 被调用
+                        // 通过 return 来阻止继续执行正常的 select 逻辑
+                        return;
+                    } catch (error) {
+                        console.error("创建循环连接时出错:", error);
+                        displayError(error as Error);
+                        // 即使出错，也要清除选择模式，恢复正常的 select 逻辑
+                        (window as any).circularConnectionSelectMode = null;
+                    }
+                } else {
+                    console.error("源层或目标层为空，无法创建循环连接");
+                    // 即使出错，也要清除选择模式，恢复正常的 select 逻辑
+                    (window as any).circularConnectionSelectMode = null;
+                }
+                // 如果创建循环连接失败，继续执行正常的 select 逻辑
+                // 但成功创建后应该 return，不执行正常的 select 逻辑
+            } else {
+                // 如果选择模式存在但没有 step，清除它并继续正常逻辑
+                (window as any).circularConnectionSelectMode = null;
+            }
+            
+            // 如果选择模式已被清除，继续执行正常的 select 逻辑
+            // 如果选择模式仍然存在，不执行正常的 select 逻辑
+            if ((window as any).circularConnectionSelectMode !== null) {
+                return;  // 仍在选择模式中，不执行正常的 select 逻辑
+            }
+        }
+
         const currSelected = windowProperties.selectedElement;
         if (currSelected != null && currSelected !== this &&
                 currSelected instanceof Layer && currSelected.outputWiresAllowed) {
@@ -236,7 +380,13 @@ export abstract class Layer extends Draggable {
 
         const bbox = this.outerBoundingBox();
         windowProperties.shapeTextBox.setOffset(new Point((bbox.left + bbox.right) / 2, bbox.bottom + 25));
-        windowProperties.shapeTextBox.setText("[" + this.layerShape().toString() + "]");
+        // 修复：检查 layerShape() 是否返回 null，避免 toString() 错误
+        const shape = this.layerShape();
+        if (shape !== null && shape !== undefined) {
+            windowProperties.shapeTextBox.setText("[" + shape.toString() + "]");
+        } else {
+            windowProperties.shapeTextBox.setText("[?]");
+        }
         windowProperties.shapeTextBox.setPosition(this.getPosition());
         windowProperties.shapeTextBox.show();
     }

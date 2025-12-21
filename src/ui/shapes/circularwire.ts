@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { windowProperties } from "../window";
 import { Layer } from "./layer";
+import { verifyCircularConnectionStep } from "../taskModule";
 
 /**
  * 循环连接类 - 用于LSTM等循环神经网络中的循环连接可视化
@@ -11,8 +12,8 @@ export class CircularWire {
 
     private source: Layer;  // 源层（如 H_t）
     public dest: Layer;    // 目标层（如 H_{t-1}，用于下一时刻）- 公开以便外部访问
-    private path: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any>;
-    private triangle: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any>;
+    public path: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any>;  // 公开以便外部访问和调试
+    public triangle: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any>;  // 公开以便外部访问和调试
     private group: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any>;
     private label: d3.Selection<SVGGraphicsElement, {}, HTMLElement, any> | null = null;  // 可选的标签文本
 
@@ -52,12 +53,24 @@ export class CircularWire {
                                 .style("font-family", "Arial, sans-serif");
         }
 
+        // 确保循环连接在最上层显示
+        this.group.raise();
         this.updatePosition();
         this.source.raise();
         this.dest.raise();
+        // 再次确保循环连接在最上层
+        this.group.raise();
 
-        this.path.on("click", () => { this.select(); });
-        this.triangle.on("click", () => { this.select(); });
+        // 点击循环连接时，触发任务验证（如果当前有教学任务）
+        this.path.on("click", () => { 
+            this.select();
+            // 触发任务验证：循环连接点击应该验证"循环连接"步骤
+            verifyCircularConnectionStep();
+        });
+        this.triangle.on("click", () => { 
+            this.select();
+            verifyCircularConnectionStep();
+        });
     }
 
     /**
@@ -67,6 +80,8 @@ export class CircularWire {
     private calculateCurvePath(): string {
         const sourceCenter = this.source.getPosition().add(this.source.center());
         const destCenter = this.dest.getPosition().add(this.dest.center());
+
+        console.log("CircularWire.calculateCurvePath() - 源层中心:", sourceCenter, "目标层中心:", destCenter);
 
         // 计算控制点，使曲线形成一个弧形
         // 控制点的x坐标在源和目标之间，y坐标向上偏移形成弧形
@@ -78,14 +93,17 @@ export class CircularWire {
         const controlPointY = Math.min(sourceCenter.y, destCenter.y) - offsetY;
 
         // 计算起点和终点（从源层右侧，到目标层左侧）
-        const startX = sourceCenter.x + 30;  // 源层右侧
+        // 如果源层和目标层是同一个层（自循环），使用特殊处理
+        const isSelfLoop = this.source === this.dest;
+        const startX = isSelfLoop ? sourceCenter.x + 40 : sourceCenter.x + 30;  // 源层右侧
         const startY = sourceCenter.y;
-        const endX = destCenter.x - 30;      // 目标层左侧
+        const endX = isSelfLoop ? destCenter.x - 40 : destCenter.x - 30;      // 目标层左侧
         const endY = destCenter.y;
 
         // 使用二次贝塞尔曲线 Q x1 y1, x y
         const pathString = `M ${startX} ${startY} Q ${controlPointX} ${controlPointY}, ${endX} ${endY}`;
         
+        console.log("CircularWire.calculateCurvePath() - 路径字符串:", pathString);
         return pathString;
     }
 
@@ -167,11 +185,25 @@ export class CircularWire {
 
     public updatePosition(): void {
         const pathString = this.calculateCurvePath();
+        console.log("CircularWire.updatePosition() - 路径字符串:", pathString);
         this.path.attr("d", pathString);
+        
+        // 确保路径样式正确应用
+        this.path.style("stroke", "#4169E1")
+                  .style("stroke-width", 4)
+                  .style("stroke-dasharray", "8,4")
+                  .style("opacity", 0.8)
+                  .style("display", null);  // 确保显示
 
         const arrowPos = this.calculateArrowPosition();
+        console.log("CircularWire.updatePosition() - 箭头位置:", arrowPos);
         this.triangle.attr("transform", 
             `translate(${arrowPos.x}, ${arrowPos.y}) rotate(${arrowPos.angle})`);
+        
+        // 确保箭头样式正确应用
+        this.triangle.style("fill", "#4169E1")
+                     .style("stroke", "#4169E1")
+                     .style("display", null);  // 确保显示
 
         // 更新标签位置（放在曲线中点上方）
         if (this.label) {
@@ -189,6 +221,9 @@ export class CircularWire {
                       .attr("y", controlPointY - labelOffsetY)
                       .attr("text-anchor", "middle");
         }
+        
+        // 确保循环连接在最上层
+        this.group.raise();
     }
 }
 

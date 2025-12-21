@@ -143,7 +143,12 @@ export function topologicalSort(input: Input, showErrors: boolean = true): Layer
  */
 export function generateTfjsModel(sorted: Layer[]): tf.LayersModel {
     try {
-        sorted.forEach((layer) => {
+        // 过滤掉可视化层（如循环连接层）
+        const actualLayers = sorted.filter(layer => {
+            return !(layer as any).isVisualizationOnly && layer.layerType !== "CircularConnection";
+        });
+        
+        actualLayers.forEach((layer) => {
             try {
                 layer.generateTfjsLayer();
             } catch (error) {
@@ -151,8 +156,8 @@ export function generateTfjsModel(sorted: Layer[]): tf.LayersModel {
                 throw error;
             }
         });
-        const input = sorted[0].getTfjsLayer();
-        const output = sorted[sorted.length - 1].getTfjsLayer();
+        const input = actualLayers[0].getTfjsLayer();
+        const output = actualLayers[actualLayers.length - 1].getTfjsLayer();
         
         // 打印输入和输出的形状信息以便调试
         console.log("Input layer shape:", input.shape);
