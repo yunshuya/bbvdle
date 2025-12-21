@@ -4,3 +4,39 @@ dist/bundle.js
 dist/test_batch.png
 src/model/graghs.ts
 src/ui/style.css
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Python 缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Python 虚拟环境
+venv/
+env/
+ENV/
+.venv
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
