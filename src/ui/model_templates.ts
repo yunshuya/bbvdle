@@ -16,7 +16,7 @@ import { Recurrent } from "./shapes/layers/rnn";
 import { Reshape } from "./shapes/layers/reshape";
 import { getSvgOriginalBoundingBox } from "./utils";
 import { windowProperties } from "./window";
-import { dataset } from "../model/data";
+import { dataset, changeDataset } from "../model/data";
 import { model } from "../model/params_object";
 
 export function resetWorkspace(svgData: IDraggableData): void {
@@ -356,17 +356,46 @@ export function complexTemplate(svgData: IDraggableData): void {
 export function rnnTemplate(svgData: IDraggableData): void {
     resetWorkspace(svgData);
 
+    // 自动设置数据集为 AirPassengers
+    // 先更新全局数据集
+    changeDataset("airpassengers");
+    
+    // 然后使用 setParams 设置 Input 层的参数
+    // setParams 方法会自动更新 paramBox 中的 select 元素
+    const params = new Map<string, any>();
+    params.set("dataset", "airpassengers");
+    svgData.input.setParams(params);
+    
+    console.log("RNN 模板：数据集已自动设置为 AirPassengers");
+
     // Initialize each of the layers and activations
     const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
     const width = canvasBoundingBox.width;
     const height = canvasBoundingBox.height;
 
-    // 获取当前数据集类型
+    // 获取当前数据集类型（现在应该是 airpassengers）
     const currentDataset = svgData.input.getParams().dataset;
     const isTimeSeries = currentDataset === "airpassengers";
+    
+    // 对于 AirPassengers 数据集，自动设置 epochs 和学习率
+    if (isTimeSeries) {
+        model.params.epochs = 100;  // 增加训练轮数以提高性能
+        model.params.learningRate = 0.0005;  // 降低学习率以提高训练稳定性
+        // 同时更新 HTML 输入框的值，确保 UI 显示一致
+        const epochsInput = document.getElementById("epochs") as HTMLInputElement;
+        const lrInput = document.getElementById("learningRate") as HTMLInputElement;
+        if (epochsInput) {
+            epochsInput.value = "100";
+        }
+        if (lrInput) {
+            lrInput.value = "0.0005";
+        }
+        console.log("RNN 模板训练 AirPassengers：epochs 已自动设置为 100，学习率已自动设置为 0.0005");
+    }
 
     const inputPos = new Point(width / 5, height / 3);
     const rnn1Pos = isTimeSeries ? new Point(width / 2.5, height / 2) : new Point(width / 2.5, height / 2);
+    const dropoutPos = isTimeSeries ? new Point(width / 1.8, height / 2) : new Point(width / 1.2, height / 2);
     const densePos = new Point(width / 1.5, height / 2);
     const outputPos = new Point(width - 100, height / 2);
 
@@ -377,7 +406,6 @@ export function rnnTemplate(svgData: IDraggableData): void {
     
     if (!isTimeSeries) {
         const reshapePos = new Point(width / 4, height / 2);
-        const dropoutPos = new Point(width / 1.2, height / 2);
         
         // Reshape层：将图像 (28, 28, 1) 或 (32, 32, 3) 转换为序列格式
         reshape = new Reshape(reshapePos);
@@ -394,11 +422,27 @@ export function rnnTemplate(svgData: IDraggableData): void {
         dropout = new Dropout(dropoutPos);
         // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
         dropout.parameterDefaults.rate = 0.2;
+    } else {
+        // 对于图像数据，添加 Dropout 层
+        dropout = new Dropout(dropoutPos);
+        // 设置dropout比例为0.2，避免过高的dropout导致训练不稳定
+        dropout.parameterDefaults.rate = 0.2;
     }
     
     const rnn1: ActivationLayer = new Recurrent(rnn1Pos);
-    // 设置RNN层units为64以提高表达能力
-    rnn1.parameterDefaults.units = 64;
+    // 对于时序数据，增加 RNN units 以提高模型容量（从 64 增加到 128）
+    if (isTimeSeries) {
+        rnn1.parameterDefaults.units = 128;  // 增加容量以提高预测性能
+        // 对于时序数据，调整 RNN 层内部的 dropout 参数，而不是添加外部 Dropout 层
+        // dropout: 在输入到 RNN 单元时应用（每个时间步的外部输入）
+        // recurrentDropout: 在 RNN 的循环连接上应用（前一时间步的隐藏状态）
+        // 注意：RNN 层内部的 dropout 已经提供了足够的正则化，不需要额外的 Dropout 层
+        rnn1.parameterDefaults.dropout = 0.2;  // 增加输入 dropout 以提高泛化能力
+        rnn1.parameterDefaults.recurrentDropout = 0.1;  // 保持较小的循环 dropout，避免梯度问题
+    } else {
+        rnn1.parameterDefaults.units = 64;  // 图像分类任务保持 64
+        // 图像分类任务保持默认的 dropout 设置
+    }
     // 为RNN层添加tanh激活函数（RNN的默认激活函数，比ReLU更适合序列数据）
     const rnnTanh: Activation = new Tanh(rnn1Pos);
     
@@ -422,7 +466,11 @@ export function rnnTemplate(svgData: IDraggableData): void {
     svgData.output.setPosition(outputPos);
     
     if (isTimeSeries) {
-        // 时序数据：Input -> RNN -> Dense(1) -> Output
+        // 时序数据：Input -> RNN(128, dropout=0.2, recurrentDropout=0.1) -> Dense(1) -> Output
+        // 注意：RNN 层内部的 dropout 参数已经提供了足够的正则化
+        // - dropout: 在输入到 RNN 单元时应用（每个时间步的外部输入）
+        // - recurrentDropout: 在 RNN 的循环连接上应用（前一时间步的隐藏状态）
+        // 不需要额外的 Dropout 层，避免过度正则化
         svgData.input.addChild(rnn1);
         rnn1.addChild(dense);
         dense.addChild(svgData.output);
@@ -453,14 +501,37 @@ export function rnnTemplate(svgData: IDraggableData): void {
 export function lstmTemplate(svgData: IDraggableData): void {
     resetWorkspace(svgData);
 
+    // 自动设置数据集为 AirPassengers
+    // 先更新全局数据集
+    changeDataset("airpassengers");
+    
+    // 然后使用 setParams 设置 Input 层的参数
+    // setParams 方法会自动更新 paramBox 中的 select 元素
+    const params = new Map<string, any>();
+    params.set("dataset", "airpassengers");
+    svgData.input.setParams(params);
+    
+    console.log("LSTM 模板：数据集已自动设置为 AirPassengers");
+
     // Initialize each of the layers and activations
     const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
     const width = canvasBoundingBox.width;
     const height = canvasBoundingBox.height;
 
-    // 获取当前数据集类型
+    // 获取当前数据集类型（现在应该是 airpassengers）
     const currentDataset = svgData.input.getParams().dataset;
     const isTimeSeries = currentDataset === "airpassengers";
+    
+    // 对于 AirPassengers 数据集，自动设置 epochs 为 20
+    if (isTimeSeries) {
+        model.params.epochs = 20;
+        // 同时更新 HTML 输入框的值，确保 UI 显示一致
+        const epochsInput = document.getElementById("epochs") as HTMLInputElement;
+        if (epochsInput) {
+            epochsInput.value = "20";
+            console.log("LSTM 模板训练 AirPassengers：epochs 已自动设置为 20");
+        }
+    }
 
     const inputPos = new Point(width / 5, height / 3);
     const lstm1Pos = isTimeSeries ? new Point(width / 2.5, height / 2) : new Point(width / 2.5, height / 2);

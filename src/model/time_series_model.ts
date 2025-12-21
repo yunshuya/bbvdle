@@ -2,8 +2,7 @@
 // 专门处理时序数据（如AirPassengers）的回归预测任务
 
 import * as tf from "@tensorflow/tfjs";
-import {plotAccuracy,
-        plotLoss,
+import {plotLoss,
         resetPlotValues,
         setupPlots,
         setupTestResults,
@@ -328,18 +327,15 @@ export async function trainTimeSeries(trainingHistory: ITrainingHistory): Promis
                         console.log(`Plotting at batch ${batch}: avgLoss=${avgLoss}, avgMetric=${avgMetric}, batchCount=${batchCount}`);
                     }
                     
-                    // 确保值有效
+                    // 确保值有效，只绘制损失曲线（不绘制MAE曲线）
                     if (isFinite(avgLoss) && avgLoss > 0) {
                         plotLoss(trainBatchCount, avgLoss, "train");
                     } else {
                         console.warn(`Invalid loss value at batch ${batch}: ${avgLoss} (totalLoss=${totalLoss}, batchCount=${batchCount})`);
                     }
                     
-                    if (isFinite(avgMetric) && avgMetric >= 0) {
-                        plotAccuracy(trainBatchCount, avgMetric, "train");
-                    } else {
-                        console.warn(`Invalid metric value at batch ${batch}: ${avgMetric} (totalAccuracy=${totalAccuracy}, batchCount=${batchCount})`);
-                    }
+                    // 注意：不再绘制MAE曲线，只显示损失曲线
+                    // MAE值仍然会在UI的文本框中显示，但不会绘制成曲线
                     
                     prevTrainBatchCount = trainBatchCount;
                     totalLoss = 0;
@@ -439,13 +435,13 @@ export async function trainTimeSeries(trainingHistory: ITrainingHistory): Promis
                 accBox.children[1].innerHTML = String(Number((valMetric || 0).toFixed(4)));
                 lossBox.children[1].innerHTML = String(Number(valLossValue.toFixed(4)));
                 
-                // 绘制验证集loss和MAE
+                // 绘制验证集损失曲线（不绘制MAE曲线）
                 if (valLossValue > 0 && isFinite(valLossValue)) {
                     plotLoss(trainBatchCount, valLossValue, "validation");
                 }
-                if (valMetric !== undefined && valMetric !== null && valMetric >= 0 && isFinite(valMetric)) {
-                    plotAccuracy(trainBatchCount, valMetric, "validation");
-                }
+                
+                // 注意：不再绘制MAE曲线，只显示损失曲线
+                // MAE值仍然会在UI的文本框中显示，但不会绘制成曲线
                 
                 // 对于时序数据，隐藏混淆矩阵
                 const confusionMatrixElement = document.getElementById("confusion-matrix-canvas");
