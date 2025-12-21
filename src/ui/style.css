@@ -555,6 +555,9 @@ label {
   width: 250px;
   padding: 6px 0 6px 0; }
 
+.question label {
+  width: 100%; }
+
 .canvases {
   display: inline-block; }
 
@@ -1321,6 +1324,18 @@ label {
   position: relative;
   z-index: 1; }
 
+/* 跳过登录按钮样式 - 深色风格 */
+#skipLoginButton {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(0, 0, 0, 0.6) !important;
+  color: rgba(255, 255, 255, 0.9) !important; }
+  #skipLoginButton:hover {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border-color: rgba(0, 0, 0, 0.8) !important;
+    color: white !important; }
+  #skipLoginButton .login-button-text {
+    color: inherit !important; }
+
 /* 切换链接 */
 .login-page-switch {
   margin-top: 28px;
@@ -1735,7 +1750,7 @@ label {
 
 /* ============ 右侧答题进度栏卡片样式 ============ */
 .exercise-right-status {
-  width: 450px;
+  width: 300px;
   background-color: #ffffff;
   border-left: 1px solid #e0e4f0;
   display: flex;
@@ -2183,11 +2198,11 @@ label {
 
 /* 练习卡片样式 */
 .exercise-card {
+  box-sizing: border-box;
   background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e0e4f0;
   width: 100%;
-  max-width: 800px;
   margin: 0 auto 25px auto;
   overflow: hidden;
   display: flex;
@@ -2314,12 +2329,12 @@ label {
 
 /* 练习章节标题卡片样式 */
 .exercise-section-title {
+  box-sizing: border-box;
   margin-bottom: 25px;
   padding: 20px;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   border-radius: 12px;
   width: 100%;
-  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
   color: white;

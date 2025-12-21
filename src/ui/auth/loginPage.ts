@@ -74,13 +74,20 @@ class LoginPage {
      * 显示登录页面
      */
     public showLoginPage(): void {
+        // 重置主应用显示标记
+        this.isMainAppShown = false;
+        
         if (this.loginPageElement) {
             this.loginPageElement.classList.remove('hidden');
+            // 移除可能存在的内联 display 样式，确保登录页面能正常显示
+            this.loginPageElement.style.removeProperty('display');
         }
         // 隐藏主应用的所有内容
         const mainDiv = document.getElementById('main');
         if (mainDiv) {
             mainDiv.classList.add('hidden');
+            // 移除主应用的内联 display 样式，确保下次显示时能正常工作
+            mainDiv.style.removeProperty('display');
         }
     }
 
@@ -212,6 +219,16 @@ class LoginPage {
             registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.handleRegister();
+            });
+        }
+
+        // 跳过登录按钮
+        const skipLoginButton = document.getElementById('skipLoginButton');
+        if (skipLoginButton) {
+            skipLoginButton.addEventListener('click', () => {
+                console.log('跳过登录，直接进入主应用');
+                // 直接显示主应用，不进行认证
+                this.showMainApp();
             });
         }
     }
