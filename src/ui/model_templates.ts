@@ -48,13 +48,6 @@ export function resetWorkspace(svgData: IDraggableData): void {
 export function defaultTemplate(svgData: IDraggableData): void {
     resetWorkspace(svgData);
 
-    // 默认模板应该使用 MNIST 数据集（图像分类任务）
-    // 如果之前其他模板（如 RNN/LSTM）设置了 airpassengers，需要重置为 MNIST
-    changeDataset("mnist");
-    const params = new Map<string, any>();
-    params.set("dataset", "mnist");
-    svgData.input.setParams(params);
-
     // Initialize each of the layers and activations
     const canvasBoundingBox = getSvgOriginalBoundingBox(document.getElementById("svg") as any as SVGSVGElement);
     const width = canvasBoundingBox.width;
@@ -66,71 +59,118 @@ export function defaultTemplate(svgData: IDraggableData): void {
     svgData.input.setPosition(inputPos);
     svgData.output.setPosition(outputPos);
     
-    // 获取当前数据集类型（现在应该是 mnist）
-    const currentDataset = svgData.input.getParams().dataset;
-    console.log("defaultTemplate - 当前数据集类型:", currentDataset);
+    // 注意：不在这里调用 changeDataset，让训练时自动处理数据集切换
+    // 这样可以避免在模板创建时重置 dataLoaded 状态
+    // 数据集会在训练时通过 startTraining() 中的 changeDataset(svgData.input.getParams().dataset) 来设置
+    
+    // 默认模板总是创建 MNIST 的网络结构（与初始版本一致）
+    // 如果用户想使用 CIFAR-10，可以在创建模板后手动在 Input 层中选择
+    // 获取当前数据集类型（用于判断是否需要创建 CIFAR-10 结构）
+    // 如果 Input 层的 paramBox 已经初始化，尝试获取其参数
+    let currentDataset = "mnist"; // 默认值
+    try {
+        const inputParams = svgData.input.getParams();
+        if (inputParams && inputParams.dataset) {
+            currentDataset = inputParams.dataset;
+        }
+    } catch (e) {
+        // 如果 paramBox 还没有初始化，使用默认值 MNIST
+        // 这是正常情况，因为模板创建时 paramBox 可能还没有初始化
+    }
+    
     const isCifar10 = currentDataset === "cifar";  // 注意：Input层中CIFAR-10的值是"cifar"，不是"cifar10"
-    console.log("defaultTemplate - isCifar10:", isCifar10);
     
     // 图像分类任务：根据数据集类型选择不同的网络结构
     if (isCifar10) {
-        // CIFAR-10: 使用更深的网络结构（2个Conv2D + MaxPooling + Flatten + Dense）
-        // CIFAR-10 比 MNIST 更难，需要更强的特征提取能力
+        // CIFAR-10: 使用更深的网络结构（3个Conv2D + 2个MaxPooling + Dropout + Flatten + Dense）
+        // CIFAR-10 比 MNIST 更难，需要更强的特征提取能力和正则化
         
-        // 自动设置学习率为 0.005（CIFAR-10 需要较小的学习率以获得更好的训练效果）
-        model.params.learningRate = 0.005;
+        // 自动设置学习率为 0.001（CIFAR-10 需要较小的学习率以获得更好的训练效果）
+        model.params.learningRate = 0.001;
         // 同时更新 HTML 输入框的值，确保 UI 显示一致
         const learningRateInput = document.getElementById("learningRate") as HTMLInputElement;
         if (learningRateInput) {
-            learningRateInput.value = "0.005";
-            console.log("CIFAR-10 默认模板：学习率已自动设置为 0.005");
+            learningRateInput.value = "0.001";
+            console.log("CIFAR-10 默认模板：学习率已自动设置为 0.001");
         }
         
-        const conv1StartingPosition = new Point(width / 5, height / 2.5);
-        const maxpoolStartingPosition = new Point(width / 2.8, height / 2.5);
-        const conv2StartingPosition = new Point(width / 2.8, height / 1.8);
-        const flatStartingPosition = new Point(width / 1.75, height / 2.5);
-        const denseStartingPosition = new Point(width * 5 / 6.5, height / 2.5);
+        // 布局定义
+        const conv1Pos = new Point(width * 0.15, height * 0.5);
+        const maxpool1Pos = new Point(width * 0.25, height * 0.5);
+        const conv2Pos = new Point(width * 0.35, height * 0.5);
+        const maxpool2Pos = new Point(width * 0.45, height * 0.5);
+        const conv3Pos = new Point(width * 0.55, height * 0.5);
+        const flatPos = new Point(width * 0.7, height * 0.5);
+        const dropoutPos = new Point(width * 0.8, height * 0.5);
+        const densePos = new Point(width * 0.9, height * 0.5);
         
-        const conv1: ActivationLayer = new Conv2D(conv1StartingPosition);
-        const conv1Relu: Activation = new Relu(conv1StartingPosition);
-        // CIFAR-10 使用更多的 filters 来提取彩色图像的特征
+        // 第一层：32 filters
+        const conv1: ActivationLayer = new Conv2D(conv1Pos);
+        const conv1Relu: Activation = new Relu(conv1Pos);
         conv1.parameterDefaults.filters = 32;
+        conv1.parameterDefaults.kernelSize = [3, 3];
+        conv1.parameterDefaults.padding = "same";
         
-        const maxpool: Layer = new MaxPooling2D(maxpoolStartingPosition);
+        const maxpool1: Layer = new MaxPooling2D(maxpool1Pos);
+        maxpool1.parameterDefaults.poolSize = [2, 2];
         
-        const conv2: ActivationLayer = new Conv2D(conv2StartingPosition);
-        const conv2Relu: Activation = new Relu(conv2StartingPosition);
+        // 第二层：64 filters
+        const conv2: ActivationLayer = new Conv2D(conv2Pos);
+        const conv2Relu: Activation = new Relu(conv2Pos);
         conv2.parameterDefaults.filters = 64;
+        conv2.parameterDefaults.kernelSize = [3, 3];
+        conv2.parameterDefaults.padding = "same";
         
-        const flat: Layer = new Flatten(flatStartingPosition);
-        const dense: ActivationLayer = new Dense(denseStartingPosition);
-        const denseRelu: Activation = new Relu(denseStartingPosition);
+        const maxpool2: Layer = new MaxPooling2D(maxpool2Pos);
+        maxpool2.parameterDefaults.poolSize = [2, 2];
         
-        // CIFAR-10 有 10 个类别
+        // 第三层：128 filters
+        const conv3: ActivationLayer = new Conv2D(conv3Pos);
+        const conv3Relu: Activation = new Relu(conv3Pos);
+        conv3.parameterDefaults.filters = 128;
+        conv3.parameterDefaults.kernelSize = [3, 3];
+        conv3.parameterDefaults.padding = "same";
+        
+        const flat: Layer = new Flatten(flatPos);
+        
+        // Dropout 层防止过拟合
+        const dropout: Layer = new Dropout(dropoutPos);
+        dropout.parameterDefaults.rate = 0.5;
+        
+        const dense: ActivationLayer = new Dense(densePos);
+        const denseRelu: Activation = new Relu(densePos);
         dense.parameterDefaults.units = 10;
         
-        // Add relationships among layers and activations
+        // 连接关系
         svgData.input.addChild(conv1);
-        conv1.addChild(maxpool);
         conv1.addActivation(conv1Relu);
+        conv1.addChild(maxpool1);
         
-        maxpool.addChild(conv2);
+        maxpool1.addChild(conv2);
         conv2.addActivation(conv2Relu);
+        conv2.addChild(maxpool2);
         
-        conv2.addChild(flat);
-        flat.addChild(dense);
-        dense.addChild(svgData.output);
+        maxpool2.addChild(conv3);
+        conv3.addActivation(conv3Relu);
+        conv3.addChild(flat);
+        
+        flat.addChild(dropout);
+        dropout.addChild(dense);
         dense.addActivation(denseRelu);
+        dense.addChild(svgData.output);
         
         // Store the new network
         svgData.draggable.push(conv1);
-        svgData.draggable.push(conv2);
-        svgData.draggable.push(maxpool);
-        svgData.draggable.push(flat);
-        svgData.draggable.push(dense);
         svgData.draggable.push(conv1Relu);
+        svgData.draggable.push(maxpool1);
+        svgData.draggable.push(conv2);
         svgData.draggable.push(conv2Relu);
+        svgData.draggable.push(maxpool2);
+        svgData.draggable.push(conv3);
+        svgData.draggable.push(conv3Relu);
+        svgData.draggable.push(flat);
+        svgData.draggable.push(dropout);
+        svgData.draggable.push(dense);
         svgData.draggable.push(denseRelu);
     } else {
         // MNIST: 使用简单的网络结构（1个Conv2D + Flatten + Dense）
