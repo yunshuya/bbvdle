@@ -39,43 +39,55 @@ cd "$PROJECT_DIR"
 log_section "BBVDLE 完整部署脚本"
 
 # ==================== 步骤1: 更新代码 ====================
-log_section "步骤1: 更新代码"
+log_section "步骤1: 更新代码（强制同步到仓库最新版本）"
 
 log_info "检查Git状态..."
 git fetch origin
+
+# 备份 ip.txt（如果存在）- 必须在重置前备份
+if [ -f "dist/ip.txt" ]; then
+    cp dist/ip.txt dist/ip.txt.backup
+    CURRENT_IP=$(cat dist/ip.txt | tr -d '\n\r ')
+    log_info "已备份 IP: $CURRENT_IP"
+else
+    CURRENT_IP=""
+fi
+
+# 检查是否有未提交的更改
+if [ -n "$(git status --porcelain)" ]; then
+    log_warn "发现本地未提交的更改，将强制丢弃..."
+    git status --short
+fi
+
+# 切换到目标分支
+log_info "切换到分支: $BRANCH"
+git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" origin/"$BRANCH"
+
+# 强制重置到远程分支的最新状态（丢弃所有本地更改）
+log_info "强制重置到远程最新版本（丢弃所有本地更改）..."
+git reset --hard origin/"$BRANCH"
+
+# 清理未跟踪的文件（可选，但更彻底）
+log_info "清理未跟踪的文件..."
+git clean -fd
+
 LOCAL_COMMIT=$(git rev-parse HEAD)
 REMOTE_COMMIT=$(git rev-parse origin/$BRANCH)
-log_info "本地提交: ${LOCAL_COMMIT:0:8}"
+log_info "当前提交: ${LOCAL_COMMIT:0:8}"
 log_info "远程提交: ${REMOTE_COMMIT:0:8}"
 
-if [ "$LOCAL_COMMIT" != "$REMOTE_COMMIT" ]; then
-    log_info "发现新代码，开始拉取..."
-    
-    # 备份 ip.txt（如果存在）
-    if [ -f "dist/ip.txt" ]; then
-        cp dist/ip.txt dist/ip.txt.backup
-        CURRENT_IP=$(cat dist/ip.txt | tr -d '\n\r ')
-        log_info "已备份 IP: $CURRENT_IP"
-    fi
-    
-    # 丢弃本地对 ip.txt 的修改（避免冲突）
-    git checkout -- dist/ip.txt 2>/dev/null || true
-    
-    # 拉取最新代码
-    git checkout "$BRANCH"
-    git pull origin "$BRANCH"
-    
-    # 恢复备份的 ip.txt
-    if [ -n "$CURRENT_IP" ] && [ -f "dist/ip.txt.backup" ]; then
-        cp dist/ip.txt.backup dist/ip.txt
-        rm dist/ip.txt.backup
-        log_info "已恢复 IP: $CURRENT_IP"
-    fi
-    
-    log_info "✓ 代码已更新"
-else
-    log_info "✓ 代码已是最新"
+# 恢复备份的 ip.txt（服务器特定配置）
+if [ -n "$CURRENT_IP" ] && [ -f "dist/ip.txt.backup" ]; then
+    cp dist/ip.txt.backup dist/ip.txt
+    rm dist/ip.txt.backup
+    log_info "已恢复服务器 IP: $CURRENT_IP"
+elif [ -n "$CURRENT_IP" ]; then
+    # 如果备份文件不存在但之前有IP，创建新的ip.txt
+    echo "$CURRENT_IP" > dist/ip.txt
+    log_info "已恢复服务器 IP: $CURRENT_IP"
 fi
+
+log_info "✓ 代码已强制同步到仓库最新版本"
 
 # ==================== 步骤2: 检查并安装依赖 ====================
 log_section "步骤2: 检查依赖"

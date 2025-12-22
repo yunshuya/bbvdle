@@ -234,7 +234,7 @@ echo "your-server-public-ip" > dist/ip.txt
 echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
 ```
 
-**二、部署后进行维护**
+**二、部署后进行日常维护**
 
 ```bash
 cd /home/ec2-user/bbvdle
@@ -466,7 +466,7 @@ python test_auth_api.py
 
 ## 项目维护
 
-### 完整部署脚本（推荐）
+### 完整部署脚本
 
 **一键部署脚本** - 整合了所有部署步骤：
 
@@ -477,7 +477,7 @@ chmod +x deploy_complete.sh
 ```
 
 这个脚本会自动完成：
-1. ✅ 拉取最新代码（自动处理 `dist/ip.txt` 冲突）
+1. ✅ 强制同步代码（丢弃所有本地更改，以仓库最新代码为准）
 2. ✅ 安装和更新依赖（npm 和 Python）
 3. ✅ 构建项目（生成 `style.css` 和 `bundle.js`）
 4. ✅ 备份Apache目录
@@ -487,10 +487,16 @@ chmod +x deploy_complete.sh
 8. ✅ 重启Apache和后端服务
 9. ✅ 验证部署结果
 
+**重要说明**：
+- 脚本会**强制丢弃**服务器上的所有本地代码更改
+- 代码将**完全同步**到 GitHub 仓库的最新版本
+- `dist/ip.txt` 会被自动备份和恢复（服务器特定配置）
+
 **使用指定分支**：
 ```bash
 ./deploy_complete.sh develop  # 部署develop分支
 ```
+
 
 ### 更新依赖
 
