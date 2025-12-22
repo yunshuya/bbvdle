@@ -11,7 +11,14 @@ from database import (
 from auth_utils import hash_password, verify_password, generate_token, verify_token
 
 app = Flask(__name__)
-CORS(app)
+# 配置CORS，允许所有来源（生产环境可以限制特定域名）
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # 初始化数据库
 init_database()
