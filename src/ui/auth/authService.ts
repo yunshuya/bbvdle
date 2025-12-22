@@ -91,10 +91,33 @@ class AuthService {
     }
 
     /**
-     * 检查是否已登录
+     * 检查是否已登录（包括游客模式）
      */
     public isAuthenticated(): boolean {
-        return this.token !== null && this.currentUser !== null;
+        // 游客模式：currentUser不为null但token为null
+        // 正常登录：currentUser和token都不为null
+        return this.currentUser !== null;
+    }
+
+    /**
+     * 设置游客身份
+     */
+    public setGuestMode(): void {
+        const guestUser: UserInfo = {
+            user_id: 0,
+            username: '游客',
+            email: 'guest@bbvdle.local'
+        };
+        this.currentUser = guestUser;
+        this.token = null; // 游客模式不使用token
+        // 不保存到localStorage，游客身份只在当前会话有效
+    }
+
+    /**
+     * 检查是否为游客模式
+     */
+    public isGuest(): boolean {
+        return this.currentUser !== null && this.currentUser.user_id === 0;
     }
 
     /**
@@ -209,6 +232,12 @@ class AuthService {
      * 用户登出
      */
     public async logout(): Promise<void> {
+        // 如果是游客，直接清除，不需要调用API
+        if (this.isGuest()) {
+            this.clearStorage();
+            return;
+        }
+        
         if (this.token) {
             try {
                 await fetch(`${API_BASE_URL}/auth/logout`, {

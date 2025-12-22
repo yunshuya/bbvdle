@@ -1324,17 +1324,14 @@ label {
   position: relative;
   z-index: 1; }
 
-/* 跳过登录按钮样式 - 深色风格 */
-#skipLoginButton {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(0, 0, 0, 0.6) !important;
-  color: rgba(255, 255, 255, 0.9) !important; }
-  #skipLoginButton:hover {
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    border-color: rgba(0, 0, 0, 0.8) !important;
-    color: white !important; }
-  #skipLoginButton .login-button-text {
-    color: inherit !important; }
+/* 游客访问按钮容器 */
+.guest-access-container {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  width: 100%; }
+  .guest-access-container .login-button {
+    width: 100%; }
 
 /* 切换链接 */
 .login-page-switch {

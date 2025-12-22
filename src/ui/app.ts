@@ -353,7 +353,7 @@ function setupOptionOnClicks(): void {
         document.getElementById("education" + articleType).scrollIntoView(true);
     });
     addOnClickToOptions("educationAct", (articleType) => {
-        document.getElementById("education" + articleType).scrollIntoView(true);
+        document.getElementById("education" + aiticleType).scrollIntoView(true);
     });
     addOnClickToOptions("classes", (_, element) => {
         selectOption("classes", element);
@@ -2286,9 +2286,10 @@ function setupAuthSystem(): void {
     function updateUserStatus(): void {
         const user = authService.getCurrentUser();
         const isAuthenticated = authService.isAuthenticated();
+        const isGuest = authService.isGuest();
 
-        if (isAuthenticated && user) {
-            // 显示用户信息
+        if ((isAuthenticated || isGuest) && user) {
+            // 显示用户信息（包括游客）
             if (userInfoElement) userInfoElement.classList.remove('hidden');
             if (loginButtonsElement) loginButtonsElement.classList.add('hidden');
             if (userNameElement) userNameElement.textContent = user.username;

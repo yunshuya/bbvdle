@@ -1,245 +1,467 @@
 # 基于可视化积木编程的深度学习教学平台
 
-项目改进自开源项目[ENNUI](https://github.com/martinjm97/ENNUI)，它允许用户：
+项目改进自开源项目 [ENNUI](https://github.com/martinjm97/ENNUI)，是一个基于浏览器的神经网络可视化教学平台，允许用户：
 
-1. 使用拖放界面构建神经网络架构。
-2. 循序渐进地学习神经网络搭建方法。
-3. 在浏览器中训练这些网络。
-4. 可视化训练过程。
+- 🎨 使用拖放界面构建神经网络架构
+- 📚 循序渐进地学习神经网络搭建方法
+- 🚀 在浏览器中训练这些网络
+- 📊 可视化训练过程和结果
+- 🤖 集成AI助手辅助学习
+
+## 技术栈
+
+### 前端
+- **TypeScript** - 类型安全的JavaScript
+- **Webpack 4** - 模块打包工具
+- **SCSS** - CSS预处理器
+- **TensorFlow.js** - 浏览器端机器学习框架
+- **D3.js** - 数据可视化库
+
+### 后端
+- **Flask** - Python Web框架
+- **SQLite** - 轻量级数据库
+- **ZhipuAI** - 智谱AI大模型API
 
 ## 项目结构
 
 ```
 bbvdle/
-├── dist/
-├── resources/
-├── src/
-|   ├──ui/              # 前端组件
-|   |                    样式、按钮逻辑以及可拖动的组件
-|   |                    （例如层和激活函数）    
-|   └──model/           # 后端组件
-|                        支持构建神经网络、
-|                        代码生成以及在浏览器中保存状态的核心功能
-└── README.md           # 项目说明文件
+├── src/                    # 源代码目录
+│   ├── ui/                # 前端UI组件
+│   │   ├── auth/          # 用户认证模块
+│   │   ├── shapes/        # 可拖拽组件（层、激活函数等）
+│   │   ├── app.ts         # 主应用入口
+│   │   └── style.scss     # 样式文件
+│   └── model/             # 后端核心功能
+│       ├── GLM.py         # Flask后端服务（AI助手+认证）
+│       ├── database.py    # 数据库操作
+│       ├── auth_utils.py  # 认证工具函数
+│       └── *.ts           # TypeScript模型文件
+├── built/                  # TypeScript编译输出
+├── dist/                   # Webpack打包输出
+│   ├── bundle.js          # 打包后的JavaScript文件
+│   ├── ip.txt             # 后端服务IP配置
+│   └── zhipuai_key.txt    # AI API密钥配置
+├── data/                   # 数据目录
+│   └── bbvdle.db          # SQLite数据库文件
+├── resources/              # 静态资源
+├── index.html             # 主HTML文件
+├── package.json           # Node.js依赖配置
+├── requirements.txt       # Python依赖配置
+├── webpack.config.js      # Webpack配置
+├── tsconfig.json          # TypeScript配置
+└── build_prod.sh          # 生产环境构建脚本
 ```
 
-## Windows部署流程（本地测试）
+## 环境要求
 
-### 1. 安装Nodejs\python及其他必要包
+### 必需环境
+- **Node.js**: v13.14.0（必须使用此版本）
+- **Python**: 3.8
+- **npm**: 随Node.js安装
 
-1. python == 3.8
-`pip install Flask flask-cors zhipuai`
-2. 下载安装 [node-v13.14.0-x64.msi](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3 ) 文件，**注意版本必须正确**
+### 可选工具
+- **Visual Studio Build Tools**（Windows下安装canvas依赖时需要）
+- **Apache**（Linux生产环境部署时需要）
 
-### 2. 克隆仓库
+## 部署流程
 
-`git clone --recursive https://github.com/sunyia123/bbvdle.git`
+### 一、Windows本地开发环境部署
+
+#### 1. 安装Node.js
+
+下载并安装 [Node.js v13.14.0](https://pan.baidu.com/s/1Cvkd-Bclmcj0SRWhz5nFAg?pwd=okb3)（Windows x64版本）
+
+**注意**：必须使用 v13.14.0 版本，其他版本可能导致依赖安装失败。
+
+#### 2. 安装Python环境
+
+```bash
+# 确保Python版本为3.8
+python --version
+
+# 安装Python依赖
+pip install -r requirements.txt
+```
+
+#### 3. 克隆项目
+
+```bash
 git clone --recursive https://github.com/yunshuya/bbvdle.git
-
-### 3. 构建应用程序
-
-`npm install`
-
-### 4. 启动项目
-
-`npm run build`
-
-### 5. 部署项目
-
+cd bbvdle
 ```
+
+#### 4. 安装前端依赖
+
+```bash
+# 如果canvas安装失败，使用以下命令跳过原生模块编译
+npm install --ignore-scripts
+
+# 或者单独安装canvas
+npm install canvas@2.8.0 --ignore-scripts
+npm install
+```
+
+#### 5. 配置后端服务
+
+**配置AI助手API密钥**：
+```bash
+# 编辑 dist/zhipuai_key.txt，填入你的智谱AI API密钥
+# 申请地址：https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys
+echo "your-api-key-here" > dist/zhipuai_key.txt
+```
+
+**配置后端服务地址**（本地开发）：
+```bash
+# 编辑 dist/ip.txt，设置为 localhost
+echo "localhost" > dist/ip.txt
+```
+
+#### 6. 构建项目
+
+```bash
+# 构建前端资源（编译TypeScript、打包Webpack、编译SCSS）
+npm run build
+```
+
+构建过程包括：
+- TypeScript编译：`tsc --skipLibCheck`
+- Webpack打包：`webpack --mode development`
+- SCSS编译：`node-sass src/ui -o src/ui`
+
+#### 7. 启动开发服务器
+
+**方式一：使用http-server**
+```bash
+# 全局安装http-server
 npm install -g http-server
-http-server . -p 8080
 
-ps:‘http-server . -p 8080’报错：zsh: command not found: http-server
-解决方案：
-1.测试：先使用完整路径启动服务器
-/usr/local/nodejs-13.14.0/bin/http-server . -p 8080
-2.若上述可行，设置永久解决方案
-echo 'export PATH="/usr/local/nodejs-13.14.0/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+# 启动服务器（端口8080）
 http-server . -p 8080
 ```
 
-或使用vscode插件`Live Server (Five Server)`
+**方式二：使用VS Code插件**
+- 安装 `Live Server` 或 `Five Server` 插件
+- 右键点击 `index.html`，选择 "Open with Live Server"
 
-### 6. 部署AI助手后端
+#### 8. 启动后端服务
 
-切换至bbvdle目录下，执行`python src/model/GLM.py`
+```bash
+# 切换到项目根目录
+cd bbvdle
 
-**注意：**
-
-1. 修改dist/ip.txt内容为localhost
-2. 修改dist\zhipuai_key.txt为你的GLM apikey
-3. 去掉src\model\GLM.py `host="0.0.0.0"`部分
-![图示](dist/ai_asisstant_mod.png){:width="600px"}
-
-## 报错解决
-
-### 1. npm install报错
-
-报错信息如下（canvas无法安装）：
-```
-gyp ERR! find VS 
-gyp ERR! find VS msvs_version was set from command line or npm config
-gyp ERR! find VS - looking for Visual Studio version 2019
-gyp ERR! find VS VCINSTALLDIR not set, not running in VS Command Prompt
-gyp ERR! find VS could not use PowerShell to find Visual Studio 2017 or newer
-gyp ERR! find VS looking for Visual Studio 2015
-gyp ERR! find VS - not found
-gyp ERR! find VS not looking for VS2013 as it is only supported up to Node.js 8
-gyp ERR! find VS
-gyp ERR! find VS valid versions for msvs_version:
-gyp ERR! find VS
-gyp ERR! find VS **************************************************************
-gyp ERR! find VS You need to install the latest version of Visual Studio
-gyp ERR! find VS including the "Desktop development with C++" workload.
-gyp ERR! find VS For more information consult the documentation at:
-gyp ERR! find VS https://github.com/nodejs/node-gyp#on-windows
-gyp ERR! find VS **************************************************************
-gyp ERR! find VS
-gyp ERR! configure error
-gyp ERR! stack Error: Could not find any Visual Studio installation to use
+# 启动Flask后端服务（默认端口5000）
+python src/model/GLM.py
 ```
 
-#### 解决方法
-删除package-lock和node_modules
+**注意**：本地开发时，确保 `src/model/GLM.py` 中的 `host` 参数为 `"localhost"` 或 `"127.0.0.1"`。
+
+---
+
+### 二、Linux生产环境部署（AWS EC2）
+
+#### 1. 系统准备
+
+```bash
+# 更新系统
+sudo yum update -y
+
+# 安装Git
+sudo yum install git -y
 ```
+
+#### 2. 安装Node.js
+
+```bash
+# 使用fnm（Fast Node Manager）安装Node.js 13
+curl -fsSL https://fnm.vercel.app/install | bash
+source ~/.bashrc
+fnm use --install-if-missing 13
+
+# 验证安装
+node --version  # 应显示 v13.14.0
+npm --version
+```
+
+#### 3. 安装Python 3.8
+
+```bash
+# 下载Miniconda
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+
+# 安装Miniconda
+bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
+source ~/.bashrc
+
+# 创建Python虚拟环境
+python3.8 -m venv py38_env
+source py38_env/bin/activate
+
+# 安装Python依赖
+pip install -r requirements.txt
+```
+
+#### 4. 部署前端项目
+
+```bash
+# 克隆项目
+git clone --recursive https://github.com/yunshuya/bbvdle.git
+cd bbvdle
+
+# 安装依赖
+npm install --ignore-scripts
+
+# 构建项目
+npm run build
+
+# 配置后端IP地址（替换为实际公网IP）
+echo "your-server-public-ip" > dist/ip.txt
+
+# 配置AI API密钥
+echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
+```
+
+#### 5. 配置Apache Web服务器
+
+```bash
+# 安装Apache
+sudo yum install -y httpd
+
+# 复制项目文件到Apache根目录
+sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
+
+# 设置文件权限
+sudo chown -R apache:apache /var/www/html/
+sudo chmod -R 755 /var/www/html/
+
+# 启动Apache服务
+sudo systemctl start httpd
+sudo systemctl enable httpd  # 设置开机自启
+sudo systemctl reload httpd
+```
+
+#### 6. 配置防火墙和安全组
+
+**AWS EC2安全组配置**：
+- 添加入站规则：HTTP (80端口)
+- 添加入站规则：HTTPS (443端口，如使用SSL)
+- 添加入站规则：自定义TCP (5000端口，后端API)
+
+**本地防火墙配置**（如需要）：
+```bash
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+```
+
+#### 7. 部署后端服务
+
+**修改后端配置**：
+编辑 `src/model/GLM.py`，确保 `host` 设置为 `"0.0.0.0"` 以允许外部访问：
+
+```python
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug=False)
+```
+
+**使用systemd管理后端服务**（推荐）：
+
+创建服务文件 `/etc/systemd/system/bbvdle-backend.service`：
+
+```ini
+[Unit]
+Description=BBVDLE Flask Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/bbvdle
+Environment="PATH=/home/ec2-user/bbvdle/py38_env/bin"
+ExecStart=/home/ec2-user/bbvdle/py38_env/bin/python src/model/GLM.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启动服务：
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start bbvdle-backend
+sudo systemctl enable bbvdle-backend  # 开机自启
+sudo systemctl status bbvdle-backend  # 查看状态
+```
+
+**或使用nohup后台运行**（简单方式）：
+```bash
+cd /home/ec2-user/bbvdle
+source py38_env/bin/activate
+nohup python src/model/GLM.py > backend.log 2>&1 &
+```
+
+#### 8. 验证部署
+
+- 前端访问：`http://your-server-ip`
+- 后端API测试：`http://your-server-ip:5000/api/health`（如配置了健康检查）
+
+---
+
+### 三、生产环境构建（优化版本）
+
+使用提供的构建脚本生成生产版本：
+
+```bash
+# 赋予执行权限
+chmod +x build_prod.sh
+
+# 执行构建
+./build_prod.sh
+```
+
+构建脚本会：
+1. 执行 `npm run build`
+2. 创建 `prod/` 目录
+3. 复制并优化 `index.html`
+4. 压缩CSS和JavaScript文件
+5. 复制所有dist资源
+
+生产版本位于 `prod/` 目录，可直接部署到Web服务器。
+
+---
+
+## 常见问题排查
+
+### 1. npm install 失败（canvas无法安装）
+
+**错误信息**：
+```
+gyp ERR! find VS could not find any Visual Studio installation to use
+```
+
+**解决方案**：
+```bash
+# 方法一：跳过原生模块编译（推荐）
+npm install --ignore-scripts
+
+# 方法二：单独安装canvas
 npm config set proxy false
 npm cache clean --force
 npm install canvas@2.8.0 --ignore-scripts
 npm install
 ```
 
-### 2. npm run build报错
+### 2. npm run build 失败（node-sass编译错误）
 
-报错信息如下（node-sass编译错误）
+**解决方案**：
+```bash
+# 方法一：重新构建node-sass
+npm rebuild node-sass
 
-```
-> tsc --skipLibCheck && webpack --mode development && node-sass src/ui -o src/ui
-
-Hash: 4c13200e2cf9321e64bd
-Version: webpack 4.41.5
-Time: 2618ms
-Built at: 2024/10/30 下午12:33:38
-           Asset      Size  Chunks             Chunk Names
-       bundle.js  8.29 MiB    main  [emitted]  main
-data_batch_1.png  22.1 MiB          [emitted]
-data_batch_2.png  22.1 MiB          [emitted]
-data_batch_3.png  22.1 MiB          [emitted]
-data_batch_4.png  22.1 MiB          [emitted]
-data_batch_5.png    22 MiB          [emitted]
-  test_batch.png  22.1 MiB          [emitted]
-Entrypoint main = bundle.js
-[./built/model/build_network.js] 4.7 KiB {main} [built]
-[./built/model/code_generation.js] 2.02 KiB {main} [built]
-[./built/model/data.js] 11.2 KiB {main} [built]
-[./built/model/export_model.js] 8.93 KiB {main} [built]
-[./built/model/graphs.js] 10 KiB {main} [built]
-[./built/model/mnist_model.js] 5.57 KiB {main} [built]
-[./built/model/params_object.js] 2.7 KiB {main} [built]
-[./built/model/save_state_url.js] 2 KiB {main} [built]
-[./built/ui/app.js] 17.5 KiB {main} [built]
-[./built/ui/error.js] 487 bytes {main} [built]
-[./built/ui/model_templates.js] 8.77 KiB {main} [built]
-[./built/ui/shapes/activation.js] 4.63 KiB {main} [built]
-[./built/ui/shapes/activationlayer.js] 3.61 KiB {main} [built]
-[./built/ui/shapes/layer.js] 11.3 KiB {main} [built]
-[./built/ui/shapes/layers/add.js] 1.6 KiB {main} [built]
-    + 1916 hidden modules
-internal/fs/utils.js:230
-    throw err;
-    ^
-```
-
-#### 解决方法
-
-1. 先尝试
-`npm rebuild node-sass`
-2. 若不行，则删除 `node-sass` 和其缓存
-
-```
+# 方法二：重新安装node-sass
 npm uninstall node-sass
 npm cache clean --force
 npm install node-sass@4.14.1
 ```
 
-## Linux部署流程
+### 3. 后端服务无法启动
 
-项目部署在AWS EC2上，使用系统为Amazon Linux 2 AMI，参考[视频](https://www.bilibili.com/video/BV1EP411v7Sw/?spm_id_from=333.337.search-card.all.click&vd_source=12ea1b89a9a563301764e357b2bfa7b2)。
+**检查项**：
+- Python版本是否为3.8
+- 是否安装了所有依赖：`pip install -r requirements.txt`
+- API密钥文件是否存在：`dist/zhipuai_key.txt`
+- 数据库文件权限是否正确
+- 端口5000是否被占用
 
-### 1. 安装Nodejs
+### 4. 前端无法连接后端
 
-```cmd
-sudo yum update -y
-sudo yum install git -y
-//// 安装Nodejs
-curl -fsSL https://fnm.vercel.app/install | bash
-source ~/.bashrc
-fnm use --install-if-missing 13
+**检查项**：
+- `dist/ip.txt` 中的IP地址是否正确
+- 后端服务是否正在运行
+- 防火墙/安全组是否开放5000端口
+- 浏览器控制台是否有CORS错误
+
+### 5. 数据库相关错误
+
+**解决方案**：
+```bash
+# 删除旧数据库，重新初始化
+rm data/bbvdle.db
+python src/model/GLM.py  # 会自动创建新数据库
 ```
 
-### 2. 安装配置Python 3.8
+---
 
-```cmd
-wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-bash Miniconda3-py38_23.10.0-1-Linux-x86_64.sh
-source ~/.bashrc
-//出现conda23.10.0,安装成功
-测试conda版本
-conda --version
+## 开发命令参考
 
-创建虚拟环境
-//conda create -n py38 python=3.8
-//conda activate py38
-//conda 创建虚拟环境可能比较慢，改为python
-python3.8 -m venv py38_env
-source py38_env/bin/activate
-pip install Flask flask-cors zhipuai
-```
+### npm脚本
 
-### 3. 安装配置并部署项目
-
-1. git项目并install和build（参考win部属部分）
-
-git clone --recursive https://github.com/sunyia123/bbvdle.git
-//直接install会报错
-cd /home/ec2-user/bbvdle/
-npm install
+```bash
+# 构建项目
 npm run build
 
+# 编译SCSS
+npm run scss
 
-2. 安装Apache
-sudo yum install -y httpd
+# 监听SCSS变化
+npm run scss-watch
 
-3. 修改实例公网ip并复制文件至根目录
+# 监听TypeScript变化
+npm run ts-watch
+
+# 监听Webpack变化
+npm run webpack-watch
+
+# 同时监听所有变化（开发模式）
+npm run watch
 ```
-echo "{{公网ip }}" > /home/ec2-user/bbvdle/dist/ip.txt
-sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
-cd /var/www/html/
+
+### Python后端
+
+```bash
+# 启动开发服务器
+python src/model/GLM.py
+
+# 测试认证API（如存在测试脚本）
+python test_auth_api.py
 ```
 
-4. 配置Apache
-sudo systemctl reload httpd
-启动apache
-sudo systemctl start httpd
-设置开机自启
-sudo systemctl enable httpd
+---
 
-后面这个就不用运行了
-//1. 启动Apache
-//`sudo systemctl start httpd`
-//1. 设置开机自启
-//`sudo systemctl enable httpd`
+## 项目维护
 
-### 4. 部署AI助手后端
+### 更新依赖
 
-**注意**
+```bash
+# 更新npm依赖
+npm update
 
-1. 部署前添加安全组入组规则（接受5000端口）
-2. 需要修改LLM的api（[申请地址](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys)），操作如下：
-
-```cmd
-cd /home/ec2-user/bbvdle/
-echo "{{92139536965c47beb1aa9762f84205fa.aSRYfudFQvXnrS7s}}" > /home/ec2-user/bbvdle/dist/zhipuai_key.txt
-python /home/ec2-user/bbvdle/src/model/GLM.py
+# 更新Python依赖
+pip install -r requirements.txt --upgrade
 ```
+
+### 数据库备份
+
+```bash
+# 备份数据库
+cp data/bbvdle.db data/bbvdle.db.backup
+
+# 恢复数据库
+cp data/bbvdle.db.backup data/bbvdle.db
+```
+
+### 日志查看
+
+```bash
+# 查看后端服务日志（systemd方式）
+sudo journalctl -u bbvdle-backend -f
+
+# 查看Apache错误日志
+sudo tail -f /var/log/httpd/error_log
+
+# 查看Apache访问日志
+sudo tail -f /var/log/httpd/access_log
+```
+
+---

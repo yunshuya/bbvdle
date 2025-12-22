@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 from database import (
     init_database, create_user, get_user_by_username, 
     get_user_by_email, get_user_by_id, update_last_login,
-    save_session, get_session_by_token, delete_session, delete_expired_sessions,
-    save_user_progress, get_user_progress, update_task_completion, get_user_task_completion
+    save_session, get_session_by_token, delete_session, delete_expired_sessions
 )
 from auth_utils import hash_password, verify_password, generate_token, verify_token
 
@@ -215,134 +214,6 @@ def cleanup_expired_sessions():
         delete_expired_sessions()
     except:
         pass  # 忽略清理错误，不影响主流程
-
-# ==================== 阶段二：学习进度 API ====================
-
-def get_user_from_token():
-    """从请求头中获取用户信息（辅助函数）"""
-    auth_header = request.headers.get('Authorization')
-    if not auth_header or not auth_header.startswith('Bearer '):
-        return None
-    
-    token = auth_header.split(' ')[1]
-    payload = verify_token(token)
-    if not payload:
-        return None
-    
-    session = get_session_by_token(token)
-    if not session:
-        return None
-    
-    user = get_user_by_id(payload['user_id'])
-    if not user or not user['is_active']:
-        return None
-    
-    return user
-
-@app.route('/api/progress/save', methods=['POST'])
-def save_progress():
-    """保存用户学习进度"""
-    try:
-        user = get_user_from_token()
-        if not user:
-            return jsonify({"success": False, "error": "未授权"}), 401
-        
-        data = request.json
-        task_type = data.get('task_type')
-        step_index = data.get('step_index')
-        step_name = data.get('step_name')
-        completed = data.get('completed', False)
-        
-        if not task_type or step_index is None or not step_name:
-            return jsonify({"success": False, "error": "缺少必要参数"}), 400
-        
-        success = save_user_progress(
-            user['id'], 
-            task_type, 
-            step_index, 
-            step_name, 
-            completed
-        )
-        
-        if success:
-            return jsonify({"success": True}), 200
-        else:
-            return jsonify({"success": False, "error": "保存失败"}), 500
-            
-    except Exception as e:
-        print(f"保存进度错误: {e}")
-        return jsonify({"success": False, "error": "服务器错误"}), 500
-
-@app.route('/api/progress/get', methods=['GET'])
-def get_progress():
-    """获取用户学习进度"""
-    try:
-        user = get_user_from_token()
-        if not user:
-            return jsonify({"success": False, "error": "未授权"}), 401
-        
-        task_type = request.args.get('task_type')
-        progress = get_user_progress(user['id'], task_type)
-        
-        return jsonify({
-            "success": True,
-            "progress": progress
-        }), 200
-        
-    except Exception as e:
-        print(f"获取进度错误: {e}")
-        return jsonify({"success": False, "error": "服务器错误"}), 500
-
-@app.route('/api/progress/task-completion', methods=['POST'])
-def update_task_completion_api():
-    """更新任务完成状态"""
-    try:
-        user = get_user_from_token()
-        if not user:
-            return jsonify({"success": False, "error": "未授权"}), 401
-        
-        data = request.json
-        task_type = data.get('task_type')
-        completion_rate = data.get('completion_rate', 0.0)
-        completed = data.get('completed', False)
-        
-        if not task_type:
-            return jsonify({"success": False, "error": "缺少任务类型"}), 400
-        
-        success = update_task_completion(
-            user['id'],
-            task_type,
-            completion_rate,
-            completed
-        )
-        
-        if success:
-            return jsonify({"success": True}), 200
-        else:
-            return jsonify({"success": False, "error": "更新失败"}), 500
-            
-    except Exception as e:
-        print(f"更新任务完成状态错误: {e}")
-        return jsonify({"success": False, "error": "服务器错误"}), 500
-
-@app.route('/api/progress/tasks', methods=['GET'])
-def get_all_tasks():
-    """获取用户所有任务的完成情况"""
-    try:
-        user = get_user_from_token()
-        if not user:
-            return jsonify({"success": False, "error": "未授权"}), 401
-        
-        tasks = get_user_task_completion(user['id'])
-        
-        return jsonify({
-            "success": True,
-            "tasks": tasks
-        }), 200
-        
-    except Exception as e:
-        print(f"获取任务列表错误: {e}")
-        return jsonify({"success": False, "error": "服务器错误"}), 500
 
 # ==================== AI 助手 API ====================
 

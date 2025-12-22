@@ -112,8 +112,8 @@ class LoginPage {
         const stack = new Error().stack;
         if (stack) {
             // 检查调用栈，如果是从任务模块调用的，则忽略
-            if (stack.includes('switchTask') || stack.includes('taskModule') || stack.includes('getProgress')) {
-                console.warn('showMainApp被任务模块或进度服务意外调用，已忽略');
+            if (stack.includes('switchTask') || stack.includes('taskModule')) {
+                console.warn('showMainApp被任务模块意外调用，已忽略');
                 return;
             }
         }
@@ -222,13 +222,21 @@ class LoginPage {
             });
         }
 
-        // 跳过登录按钮
+        // 游客访问按钮
         const skipLoginButton = document.getElementById('skipLoginButton');
         if (skipLoginButton) {
             skipLoginButton.addEventListener('click', () => {
-                console.log('跳过登录，直接进入主应用');
-                // 直接显示主应用，不进行认证
+                console.log('游客访问，直接进入主应用');
+                // 设置游客身份
+                authService.setGuestMode();
+                // 显示主应用
                 this.showMainApp();
+                // 触发自定义事件，通知其他模块
+                setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('userLoggedIn', { 
+                        detail: { user: { user_id: 0, username: '游客', email: 'guest@bbvdle.local' } } 
+                    }));
+                }, 100);
             });
         }
     }
