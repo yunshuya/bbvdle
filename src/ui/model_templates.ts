@@ -26,20 +26,45 @@ export function resetWorkspace(svgData: IDraggableData): void {
     if (windowProperties.selectedElement != null) {
         windowProperties.selectedElement.unselect();
     }
-    // Set input and output locations
+    
+    // 先清理所有层的连接关系，避免删除时出现引用问题
+    // 创建副本以避免在遍历时修改数组
+    const layersToDelete = [...svgData.draggable];
+    
+    // 先断开所有层的连接关系
+    for (const layer of layersToDelete) {
+        if (layer instanceof Layer) {
+            // 清理所有连接线
+            layer.wires.forEach((w) => w.delete());
+            layer.deleteCircularWires();
+            // 清理父子关系
+            layer.children.clear();
+            layer.parents.clear();
+        }
+    }
+    
+    // 清理 Input 和 Output 的连接
     if (svgData.input != null) {
         svgData.input.setPosition(svgData.input.defaultLocation);
         svgData.input.wires.forEach((w) => w.delete());
         svgData.input.deleteCircularWires();  // 清理循环连接
+        svgData.input.children.clear();
+        svgData.input.parents.clear();
     }
     if (svgData.output != null) {
         svgData.output.setPosition(svgData.output.defaultLocation);
         svgData.output.deleteCircularWires();  // 清理循环连接
+        svgData.output.children.clear();
+        svgData.output.parents.clear();
     }
 
-    // Remove all other layers
-    for (const layer of svgData.draggable) {
-        layer.delete();
+    // 删除所有层（使用副本数组）
+    for (const layer of layersToDelete) {
+        try {
+            layer.delete();
+        } catch (e) {
+            console.warn("删除层时出错:", e);
+        }
     }
 
     // Clear the current list of draggables
@@ -48,7 +73,13 @@ export function resetWorkspace(svgData: IDraggableData): void {
     // 清理公式标签
     if ((svgData as any).formulaLabels) {
         const formulaLabels = (svgData as any).formulaLabels as FormulaLabel[];
-        formulaLabels.forEach(label => label.remove());
+        formulaLabels.forEach(label => {
+            try {
+                label.remove();
+            } catch (e) {
+                console.warn("删除公式标签时出错:", e);
+            }
+        });
         (svgData as any).formulaLabels = undefined;
     }
 }

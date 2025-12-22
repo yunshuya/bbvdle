@@ -48,8 +48,38 @@ sudo systemctl restart bbvdle-backend 2>/dev/null || {
 }
 
 echo "6. 复制文件到Apache目录..."
-sudo cp -r "$PROJECT_DIR"/* "$APACHE_DIR/"
+# 先清理旧文件（保留可能的配置文件）
+sudo rm -rf "$APACHE_DIR/dist" "$APACHE_DIR/src" "$APACHE_DIR/node_modules" 2>/dev/null || true
+sudo rm -f "$APACHE_DIR/bundle.js" 2>/dev/null || true
+
+# 只复制必要的文件
+sudo cp -r "$PROJECT_DIR/dist" "$APACHE_DIR/"
+sudo cp "$PROJECT_DIR/index.html" "$APACHE_DIR/"
+sudo cp -r "$PROJECT_DIR/data" "$APACHE_DIR/" 2>/dev/null || true
+
+# 确保dist目录中的文件也被正确复制
+if [ -d "$PROJECT_DIR/dist" ]; then
+    sudo cp -r "$PROJECT_DIR/dist"/* "$APACHE_DIR/dist/"
+fi
+
+# 设置文件权限
 sudo chown -R apache:apache "$APACHE_DIR"
+sudo chmod -R 755 "$APACHE_DIR"
+
+# 配置Apache禁用缓存（对JavaScript和CSS文件）
+sudo bash -c "cat > $APACHE_DIR/.htaccess << 'EOF'
+<FilesMatch \"\.(js|css)$\">
+    Header set Cache-Control \"no-cache, no-store, must-revalidate\"
+    Header set Pragma \"no-cache\"
+    Header set Expires \"0\"
+</FilesMatch>
+<FilesMatch \"\.(html|htm)$\">
+    Header set Cache-Control \"no-cache, no-store, must-revalidate\"
+    Header set Pragma \"no-cache\"
+    Header set Expires \"0\"
+</FilesMatch>
+EOF"
+
 sudo systemctl reload httpd
 
 echo "=========================================="
