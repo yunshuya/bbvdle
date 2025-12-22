@@ -332,8 +332,12 @@ fi
 # ==================== 完成 ====================
 log_section "部署完成！"
 
-# 获取服务器IP
-SERVER_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "your-server-ip")
+# 获取服务器IP（从ip.txt或metadata服务）
+if [ -f "dist/ip.txt" ]; then
+    SERVER_IP=$(cat dist/ip.txt | tr -d '\n\r ')
+else
+    SERVER_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "your-server-ip")
+fi
 
 echo ""
 log_info "前端访问: http://$SERVER_IP"

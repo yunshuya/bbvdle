@@ -203,16 +203,6 @@ pip install -r requirements.txt
 
 #### 4. 部署前端项目
 
-**方法一：使用完整部署脚本（推荐）**
-
-```bash
-cd /home/ec2-user/bbvdle
-chmod +x deploy_complete.sh
-./deploy_complete.sh
-```
-
-脚本会自动完成所有部署步骤（见下方"项目维护"章节）。
-
 **一、首次部署**
 
 ```bash
@@ -532,28 +522,6 @@ sudo tail -f /var/log/httpd/error_log
 
 # 查看Apache访问日志
 sudo tail -f /var/log/httpd/access_log
-```
-
-### 快速修复脚本
-
-如果遇到特定问题，可以使用专门的修复脚本：
-
-**修复前端资源加载问题**：
-```bash
-chmod +x fix_frontend_resources.sh
-./fix_frontend_resources.sh
-```
-
-**修复清空功能问题**：
-```bash
-chmod +x check_and_fix_clear_function.sh
-./check_and_fix_clear_function.sh
-```
-
-**强制更新 bundle.js**：
-```bash
-chmod +x force_update_bundle.sh
-./force_update_bundle.sh
 ```
 
 ---
