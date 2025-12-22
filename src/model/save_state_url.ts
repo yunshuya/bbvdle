@@ -11,10 +11,12 @@ export function storeNetworkInUrl(state: ISerializedNetwork): string {
 
 /**
  * Load a network from a URL if possible. Otherwise, load the default workspace.
+ * @param existingSvgData Optional existing svgData object to update instead of creating a new one
+ * @returns The svgData object (either updated existing or newly created)
  */
-export function loadStateIfPossible(): IDraggableData {
-
-    let svgData: IDraggableData = {
+export function loadStateIfPossible(existingSvgData?: IDraggableData): IDraggableData {
+    // 如果提供了现有的 svgData，使用它；否则创建新的
+    let svgData: IDraggableData = existingSvgData || {
         draggable : [],
         input: null,
         output: null,
@@ -22,12 +24,15 @@ export function loadStateIfPossible(): IDraggableData {
 
     const urlParams: string = window.location.hash;
     try {
+        // 先清空工作区（清理现有内容）
         resetWorkspace(svgData);
+        
         if (urlParams.length > 1) {
             const network: ISerializedNetwork = JSON.parse(decodeURI(urlParams.slice(1)));
 
             // Serialize the model if it exists
-            svgData = stateFromJson(svgData, network);
+            // stateFromJson 会更新传入的 svgData 对象
+            stateFromJson(svgData, network);
         } else {
             svgData.input = new Input();
             svgData.output = new Output();

@@ -163,11 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // 如果主应用已经显示，立即加载；否则等待显示事件
     const mainDiv = document.getElementById("main");
     if (mainDiv && !mainDiv.classList.contains("hidden")) {
-        svgData = loadStateIfPossible();
+        // 传递现有的 svgData，避免重新赋值导致引用丢失
+        loadStateIfPossible(svgData);
     } else {
         // 监听主应用显示事件
         const loadNetworkState = () => {
-            svgData = loadStateIfPossible();
+            // 传递现有的 svgData，避免重新赋值导致引用丢失
+            loadStateIfPossible(svgData);
             // 加载后重新计算布局
             setTimeout(() => {
                 resizeMiddleSVG();

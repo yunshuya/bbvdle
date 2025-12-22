@@ -26,19 +26,23 @@ export function resetWorkspace(svgData: IDraggableData): void {
     if (windowProperties.selectedElement != null) {
         windowProperties.selectedElement.unselect();
     }
-    // Set input and output locations
+    
+    // 先清理 input 和 output 的连接
     if (svgData.input != null) {
-        svgData.input.setPosition(svgData.input.defaultLocation);
         svgData.input.wires.forEach((w) => w.delete());
         svgData.input.deleteCircularWires();  // 清理循环连接
+        svgData.input.setPosition(svgData.input.defaultLocation);
     }
     if (svgData.output != null) {
-        svgData.output.setPosition(svgData.output.defaultLocation);
         svgData.output.deleteCircularWires();  // 清理循环连接
+        svgData.output.setPosition(svgData.output.defaultLocation);
     }
 
+    // 创建 draggable 数组的副本，避免在迭代时修改数组导致问题
+    const layersToDelete = [...svgData.draggable];
+    
     // Remove all other layers
-    for (const layer of svgData.draggable) {
+    for (const layer of layersToDelete) {
         layer.delete();
     }
 
@@ -50,6 +54,28 @@ export function resetWorkspace(svgData: IDraggableData): void {
         const formulaLabels = (svgData as any).formulaLabels as FormulaLabel[];
         formulaLabels.forEach(label => label.remove());
         (svgData as any).formulaLabels = undefined;
+    }
+    
+    // 额外清理：直接查询 DOM 并删除任何残留的层和连线
+    // 这确保即使 svgData.draggable 与 DOM 不同步，也能彻底清理
+    const svgElement = document.getElementById("svg");
+    if (svgElement) {
+        // 删除所有非 input/output 的层（通过 draggable-id 属性）
+        const allLayers = svgElement.querySelectorAll('g[draggable-id]');
+        allLayers.forEach((layer) => {
+            const layerElement = layer as HTMLElement;
+            const draggableId = layerElement.getAttribute('draggable-id');
+            // 只删除非 input/output 的层
+            if (draggableId && draggableId !== 'input' && draggableId !== 'output') {
+                layer.remove();
+            }
+        });
+        
+        // 删除所有连线（通过 wire-id 属性）
+        const allWires = svgElement.querySelectorAll('line[wire-id]');
+        allWires.forEach((wire) => {
+            wire.remove();
+        });
     }
 }
 
