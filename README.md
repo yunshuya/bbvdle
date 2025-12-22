@@ -213,7 +213,7 @@ chmod +x deploy_complete.sh
 
 脚本会自动完成所有部署步骤（见下方"项目维护"章节）。
 
-**方法二：手动部署**
+**一、首次部署**
 
 ```bash
 # 克隆项目
@@ -233,6 +233,16 @@ echo "your-server-public-ip" > dist/ip.txt
 # 配置AI API密钥
 echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
 ```
+
+**二、部署后进行维护**
+
+```bash
+cd /home/ec2-user/bbvdle
+chmod +x deploy_complete.sh
+./deploy_complete.sh
+```
+
+脚本会自动完成所有部署步骤（见下方"项目维护"章节）。
 
 #### 5. 配置Apache Web服务器
 
