@@ -26,7 +26,7 @@ import { MaxPooling2D } from "./shapes/layers/maxpooling";
 import { Multiply } from "./shapes/layers/multiply";
 import { Output } from "./shapes/layers/output";
 import { Recurrent } from "./shapes/layers/rnn";
-import { Reshape } from "./shapes/layers/reshape";
+// Reshape 层已从前端移除
 import { TextBox } from "./shapes/textbox";
 import { WireGuide } from "./shapes/wireguide";
 import { Point } from "./shapes/shape";
@@ -420,6 +420,22 @@ function createTemplate(template: string): void {
 function appendItem(itemType: string): void {
     console.log("appendItem called with itemType:", itemType);
     
+    // 特殊处理：循环连接不是积木块，而是操作模式
+    if (itemType === "circularConnection") {
+        // 进入循环连接选择模式
+        (window as any).circularConnectionSelectMode = {
+            step: "source",
+            sourceLayer: null,
+            targetLayer: null,
+            labelText: ""
+        };
+        console.log("✓ 循环连接模式已激活，请点击源层（如 H_t）");
+        console.log("选择模式状态:", (window as any).circularConnectionSelectMode);
+        // 显示友好的提示信息（使用 console.log，用户可以通过控制台看到提示）
+        // 注意：这里不创建积木块，只是进入选择模式
+        return;
+    }
+    
     // 检查 itemType 是否在映射中
     const itemMap: { [key: string]: any } = {
         add: Add,
@@ -434,7 +450,6 @@ function appendItem(itemType: string): void {
         multiply: Multiply,
         recurrent: Recurrent,
         relu: Relu,
-        reshape: Reshape,
         sigmoid: Sigmoid,
         softmax: Softmax,
         tanh: Tanh,

@@ -163,6 +163,38 @@ export function verifyStepCompletion(item: Draggable): void {
    
 }
 
+/**
+ * 验证循环连接步骤是否完成
+ * 当用户点击循环连接时调用此函数
+ */
+export function verifyCircularConnectionStep(): void {
+    // 如果当前任务是 "None"，不进行任何操作
+    if (CurrentTask === "None") {
+        console.log("当前没有正在进行的任务");
+        return;
+    }
+
+    // 获取当前任务的步骤
+    const task = taskSteps[CurrentTask];
+    if (!task) {
+        console.error(`任务类型 '${CurrentTask}' 不存在`);
+        return;
+    }
+
+    // 查找"循环连接"相关的步骤（requiredBlock 为 "circularConnection" 或 "None" 且步骤描述包含"循环连接"）
+    for (let i = 0; i < task.length; i++) {
+        const step = task[i];
+        // 如果当前步骤没有完成，且步骤描述包含"循环连接"，且 requiredBlock 为 "circularConnection" 或 "None"
+        if (!step.completed && 
+            step.step.includes("循环连接") && 
+            (step.requiredBlock === "circularConnection" || step.requiredBlock === "None")) {
+            markStepAsCompleted(i);
+            console.log(`循环连接步骤已完成（步骤 ${i}）`);
+            break;
+        }
+    }
+}
+
 
 // 标记步骤为完成，并更新 UI
 export function markStepAsCompleted(stepIndex: number): void {

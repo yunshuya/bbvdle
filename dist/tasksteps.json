@@ -18,13 +18,15 @@
     { "step": "连接‘测试模型’积木块，查看模型在测试集上的准确率，并通过图表积木块显示训练过程中的损失和准确率变化。", "requiredBlock": "None", "completed": false }
   ],
   "RNN": [
-    { "step": "模板中自动生成'Input'层和'Output'层，点击画板中左侧紫色方块（Input），在右侧选择模型训练的数据集AirPassengers。", "requiredBlock": "input", "completed": false },
-    { "step": "找到'Reshape'积木块，将其拖动并放置在'Input'块之后，设置Target Shape 1为28，Target Shape 2为28，将图像数据转换为序列格式。", "requiredBlock": "reshape", "completed": false },
-    { "step": "找到'Recurrent'积木块，将其拖动并放置在'Reshape'块之后，设置单元数量为64，激活函数为tanh。", "requiredBlock": "recurrent", "completed": false, "parentLayer": "reshape" },
-    { "step": "选择'Dropout'积木块，将其连接到'Recurrent'层之后，并设置dropout比例为0.2以防止过拟合。", "requiredBlock": "dropout", "completed": false },
-    { "step": "根据需要可以重复添加'Recurrent'层和'Dropout'层来构建深层RNN网络。", "requiredBlock": "recurrent", "completed": false },
-    { "step": "选择'Dense'积木块，将其连接到最后一个'Dropout'层之后，设置神经元数量为10（对应10个类别）。注意：Dense层不需要激活函数，因为Output层会自动应用softmax。", "requiredBlock": "dense", "completed": false },
-    { "step": "在'训练设置'中，选择优化器（如Adam）、损失函数（如categoricalCrossentropy），设置批次大小为64，迭代次数为10，并点击'训练'按钮。", "requiredBlock": "train", "completed": false },
-    { "step": "训练完成后，可以在'结果可视化'标签页查看模型在测试集上的准确率，并通过图表查看训练过程中的损失和准确率变化。", "requiredBlock": "test", "completed": false }
+    { "step": "点击'RNN内部结构'模板，系统会自动生成完整的RNN内部结构。注意：模板会自动选择AirPassengers数据集（时序数据）。", "requiredBlock": "input", "completed": false },
+    { "step": "观察'Flatten'层：它将时序数据从3D格式[batch, timesteps, features]转换为2D格式[batch, timesteps*features]，为后续处理做准备。", "requiredBlock": "flatten", "completed": false },
+    { "step": "理解'HiddenStatePrev'占位层：这是前一时刻的隐藏状态H_{t-1}的占位层，用于拓扑排序和循环连接可视化。点击该层可以看到'⚠️ 占位层'标记。", "requiredBlock": "dense", "completed": false },
+    { "step": "观察'Concatenate'层：它将当前输入X_t和前一时刻的隐藏状态H_{t-1}合并为[X_t, H_{t-1}]，这是RNN计算的第一步。", "requiredBlock": "concatenate", "completed": false },
+    { "step": "理解'Dense'层（线性变换）：它执行z_t = W · [X_t, H_{t-1}] + b，将合并后的输入进行线性变换。注意：该层的units设置为128。", "requiredBlock": "dense", "completed": false },
+    { "step": "观察'Tanh'激活函数：它应用在Dense层之后，计算H_t = tanh(z_t)，得到当前时刻的隐藏状态。这是RNN的核心计算。", "requiredBlock": "tanh", "completed": false },
+    { "step": "创建循环连接：点击'循环连接'积木块，然后依次点击源层（Dense层，H_t）和目标层（HiddenStatePrev，H_{t-1}），最后点击'创建循环连接'按钮。这表示H_t会作为下一时刻的H_{t-1}输入，体现了RNN的循环特性。", "requiredBlock": "circularConnection", "completed": false },
+    { "step": "观察'Dropout'层：它位于Tanh激活之后，用于防止过拟合（rate=0.2）。这是正则化技术，提高模型的泛化能力。", "requiredBlock": "dropout", "completed": false },
+    { "step": "在'训练设置'中，确认数据集为AirPassengers，选择优化器（如Adam）、损失函数（如meanSquaredError），设置批次大小为1，迭代次数为100，学习率为0.0005，并点击'训练'按钮。", "requiredBlock": "None", "completed": false },
+    { "step": "训练完成后，可以在'结果可视化'标签页查看模型在测试集上的RMSE和MAE指标，并通过图表查看训练过程中的损失曲线变化。注意：这是时序预测任务（回归），不是分类任务。", "requiredBlock": "None", "completed": false }
   ]
 }
