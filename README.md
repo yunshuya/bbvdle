@@ -294,7 +294,7 @@ sudo systemctl enable bbvdle-backend  # 开机自启
 sudo systemctl status bbvdle-backend  # 查看状态
 ```
 
-**或使用nohup后台运行**（简单方式）：
+**或使用nohup后台运行**（如果用systemd配置有问题，改用该简单方式）：
 ```bash
 cd /home/ec2-user/bbvdle
 source py38_env/bin/activate
