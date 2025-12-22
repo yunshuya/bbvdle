@@ -22,6 +22,9 @@ import { dataset, changeDataset } from "../model/data";
 import { model } from "../model/params_object";
 
 export function resetWorkspace(svgData: IDraggableData): void {
+    console.log("resetWorkspace: 开始清空工作区");
+    console.log("resetWorkspace: 当前层数量:", svgData.draggable.length);
+    
     // Deselect current element
     if (windowProperties.selectedElement != null) {
         windowProperties.selectedElement.unselect();
@@ -30,6 +33,7 @@ export function resetWorkspace(svgData: IDraggableData): void {
     // 先清理所有层的连接关系，避免删除时出现引用问题
     // 创建副本以避免在遍历时修改数组
     const layersToDelete = [...svgData.draggable];
+    console.log("resetWorkspace: 准备删除", layersToDelete.length, "个层");
     
     // 先断开所有层的连接关系
     for (const layer of layersToDelete) {
@@ -59,16 +63,62 @@ export function resetWorkspace(svgData: IDraggableData): void {
     }
 
     // 删除所有层（使用副本数组）
+    let deletedCount = 0;
     for (const layer of layersToDelete) {
         try {
             layer.delete();
+            deletedCount++;
         } catch (e) {
-            console.warn("删除层时出错:", e);
+            console.warn("删除层时出错:", e, layer);
         }
     }
+    console.log("resetWorkspace: 已删除", deletedCount, "个层");
 
     // Clear the current list of draggables
     svgData.draggable = [];
+    
+    // 清理DOM中残留的层（如果 svgData.draggable 为空但DOM中还有层）
+    // 这可以处理 svgData 被重新赋值但DOM元素还在的情况
+    try {
+        const svg = document.getElementById("svg");
+        if (svg) {
+            // 查找所有层元素（通过 draggable-id 属性或特定的类名）
+            const allLayers = svg.querySelectorAll('g[draggable-id], g.layer-group');
+            let domCleanedCount = 0;
+            allLayers.forEach((layerElement) => {
+                const layerId = layerElement.id;
+                // 保留 input 和 output
+                if (layerId !== 'input' && layerId !== 'output' && layerId !== 'svg') {
+                    try {
+                        layerElement.remove();
+                        domCleanedCount++;
+                    } catch (e) {
+                        console.warn("清理DOM层时出错:", e, layerElement);
+                    }
+                }
+            });
+            
+            // 清理所有连接线
+            const allWires = svg.querySelectorAll('line[wire-id], line.wire');
+            let wireCleanedCount = 0;
+            allWires.forEach((wireElement) => {
+                try {
+                    wireElement.remove();
+                    wireCleanedCount++;
+                } catch (e) {
+                    console.warn("清理连接线时出错:", e);
+                }
+            });
+            
+            if (domCleanedCount > 0 || wireCleanedCount > 0) {
+                console.log("resetWorkspace: 清理了", domCleanedCount, "个DOM层和", wireCleanedCount, "条连接线");
+            }
+        }
+    } catch (e) {
+        console.warn("resetWorkspace: 清理DOM时出错:", e);
+    }
+    
+    console.log("resetWorkspace: 清空后的层数量:", svgData.draggable.length);
     
     // 清理公式标签
     if ((svgData as any).formulaLabels) {
@@ -82,6 +132,8 @@ export function resetWorkspace(svgData: IDraggableData): void {
         });
         (svgData as any).formulaLabels = undefined;
     }
+    
+    console.log("resetWorkspace: 清空工作区完成");
 }
 
 export function defaultTemplate(svgData: IDraggableData): void {
@@ -248,7 +300,9 @@ export function defaultTemplate(svgData: IDraggableData): void {
 }
 
 export function blankTemplate(svgData: IDraggableData): void {
+    console.log("blankTemplate: 开始执行清空模板");
     resetWorkspace(svgData);
+    console.log("blankTemplate: 清空模板完成");
 }
 
 export function resnetTemplate(svgData: IDraggableData): void {

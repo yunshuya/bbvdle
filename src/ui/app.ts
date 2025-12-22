@@ -163,11 +163,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // 如果主应用已经显示，立即加载；否则等待显示事件
     const mainDiv = document.getElementById("main");
     if (mainDiv && !mainDiv.classList.contains("hidden")) {
-        svgData = loadStateIfPossible();
+        console.log("app.ts: 主应用已显示，立即加载网络状态");
+        // 传入现有的 svgData，避免重新赋值导致引用丢失
+        loadStateIfPossible(svgData);
+        console.log("app.ts: 网络状态加载完成，svgData.draggable.length =", svgData.draggable.length);
     } else {
+        console.log("app.ts: 主应用未显示，等待显示事件");
         // 监听主应用显示事件
         const loadNetworkState = () => {
-            svgData = loadStateIfPossible();
+            console.log("app.ts: 主应用显示事件触发，开始加载网络状态");
+            // 传入现有的 svgData，避免重新赋值导致引用丢失
+            loadStateIfPossible(svgData);
+            console.log("app.ts: 网络状态加载完成，svgData.draggable.length =", svgData.draggable.length);
             // 加载后重新计算布局
             setTimeout(() => {
                 resizeMiddleSVG();
@@ -183,6 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     const target = mutation.target as HTMLElement;
                     if (target.id === 'main' && !target.classList.contains('hidden')) {
+                        console.log("app.ts: MutationObserver检测到主应用显示");
                         loadNetworkState();
                         observer.disconnect();
                     }
@@ -394,9 +402,34 @@ function selectOption(optionCategoryId: string, optionElement: HTMLElement): voi
 }
 
 function createTemplate(template: string): void {
+    console.log("createTemplate: 开始创建模板，类型:", template);
+    console.log("createTemplate: 当前 svgData.draggable.length =", svgData.draggable.length);
+    
+    // 确保 svgData 已初始化
+    if (!svgData || !svgData.input || !svgData.output) {
+        console.error("createTemplate: svgData 未正确初始化！");
+        console.error("createTemplate: svgData =", svgData);
+        // 尝试重新初始化
+        if (!svgData) {
+            svgData = {
+                draggable: [],
+                input: null,
+                output: null,
+            };
+        }
+        if (!svgData.input) {
+            svgData.input = new Input();
+        }
+        if (!svgData.output) {
+            svgData.output = new Output();
+        }
+        console.log("createTemplate: 已重新初始化 svgData");
+    }
+    
     switch (template) {
         case "blank": {
             blankTemplate(svgData);
+            console.log("createTemplate: blank模板创建完成，svgData.draggable.length =", svgData.draggable.length);
             if(isTaskAlready){
                 console.log(template);
                 verifyStepCompletion(svgData.input);
@@ -407,14 +440,34 @@ function createTemplate(template: string): void {
 
         }
         
-        case "default": defaultTemplate(svgData); break;
-        case "resnet": resnetTemplate(svgData); break;
-        case "rnn": rnnTemplate(svgData); break;
-        case "lstm": lstmTemplate(svgData); break;
-        case "lstmFullInternal": lstmFullInternalStructureTemplate(svgData); break;
-        case "rnnInternalStructure": rnnInternalStructureTemplate(svgData); break;
+        case "default": 
+            defaultTemplate(svgData); 
+            console.log("createTemplate: default模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
+        case "resnet": 
+            resnetTemplate(svgData); 
+            console.log("createTemplate: resnet模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
+        case "rnn": 
+            rnnTemplate(svgData); 
+            console.log("createTemplate: rnn模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
+        case "lstm": 
+            lstmTemplate(svgData); 
+            console.log("createTemplate: lstm模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
+        case "lstmFullInternal": 
+            lstmFullInternalStructureTemplate(svgData); 
+            console.log("createTemplate: lstmFullInternal模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
+        case "rnnInternalStructure": 
+            rnnInternalStructureTemplate(svgData); 
+            console.log("createTemplate: rnnInternalStructure模板创建完成，svgData.draggable.length =", svgData.draggable.length);
+            break;
 
     }
+    
+    console.log("createTemplate: 模板创建完成，最终 svgData.draggable.length =", svgData.draggable.length);
 }
 
 function appendItem(itemType: string): void {
