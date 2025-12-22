@@ -353,7 +353,7 @@ function setupOptionOnClicks(): void {
         document.getElementById("education" + articleType).scrollIntoView(true);
     });
     addOnClickToOptions("educationAct", (articleType) => {
-        document.getElementById("education" + aiticleType).scrollIntoView(true);
+        document.getElementById("education" + articleType).scrollIntoView(true);
     });
     addOnClickToOptions("classes", (_, element) => {
         selectOption("classes", element);
