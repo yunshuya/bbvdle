@@ -25,17 +25,44 @@ export interface VerifyResponse {
     error?: string;
 }
 
-const API_BASE_URL = 'http://localhost:5000/api';
 const TOKEN_KEY = 'bbvdle_auth_token';
 const USER_KEY = 'bbvdle_user_info';
+
+// 从 dist 目录读取 ip.txt 文件的内容，获取服务器IP
+async function getServerIP(): Promise<string> {
+    try {
+        const response = await fetch('/dist/ip.txt');
+        const ip = await response.text();
+        return ip.trim();
+    } catch (error) {
+        console.error('获取 IP 地址失败:', error);
+        return 'localhost'; // 如果失败，返回默认的本地地址
+    }
+}
+
+// 获取API基础URL
+async function getApiBaseUrl(): Promise<string> {
+    const serverIP = await getServerIP();
+    return `http://${serverIP}:5000/api`;
+}
 
 class AuthService {
     private currentUser: UserInfo | null = null;
     private token: string | null = null;
+    private apiBaseUrl: string = 'http://localhost:5000/api'; // 默认值，会在首次使用时更新
 
     constructor() {
         // 从localStorage加载token和用户信息
         this.loadFromStorage();
+        // 异步获取API地址
+        this.initApiBaseUrl();
+    }
+
+    /**
+     * 初始化API基础URL
+     */
+    private async initApiBaseUrl(): Promise<void> {
+        this.apiBaseUrl = await getApiBaseUrl();
     }
 
     /**
@@ -125,8 +152,12 @@ class AuthService {
      */
     public async register(username: string, email: string, password: string): Promise<AuthResponse> {
         try {
+            // 确保API地址已初始化
+            if (this.apiBaseUrl === 'http://localhost:5000/api') {
+                await this.initApiBaseUrl();
+            }
             console.log('开始注册请求:', { username, email });
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            const response = await fetch(`${this.apiBaseUrl}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -179,8 +210,12 @@ class AuthService {
      */
     public async login(usernameOrEmail: string, password: string, rememberMe: boolean = false): Promise<AuthResponse> {
         try {
+            // 确保API地址已初始化
+            if (this.apiBaseUrl === 'http://localhost:5000/api') {
+                await this.initApiBaseUrl();
+            }
             console.log('开始登录请求:', { usernameOrEmail, rememberMe });
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -240,7 +275,11 @@ class AuthService {
         
         if (this.token) {
             try {
-                await fetch(`${API_BASE_URL}/auth/logout`, {
+                // 确保API地址已初始化
+                if (this.apiBaseUrl === 'http://localhost:5000/api') {
+                    await this.initApiBaseUrl();
+                }
+                await fetch(`${this.apiBaseUrl}/auth/logout`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
@@ -268,7 +307,11 @@ class AuthService {
             const timeoutId = setTimeout(() => controller.abort(), 3000); // 3秒超时
             
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+                // 确保API地址已初始化
+                if (this.apiBaseUrl === 'http://localhost:5000/api') {
+                    await this.initApiBaseUrl();
+                }
+                const response = await fetch(`${this.apiBaseUrl}/auth/verify`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
@@ -290,26 +333,32 @@ class AuthService {
                     localStorage.setItem(USER_KEY, JSON.stringify(this.currentUser));
                     return true;
                 } else {
-                    // token无效，清除存储
+                    // token无效，清除存储（包括内存中的用户信息）
+                    console.log('Token验证失败，清除认证信息');
                     this.clearStorage();
+                    this.currentUser = null; // 确保清除内存中的用户信息
                     return false;
                 }
             } catch (fetchError) {
                 clearTimeout(timeoutId);
                 const error = fetchError as any;
                 if (error.name === 'AbortError') {
-                    console.log('验证token超时');
+                    console.log('验证token超时，可能是网络问题或后端服务未启动');
+                    // 超时时不清除存储，允许离线使用
                 } else {
                     console.error('验证token失败:', error);
+                    // 如果是401错误（未授权），说明token无效，应该清除
+                    if (error.response?.status === 401) {
+                        console.log('Token未授权，清除认证信息');
+                        this.clearStorage();
+                        this.currentUser = null;
+                    }
                 }
-                // 网络错误时不清除存储，允许离线使用
-                // this.clearStorage();
                 return false;
             }
         } catch (error) {
             console.error('验证token异常:', error);
             // 异常时不清除存储，允许离线使用
-            // this.clearStorage();
             return false;
         }
     }

@@ -23,6 +23,9 @@ git pull origin "$BRANCH"
 echo "2. 检查是否有新的npm依赖..."
 if [ -f package.json ]; then
     npm install --ignore-scripts
+    # 重新构建 node-sass（修复 vendor 目录缺失问题）
+    echo "   重新构建 node-sass..."
+    npm rebuild node-sass || echo "   警告: node-sass 重建失败，但继续构建"
 fi
 
 echo "3. 重新构建前端..."
