@@ -203,6 +203,18 @@ pip install -r requirements.txt
 
 #### 4. 部署前端项目
 
+**方法一：使用完整部署脚本（推荐）**
+
+```bash
+cd /home/ec2-user/bbvdle
+chmod +x deploy_complete.sh
+./deploy_complete.sh
+```
+
+脚本会自动完成所有部署步骤（见下方"项目维护"章节）。
+
+**方法二：手动部署**
+
 ```bash
 # 克隆项目
 git clone --recursive https://github.com/yunshuya/bbvdle.git
@@ -210,6 +222,7 @@ cd bbvdle
 
 # 安装依赖
 npm install --ignore-scripts
+npm rebuild node-sass
 
 # 构建项目
 npm run build
@@ -228,11 +241,23 @@ echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
 sudo yum install -y httpd
 
 # 复制项目文件到Apache根目录
-sudo cp -r /home/ec2-user/bbvdle/* /var/www/html/
+sudo cp -r /home/ec2-user/bbvdle/dist /var/www/html/
+sudo cp -r /home/ec2-user/bbvdle/src/ui /var/www/html/src/
+sudo cp /home/ec2-user/bbvdle/index.html /var/www/html/
+sudo cp -r /home/ec2-user/bbvdle/resources /var/www/html/ 2>/dev/null || true
 
 # 设置文件权限
 sudo chown -R apache:apache /var/www/html/
 sudo chmod -R 755 /var/www/html/
+
+# 配置缓存控制
+sudo bash -c "cat > /var/www/html/.htaccess << 'EOF'
+<FilesMatch \"\.(js|css)$\">
+    Header set Cache-Control \"no-cache, no-store, must-revalidate\"
+    Header set Pragma \"no-cache\"
+    Header set Expires \"0\"
+</FilesMatch>
+EOF"
 
 # 启动Apache服务
 sudo systemctl start httpd
@@ -264,38 +289,38 @@ if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=False)
 ```
 
-**使用systemd管理后端服务**（推荐）：
+**使用nohup后台运行**（推荐方式）：
 
-创建服务文件 `/etc/systemd/system/bbvdle-backend.service`：
+```bash
+cd /home/ec2-user/bbvdle
 
-```ini
-[Unit]
-Description=BBVDLE Flask Backend Service
-After=network.target
+# 停止可能正在运行的进程
+pkill -f "python.*GLM.py" || true
 
-[Service]
-Type=simple
-User=ec2-user
-WorkingDirectory=/home/ec2-user/bbvdle
-Environment="PATH=/home/ec2-user/bbvdle/py38_env/bin"
-ExecStart=/home/ec2-user/bbvdle/py38_env/bin/python src/model/GLM.py
-Restart=always
-RestartSec=10
+# 激活虚拟环境（如果存在）
+source py38_env/bin/activate
 
-[Install]
-WantedBy=multi-user.target
+# 启动后端服务
+nohup python src/model/GLM.py > backend.log 2>&1 &
+
+# 查看日志
+tail -f backend.log
 ```
 
-启动服务：
-```bash
-sudo systemctl daemon-reload
-sudo systemctl start bbvdle-backend
-sudo systemctl enable bbvdle-backend  # 开机自启
-sudo systemctl status bbvdle-backend  # 查看状态
-```
+**管理后端服务**：
 
-**或使用nohup后台运行**（如果用systemd配置有问题，改用该简单方式）：
 ```bash
+# 查看服务状态
+ps aux | grep "python.*GLM.py"
+
+# 停止服务
+pkill -f "python.*GLM.py"
+
+# 查看日志
+tail -f /home/ec2-user/bbvdle/backend.log
+
+# 重启服务
+pkill -f "python.*GLM.py"
 cd /home/ec2-user/bbvdle
 source py38_env/bin/activate
 nohup python src/model/GLM.py > backend.log 2>&1 &
@@ -431,6 +456,32 @@ python test_auth_api.py
 
 ## 项目维护
 
+### 完整部署脚本（推荐）
+
+**一键部署脚本** - 整合了所有部署步骤：
+
+```bash
+cd /home/ec2-user/bbvdle
+chmod +x deploy_complete.sh
+./deploy_complete.sh
+```
+
+这个脚本会自动完成：
+1. ✅ 拉取最新代码（自动处理 `dist/ip.txt` 冲突）
+2. ✅ 安装和更新依赖（npm 和 Python）
+3. ✅ 构建项目（生成 `style.css` 和 `bundle.js`）
+4. ✅ 备份Apache目录
+5. ✅ 复制所有必要文件到Apache目录
+6. ✅ 设置文件权限
+7. ✅ 配置Apache缓存控制
+8. ✅ 重启Apache和后端服务
+9. ✅ 验证部署结果
+
+**使用指定分支**：
+```bash
+./deploy_complete.sh develop  # 部署develop分支
+```
+
 ### 更新依赖
 
 ```bash
@@ -454,14 +505,39 @@ cp data/bbvdle.db.backup data/bbvdle.db
 ### 日志查看
 
 ```bash
-# 查看后端服务日志（systemd方式）
-sudo journalctl -u bbvdle-backend -f
+# 查看后端服务日志（nohup方式）
+tail -f /home/ec2-user/bbvdle/backend.log
+
+# 查看后端服务状态
+ps aux | grep "python.*GLM.py"
 
 # 查看Apache错误日志
 sudo tail -f /var/log/httpd/error_log
 
 # 查看Apache访问日志
 sudo tail -f /var/log/httpd/access_log
+```
+
+### 快速修复脚本
+
+如果遇到特定问题，可以使用专门的修复脚本：
+
+**修复前端资源加载问题**：
+```bash
+chmod +x fix_frontend_resources.sh
+./fix_frontend_resources.sh
+```
+
+**修复清空功能问题**：
+```bash
+chmod +x check_and_fix_clear_function.sh
+./check_and_fix_clear_function.sh
+```
+
+**强制更新 bundle.js**：
+```bash
+chmod +x force_update_bundle.sh
+./force_update_bundle.sh
 ```
 
 ---
