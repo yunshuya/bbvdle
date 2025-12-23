@@ -111,19 +111,22 @@ async function trainClassification(): Promise<void> {
         return;
     }
     
-    trainingHistory = {
-        startedAt: new Date().toISOString(),
-        dataset: dataset.pythonName ?? dataset.constructor.name ?? "unknown",
-        hyperparameters: {
-            learningRate: model.params.learningRate,
-            batchSize: model.params.batchSize,
-            epochs: model.params.epochs,
-            optimizer: model.params.optimizer,
-            loss: model.params.loss,
-        },
-        batchMetrics: [],
-        epochMetrics: [],
-    };
+    // 确保 trainingHistory 已初始化（由 train() 函数初始化）
+    if (!trainingHistory) {
+        trainingHistory = {
+            startedAt: new Date().toISOString(),
+            dataset: dataset.pythonName ?? dataset.constructor.name ?? "unknown",
+            hyperparameters: {
+                learningRate: model.params.learningRate,
+                batchSize: model.params.batchSize,
+                epochs: model.params.epochs,
+                optimizer: model.params.optimizer,
+                loss: model.params.loss,
+            },
+            batchMetrics: [],
+            epochMetrics: [],
+        };
+    }
 
     const onIteration = () => showPredictions();
     
@@ -208,12 +211,23 @@ async function trainClassification(): Promise<void> {
                   totalLoss = 0;
                   totalAccuracy = 0;
                 }
+                
+                // 记录训练历史数据
+                if (trainingHistory) {
+                    const batchMetric: IBatchMetric = {
+                        batch: trainBatchCount,
+                        loss: logs.loss !== null && logs.loss !== undefined ? Number(logs.loss.toFixed(4)) : null,
+                        accuracy: logs.acc !== null && logs.acc !== undefined ? Number(logs.acc.toFixed(4)) : null,
+                    };
+                    trainingHistory.batchMetrics.push(batchMetric);
+                }
+                
                 if (batch % 60 === 0) {
                   onIteration();
                 }
                 await tf.nextFrame();
             },
-            onEpochEnd: async (_: number, logs: tf.Logs) => {
+            onEpochEnd: async (epoch: number, logs: tf.Logs) => {
 
                 if (stopTraining) {
                     console.log("Training stopped by user.");
@@ -231,6 +245,17 @@ async function trainClassification(): Promise<void> {
                 plotLoss(trainBatchCount, logs.val_loss, "validation");
                 plotAccuracy(trainBatchCount, logs.val_acc, "validation");
                 showConfusionMatrix();
+                
+                // 记录训练历史数据
+                if (trainingHistory) {
+                    const epochMetric: IEpochMetric = {
+                        epoch: epoch + 1,
+                        valLoss: valLoss !== null && valLoss !== undefined ? Number(valLoss.toFixed(4)) : null,
+                        valAccuracy: valAcc !== null && valAcc !== undefined ? Number(valAcc.toFixed(4)) : null,
+                    };
+                    trainingHistory.epochMetrics.push(epochMetric);
+                }
+                
                 onIteration();
                 await tf.nextFrame();
             },
@@ -271,6 +296,15 @@ async function trainClassification(): Promise<void> {
         vaccBox.children[1].innerHTML = String(Number((100 * testAccuracy).toFixed(2)));
     }
     vlossBox.children[1].innerHTML = String(Number(testLoss.toFixed(2)));
+    
+    // 记录测试集结果到训练历史
+    if (trainingHistory) {
+        trainingHistory.testMetrics = {
+            loss: Number(testLoss.toFixed(4)),
+            accuracy: testAccuracy > 1.0 ? Number(testAccuracy.toFixed(4)) : Number((testAccuracy * 100).toFixed(4)),
+        };
+        trainingHistory.finishedAt = new Date().toISOString();
+    }
 }
 
 /**

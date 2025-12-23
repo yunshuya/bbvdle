@@ -118,7 +118,7 @@ echo "localhost" > dist/ip.txt
 ```
 
 **修改后端代码**：
-- 编辑`src/model/GLM.py`
+- 编辑`src/model/GLM.py`文件
 
 ```bash
 # 把部署服务器的代码注释掉，保留本地的那一行的代码
