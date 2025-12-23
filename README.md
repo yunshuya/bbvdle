@@ -118,6 +118,8 @@ echo "localhost" > dist/ip.txt
 ```
 
 **修改后端代码**：
+- 编辑`src/model/GLM.py`
+
 ```bash
 # 把部署服务器的代码注释掉，保留本地的那一行的代码
 if __name__ == "__main__":
@@ -164,8 +166,6 @@ cd bbvdle
 # 启动Flask后端服务（默认端口5000）
 python src/model/GLM.py
 ```
-
-**注意**：本地开发时，确保 `src/model/GLM.py` 中的 `host` 参数为 `"localhost"` 或 `"127.0.0.1"`。
 
 ---
 
