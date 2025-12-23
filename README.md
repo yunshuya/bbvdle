@@ -79,9 +79,6 @@ bbvdle/
 ```bash
 # 确保Python版本为3.8
 python --version
-
-# 安装Python依赖
-pip install -r requirements.txt
 ```
 
 #### 3. 克隆项目
@@ -89,6 +86,9 @@ pip install -r requirements.txt
 ```bash
 git clone --recursive https://github.com/yunshuya/bbvdle.git
 cd bbvdle
+
+# 安装Python依赖
+pip install -r requirements.txt
 ```
 
 #### 4. 安装前端依赖
@@ -115,6 +115,17 @@ echo "your-api-key-here" > dist/zhipuai_key.txt
 ```bash
 # 编辑 dist/ip.txt，设置为 localhost
 echo "localhost" > dist/ip.txt
+```
+
+**修改后端代码**：
+```bash
+# 把部署服务器的代码注释掉，保留本地的那一行的代码
+if __name__ == "__main__":
+    # 本地测试使用以下代码
+    app.run(debug=True, port=5000)
+    
+    # 部署到服务器使用以下代码
+    # app.run(debug=False, host="0.0.0.0", port=5000)
 ```
 
 #### 6. 构建项目
