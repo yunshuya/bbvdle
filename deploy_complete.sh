@@ -2,6 +2,7 @@
 
 # BBVDLE 完整部署脚本
 # 功能：一键完成代码同步、构建、部署和重启服务
+# 重要：此脚本只从远程拉取代码，不会推送任何本地更改到远程仓库
 # 用法：./deploy_complete.sh [分支名] [--skip-sync]
 # 示例：./deploy_complete.sh main              # 完整部署（包含代码同步）
 #        ./deploy_complete.sh main --skip-sync # 跳过代码同步，直接部署
@@ -101,12 +102,12 @@ fi
 
 log "备份完成: $BACKUP_DIR"
 
-# ==================== 步骤2: 同步代码（保留本地修改） ====================
+# ==================== 步骤2: 强制同步远程代码（丢弃本地修改） ====================
 if [ "$SKIP_SYNC" = true ]; then
     log "步骤2: 跳过代码同步（使用 --skip-sync 选项）"
     log "将直接使用当前代码进行部署"
 else
-    log "步骤2: 同步代码（分支: $BRANCH，保留本地修改）..."
+    log "步骤2: 强制同步远程代码（分支: $BRANCH，将丢弃所有本地修改）..."
     
     # 获取当前分支
     CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
@@ -118,106 +119,88 @@ else
         git checkout "$BRANCH" || error "无法切换到分支 $BRANCH"
     fi
     
-    # 检查是否有未提交的更改
-    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        log "检测到本地有未提交的更改，使用stash保存..."
-        git stash push -m "部署前保存本地更改 $(date '+%Y-%m-%d %H:%M:%S')" || warn "stash保存失败，继续执行"
-    fi
+    # 获取最新远程代码
+    log "获取远程最新代码..."
+    git fetch origin "$BRANCH" || error "无法获取远程代码"
     
-    # 获取最新代码
-    log "获取最新代码..."
-    git fetch origin "$BRANCH" || warn "无法获取最新代码"
+    # 强制重置到远程分支（丢弃所有本地修改和未提交的更改）
+    log "强制同步到远程分支（丢弃所有本地修改）..."
+    git reset --hard "origin/$BRANCH" || error "无法重置到远程分支"
     
-    # 使用pull合并远程更改（而不是强制重置）
-    log "合并远程更改..."
-    if git pull origin "$BRANCH" --no-edit; then
-        log "代码同步成功"
-    else
-        warn "代码合并时出现冲突，尝试解决..."
-        # 如果有冲突，对于关键文件保留本地版本
-        if [ -f "src/model/GLM.py" ] && git diff --name-only --diff-filter=U | grep -q "src/model/GLM.py"; then
-            log "检测到 GLM.py 冲突，保留本地版本..."
-            git checkout --ours "src/model/GLM.py" || true
-            git add "src/model/GLM.py" || true
-        fi
-        if [ -f "dist/ip.txt" ] && git diff --name-only --diff-filter=U | grep -q "dist/ip.txt"; then
-            log "检测到 ip.txt 冲突，保留本地版本..."
-            git checkout --ours "dist/ip.txt" || true
-            git add "dist/ip.txt" || true
-        fi
-        # 尝试继续合并
-        git merge --continue 2>/dev/null || warn "合并未完成，但继续执行部署"
-    fi
+    # 清理未跟踪的文件
+    log "清理未跟踪的文件..."
+    git clean -fd || warn "清理文件时出现问题"
     
-    # 恢复stash的更改（如果有）
-    if git stash list | grep -q "部署前保存本地更改"; then
-        log "恢复本地更改..."
-        git stash pop || warn "恢复stash失败，但继续执行"
-    fi
-    
-    log "代码同步完成"
+    log "代码同步完成（已强制同步到远程最新版本）"
 fi
 
-# ==================== 步骤3: 恢复备份的配置文件 ====================
+# ==================== 步骤3: 恢复云端配置（同步后重新配置） ====================
 if [ "$SKIP_SYNC" = true ]; then
     log "步骤3: 跳过配置文件恢复（使用当前配置）"
     # 跳过代码同步时，不需要恢复备份，直接使用当前配置
     log "将使用当前已配置的文件（dist/ip.txt, dist/zhipuai_key.txt, src/model/GLM.py）"
 else
-    log "步骤3: 恢复备份的配置文件..."
+    log "步骤3: 恢复云端配置（同步后重新配置云端特定文件）..."
     
-    # 恢复 dist/ip.txt（如果备份存在且当前文件不存在或为空）
+    # 确保dist目录存在
+    mkdir -p dist
+    
+    # 恢复 dist/ip.txt（优先使用备份，否则自动检测）
     if [ -f "$BACKUP_DIR/ip.txt.bak" ]; then
-        if [ ! -f "dist/ip.txt" ] || [ ! -s "dist/ip.txt" ]; then
-            cp "$BACKUP_DIR/ip.txt.bak" "dist/ip.txt"
-            log "已恢复 dist/ip.txt"
-        else
-            log "dist/ip.txt 已存在且不为空，保留当前版本"
-        fi
+        cp "$BACKUP_DIR/ip.txt.bak" "dist/ip.txt"
+        log "✓ 已恢复 dist/ip.txt（从备份）"
     else
         # 如果备份不存在，尝试自动检测IP
-        if [ ! -f "dist/ip.txt" ] || [ ! -s "dist/ip.txt" ]; then
-            log "未找到IP配置，尝试自动检测..."
-            CURRENT_IP=$(curl -s --max-time 5 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || \
-                         curl -s --max-time 5 https://checkip.amazonaws.com 2>/dev/null | tr -d '\n' || echo "")
-            
-            if [ -n "$CURRENT_IP" ] && echo "$CURRENT_IP" | grep -qE '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
-                echo "$CURRENT_IP" > "dist/ip.txt"
-                log "已自动检测并设置IP: $CURRENT_IP"
-            else
-                warn "无法自动检测IP，请手动设置 dist/ip.txt"
-            fi
+        log "未找到IP备份，尝试自动检测..."
+        CURRENT_IP=$(curl -s --max-time 5 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || \
+                     curl -s --max-time 5 https://checkip.amazonaws.com 2>/dev/null | tr -d '\n' || echo "")
+        
+        if [ -n "$CURRENT_IP" ] && echo "$CURRENT_IP" | grep -qE '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
+            echo "$CURRENT_IP" > "dist/ip.txt"
+            log "✓ 已自动检测并设置IP: $CURRENT_IP"
+        else
+            warn "无法自动检测IP，请手动设置 dist/ip.txt"
         fi
     fi
     
-    # 恢复 dist/zhipuai_key.txt（如果备份存在且当前文件不存在）
+    # 恢复 dist/zhipuai_key.txt（从备份）
     if [ -f "$BACKUP_DIR/zhipuai_key.txt.bak" ]; then
-        if [ ! -f "dist/zhipuai_key.txt" ]; then
-            cp "$BACKUP_DIR/zhipuai_key.txt.bak" "dist/zhipuai_key.txt"
-            log "已恢复 dist/zhipuai_key.txt"
-        else
-            log "dist/zhipuai_key.txt 已存在，保留当前版本"
-        fi
+        cp "$BACKUP_DIR/zhipuai_key.txt.bak" "dist/zhipuai_key.txt"
+        log "✓ 已恢复 dist/zhipuai_key.txt（从备份）"
     else
         warn "未找到 zhipuai_key.txt 备份，请手动配置"
+        warn "提示：可以运行 ./setup_cloud_config.sh 进行配置"
     fi
     
-    # 恢复 src/model/GLM.py（如果备份存在且当前文件被覆盖）
+    # 恢复 src/model/GLM.py（从备份，恢复云端部署配置）
     if [ -f "$BACKUP_DIR/GLM.py.bak" ]; then
-        # 检查当前文件是否与备份不同（可能被远程覆盖）
-        if ! diff -q "$BACKUP_DIR/GLM.py.bak" "src/model/GLM.py" > /dev/null 2>&1; then
-            log "检测到 GLM.py 可能被远程覆盖，恢复本地版本..."
+        # 检查备份文件是否包含部署配置
+        if grep -q "app.run(debug=False, host=\"0.0.0.0\"" "$BACKUP_DIR/GLM.py.bak"; then
+            # 备份文件已经是部署配置，直接恢复
             cp "$BACKUP_DIR/GLM.py.bak" "src/model/GLM.py"
-            log "已恢复 src/model/GLM.py"
+            log "✓ 已恢复 src/model/GLM.py（部署配置）"
         else
-            log "src/model/GLM.py 未变化，保留当前版本"
+            # 备份文件是本地配置，需要修改为部署配置
+            cp "$BACKUP_DIR/GLM.py.bak" "src/model/GLM.py"
+            log "检测到备份为本地配置，切换为部署配置..."
+            
+            # 修改为部署配置
+            sed -i 's/^    app\.run(debug=True, port=5000)$/    # app.run(debug=True, port=5000)/' "src/model/GLM.py" 2>/dev/null || true
+            sed -i 's/^    # app\.run(debug=False, host="0\.0\.0\.0", port=5000)$/    app.run(debug=False, host="0.0.0.0", port=5000)/' "src/model/GLM.py" 2>/dev/null || true
+            
+            log "✓ 已恢复并切换 src/model/GLM.py 为部署配置"
         fi
+    else
+        warn "未找到 GLM.py 备份，将使用远程版本"
+        warn "提示：如果远程版本是本地配置，请运行 ./setup_cloud_config.sh 进行配置"
     fi
     
+    # 数据库备份信息
     if [ -f "$BACKUP_DIR/bbvdle.db.bak" ]; then
-        # 数据库不自动恢复，只备份
-        log "数据库备份已保存: $BACKUP_DIR/bbvdle.db.bak"
+        log "数据库备份已保存: $BACKUP_DIR/bbvdle.db.bak（不自动恢复）"
     fi
+    
+    log "云端配置恢复完成"
 fi
 
 # ==================== 步骤4: 安装和更新依赖 ====================
