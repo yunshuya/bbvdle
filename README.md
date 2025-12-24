@@ -228,11 +228,26 @@ npm rebuild node-sass
 # 构建项目
 npm run build
 
-# 配置后端IP地址（替换为实际公网IP）
+# 方式一：使用配置脚本（推荐）
+chmod +x setup_cloud_config.sh
+./setup_cloud_config.sh
+
+# 方式二：手动配置
+# 1. 配置后端IP地址（替换为实际公网IP）
 echo "your-server-public-ip" > dist/ip.txt
 
-# 配置AI API密钥
+# 2. 配置AI API密钥
 echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
+
+# 3. 修改src/model/GLM.py文件
+# 编辑文件，将部署代码取消注释，本地代码注释掉：
+# if __name__ == "__main__":
+#     # 本地测试使用以下代码
+#     # app.run(debug=True, port=5000)
+#     
+#     # 部署到服务器使用以下代码
+#     app.run(debug=False, host="0.0.0.0", port=5000)
+
 ```
 
 **二、部署后进行日常维护**
@@ -240,6 +255,11 @@ echo "your-zhipuai-api-key" > dist/zhipuai_key.txt
 ```bash
 cd /home/ec2-user/bbvdle
 chmod +x deploy_complete.sh
+
+# 如果已经运行过 setup_cloud_config.sh 配置，使用 --skip-sync 跳过代码同步
+./deploy_complete.sh --skip-sync
+
+# 或者运行完整部署（包含代码同步）
 ./deploy_complete.sh
 ```
 
@@ -474,11 +494,20 @@ python test_auth_api.py
 ```bash
 cd /home/ec2-user/bbvdle
 chmod +x deploy_complete.sh
+
+# 完整部署（包含代码同步）
 ./deploy_complete.sh
+
+# 跳过代码同步，直接部署（推荐在配置完成后使用）
+./deploy_complete.sh --skip-sync
+
+# 使用指定分支
+./deploy_complete.sh develop
+./deploy_complete.sh develop --skip-sync
 ```
 
 这个脚本会自动完成：
-1. ✅ 强制同步代码（丢弃所有本地更改，以仓库最新代码为准）
+1. ✅ 同步代码（使用 `--skip-sync` 可跳过此步骤）
 2. ✅ 安装和更新依赖（npm 和 Python）
 3. ✅ 构建项目（生成 `style.css` 和 `bundle.js`）
 4. ✅ 备份Apache目录
@@ -489,14 +518,9 @@ chmod +x deploy_complete.sh
 9. ✅ 验证部署结果
 
 **重要说明**：
-- 脚本会**强制丢弃**服务器上的所有本地代码更改
-- 代码将**完全同步**到 GitHub 仓库的最新版本
+- **使用 `--skip-sync` 选项**：跳过代码同步，直接使用当前代码进行部署（推荐在运行 `setup_cloud_config.sh` 后使用）
+- **不使用 `--skip-sync`**：会同步代码，但会保留本地修改的 `dist/ip.txt`、`dist/zhipuai_key.txt` 和 `src/model/GLM.py`
 - `dist/ip.txt` 会被自动备份和恢复（服务器特定配置）
-
-**使用指定分支**：
-```bash
-./deploy_complete.sh develop  # 部署develop分支
-```
 
 
 ### 更新依赖
