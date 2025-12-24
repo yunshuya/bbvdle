@@ -35,7 +35,8 @@ body {
   font-family: Helvetica;
   user-select: none;
   padding: 7.5px 10px;
-  display: block; }
+  display: block;
+  overflow-y: auto; }
 
 #menu_expander {
   width: 10px;

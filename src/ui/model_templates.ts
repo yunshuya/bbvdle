@@ -49,14 +49,12 @@ export function resetWorkspace(svgData: IDraggableData): void {
     
     // 清理 Input 和 Output 的连接
     if (svgData.input != null) {
-        svgData.input.setPosition(svgData.input.defaultLocation);
         svgData.input.wires.forEach((w) => w.delete());
         svgData.input.deleteCircularWires();  // 清理循环连接
         svgData.input.children.clear();
         svgData.input.parents.clear();
     }
     if (svgData.output != null) {
-        svgData.output.setPosition(svgData.output.defaultLocation);
         svgData.output.deleteCircularWires();  // 清理循环连接
         svgData.output.children.clear();
         svgData.output.parents.clear();
